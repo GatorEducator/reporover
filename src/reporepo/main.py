@@ -61,7 +61,7 @@ def read_usernames_from_json(file_path: Path) -> List[str]:
     return data.get("usernames", [])
 
 
-def modify_user_access(
+def modify_user_access(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
