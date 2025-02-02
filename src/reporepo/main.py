@@ -8,6 +8,7 @@ from typing import List
 import requests
 import typer
 from rich.console import Console
+from rich.progress import Progress
 from typer import Typer
 
 # define the Typer app that will be used
@@ -66,6 +67,7 @@ def modify_user_access(
     username: str,
     access_level: GitHubAccessLevel,
     token: str,
+    progress: Progress,
 ) -> None:
     """Change user access to read."""
     # extract the repository name from the URL
@@ -92,13 +94,13 @@ def modify_user_access(
     # check if the request was successful
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
-        console.print(
+        progress.console.print(
             f"󰄬 Changed {username}'s access to '{access_level.value}'"
         )
     # display error message since the change of the access level did not work
     else:
         # display the basic error message
-        console.print(
+        progress.console.print(
             f" Failed to change access for {username}: {response.status_code}"
         )
         # display all of the rest of the details in the string
@@ -117,9 +119,7 @@ def cli(
     usernames: Path = typer.Argument(
         ..., help="Path to JSON file with usernames"
     ),
-    token: str = typer.Argument(
-        ..., help="GitHub token for authentication"
-    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
         help="The access level for user",
@@ -132,8 +132,21 @@ def cli(
     # extract the usernames from the TOML file
     usernames_parsed = read_usernames_from_json(usernames)
     # iterate through all of the usernames
-    for username in usernames_parsed:
-        # call the function to modify the user's access
-        modify_user_access(
-            github_org_url, repo_prefix, username, access_level, token
+    # display a progress bar based on the
+    # number of usernames in the JSON file
+    with Progress() as progress:
+        task = progress.add_task(
+            "[green]Modifying User's Access", total=len(usernames_parsed)
         )
+        # modify the access for the current user
+        for username in usernames_parsed:
+            modify_user_access(
+                github_org_url,
+                repo_prefix,
+                username,
+                access_level,
+                token,
+                progress,
+            )
+            # take the next step in the progress bar
+            progress.advance(task)
