@@ -3,6 +3,7 @@
 import json
 from enum import Enum
 from pathlib import Path
+from typing import List
 
 import requests
 import typer
@@ -50,10 +51,12 @@ def print_json_string(json_string: str):
         console.print(f"\t{key}: {value}")
 
 
-def read_usernames_from_json(file_path: Path):
+def read_usernames_from_json(file_path: Path) -> List[str]:
     """Read usernames from a JSON file."""
+    # read the JSON file and load contents
     with file_path.open("r") as file:
         data = json.load(file)
+    # return the list of usernames in JSON file
     return data.get("usernames", [])
 
 
