@@ -2,6 +2,7 @@
 
 import json
 from enum import Enum
+from pathlib import Path
 
 import requests
 import typer
@@ -40,9 +41,20 @@ class GitHubAccessLevel(Enum):
 
 def print_json_string(json_string: str):
     """Convert JSON string to dictionary and print each key-value pair."""
+    # convert the JSON string to a dictionary
     dictionary = json.loads(json_string)
+    # display each key-value pair in the dictionary;
+    # useful for debugging purposes when there is a
+    # response back from the GitHub API after an error
     for key, value in dictionary.items():
         console.print(f"\t{key}: {value}")
+
+
+def read_usernames_from_json(file_path: Path):
+    """Read usernames from a JSON file."""
+    with file_path.open("r") as file:
+        data = json.load(file)
+    return data.get("usernames", [])
 
 
 def modify_user_access(
@@ -57,7 +69,10 @@ def modify_user_access(
     organization_name = github_organization_url.split("github.com/")[1].split(
         "/"
     )[0]
-    console.print(organization_name)
+    # define the full name of the repository that involves
+    # the prefix of the repository a separating dash and
+    # then the name of the user; note that this is the standard
+    # adopted by GitHub repositories created by GitHub Classroom
     full_repository_name = repo_prefix + "-" + username
     full_name_for_api = organization_name + "/" + full_repository_name
     # define the API URL for the request
@@ -74,37 +89,48 @@ def modify_user_access(
     # check if the request was successful
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
-        console.print(f"󰄬 Changed {username}'s access to 'read'")
+        console.print(
+            f"󰄬 Changed {username}'s access to '{access_level.value}'"
+        )
     # display error message since the change of the access level did not work
     else:
+        # display the basic error message
         console.print(
             f" Failed to change access for {username}: {response.status_code}"
         )
+        # display all of the rest of the details in the string
+        # that encodes the JSON response from the GitHub API
         print_json_string(response.text)
 
 
 @app.command()
 def cli(
     github_org_url: str = typer.Argument(
-        ..., help="The URL of GitHub organization"
+        ..., help="URL of GitHub organization"
     ),
     repo_prefix: str = typer.Argument(
-        ..., help="The prefix for GitHub repository"
+        ..., help="Prefix for GitHub repository"
     ),
-    username: str = typer.Argument(
-        ..., help="The username subject to access change"
+    usernames: Path = typer.Argument(
+        ..., help="Path to JSON file with usernames"
     ),
     token: str = typer.Argument(
-        ..., help="The GitHub token for authentication"
+        ..., help="GitHub token for authentication"
     ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
         help="The access level for user",
     ),
 ):
-    """Define command-line interface for the reporepo program."""
+    """Modify a user's access to GitHub repository."""
+    # display the welcome message
     console.print(":sparkles: RepoRepo helps you `repo` a GitHub repository!")
     console.print()
-    modify_user_access(
-        github_org_url, repo_prefix, username, access_level, token
-    )
+    # extract the usernames from the TOML file
+    usernames_parsed = read_usernames_from_json(usernames)
+    # iterate through all of the usernames
+    for username in usernames_parsed:
+        # call the function to modify the user's access
+        modify_user_access(
+            github_org_url, repo_prefix, username, access_level, token
+        )
