@@ -41,7 +41,7 @@ class GitHubAccessLevel(Enum):
     ADMIN = "admin"
 
 
-def print_json_string(json_string: str):
+def print_json_string(json_string: str, progress: Progress) -> None:
     """Convert JSON string to dictionary and print each key-value pair."""
     # convert the JSON string to a dictionary
     dictionary = json.loads(json_string)
@@ -49,7 +49,7 @@ def print_json_string(json_string: str):
     # useful for debugging purposes when there is a
     # response back from the GitHub API after an error
     for key, value in dictionary.items():
-        console.print(f"\t{key}: {value}")
+        progress.console.print(f"  {key}: {value}")
 
 
 def read_usernames_from_json(file_path: Path) -> List[str]:
@@ -105,7 +105,7 @@ def modify_user_access(  # noqa: PLR0913
         )
         # display all of the rest of the details in the string
         # that encodes the JSON response from the GitHub API
-        print_json_string(response.text)
+        print_json_string(response.text, progress)
 
 
 @app.command()
