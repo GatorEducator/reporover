@@ -9,6 +9,7 @@ import requests
 import typer
 from rich.console import Console
 from rich.progress import Progress
+from rich.progress import Progress, BarColumn, TextColumn
 from typer import Typer
 
 # define the Typer app that will be used
@@ -134,7 +135,12 @@ def cli(
     # iterate through all of the usernames
     # display a progress bar based on the
     # number of usernames in the JSON file
-    with Progress() as progress:
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
         task = progress.add_task(
             "[green]Modifying User's Access", total=len(usernames_parsed)
         )
