@@ -8,8 +8,7 @@ from typing import List
 import requests
 import typer
 from rich.console import Console
-from rich.progress import Progress
-from rich.progress import Progress, BarColumn, TextColumn
+from rich.progress import BarColumn, Progress, TextColumn
 from typer import Typer
 
 # define the Typer app that will be used
