@@ -127,7 +127,7 @@ def cli(
 ):
     """Modify a user's access to GitHub repository."""
     # display the welcome message
-    console.print(":sparkles: RepoRepo helps you `repo` a GitHub repository!")
+    console.print(":sparkles: RepoRepo helps you 'repo' a GitHub repository!")
     console.print()
     # extract the usernames from the TOML file
     usernames_parsed = read_usernames_from_json(usernames)
