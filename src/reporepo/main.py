@@ -134,9 +134,9 @@ def cli(  # noqa: PLR0913
     console.print()
     # extract the usernames from the TOML file
     usernames_parsed = read_usernames_from_json(usernames_file)
-    # if the user has provided a list of usernames only use
-    # those usernames as long as they are inside of the parsed usernames
-    # (i.e., the usernames variable lets you select a subset of those
+    # if there exists a list of usernames only use those usernames as long
+    # as they are inside of the parsed usernames, the complete list
+    # (i.e., the username variable lets you select a subset of those
     # names that are specified in the JSON file of usernames)
     if username:
         usernames_parsed = list(set(username) & set(usernames_parsed))
