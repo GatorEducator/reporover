@@ -121,14 +121,14 @@ def cli(  # noqa: PLR0913
     ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
     username: Optional[List[str]] = typer.Option(
-        default=None, help="List of usernames' accounts to modify"
+        default=None, help="One or more usernames' accounts to modify"
     ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
         help="The access level for user",
     ),
 ):
-    """Modify a user's access to GitHub repository."""
+    """Modify a user's access to their GitHub repository."""
     # display the welcome message
     console.print(":sparkles: RepoRepo helps you 'repo' a GitHub repository!")
     console.print()
