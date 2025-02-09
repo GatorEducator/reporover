@@ -3,7 +3,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import requests
 import typer
@@ -109,17 +109,20 @@ def modify_user_access(  # noqa: PLR0913
 
 
 @app.command()
-def cli(
+def cli(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
     repo_prefix: str = typer.Argument(
         ..., help="Prefix for GitHub repository"
     ),
-    usernames: Path = typer.Argument(
+    usernames_file: Path = typer.Argument(
         ..., help="Path to JSON file with usernames"
     ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
+    username: Optional[List[str]] = typer.Option(
+        default=None, help="List of usernames' accounts to modify"
+    ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
         help="The access level for user",
@@ -130,7 +133,13 @@ def cli(
     console.print(":sparkles: RepoRepo helps you 'repo' a GitHub repository!")
     console.print()
     # extract the usernames from the TOML file
-    usernames_parsed = read_usernames_from_json(usernames)
+    usernames_parsed = read_usernames_from_json(usernames_file)
+    # if the user has provided a list of usernames only use
+    # those usernames as long as they are inside of the parsed usernames
+    # (i.e., the usernames variable lets you select a subset of those
+    # names that are specified in the JSON file of usernames)
+    if username:
+        usernames_parsed = list(set(username) & set(usernames_parsed))
     # iterate through all of the usernames
     # display a progress bar based on the
     # number of usernames in the JSON file
@@ -144,11 +153,11 @@ def cli(
             "[green]Modifying User's Access", total=len(usernames_parsed)
         )
         # modify the access for the current user
-        for username in usernames_parsed:
+        for current_username in usernames_parsed:
             modify_user_access(
                 github_org_url,
                 repo_prefix,
-                username,
+                current_username,
                 access_level,
                 token,
                 progress,
