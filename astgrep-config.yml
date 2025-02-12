@@ -1,0 +1,13 @@
+id: add-conditional-logic-with-docstring-and-return-types
+language: python
+rule:
+  pattern: |
+    def $FUNC($$$ARGS) -> $RET:
+        $DOCSTRING
+        $$$BODY
+fix: |-
+  def $FUNC($$$ARGS) -> $RET:
+      $DOCSTRING
+      if should_execute:
+          $$$BODY
+      return None
