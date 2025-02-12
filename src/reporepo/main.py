@@ -41,6 +41,15 @@ class GitHubAccessLevel(Enum):
     ADMIN = "admin"
 
 
+class GitHubPullRequestNumber(Enum):
+    """Define the pull request number(s) for the GitHub repositories."""
+
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    DEFAULT = 1
+
+
 def print_json_string(json_string: str, progress: Progress) -> None:
     """Convert JSON string to dictionary and print each key-value pair."""
     # convert the JSON string to a dictionary
@@ -108,11 +117,12 @@ def modify_user_access(  # noqa: PLR0913
         print_json_string(response.text, progress)
 
 
-def leave_pr_comment(
+def leave_pr_comment(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
     message: str,
+    pr_number: int,
     token: str,
     progress: Progress,
 ) -> None:
@@ -125,9 +135,7 @@ def leave_pr_comment(
     full_repository_name = f"{repo_prefix}-{username}"
     full_name_for_api = f"{organization_name}/{full_repository_name}"
     # define the API URL for the pull request comments
-    pr_comments_url = (
-        f"https://api.github.com/repos/{full_name_for_api}/issues/1/comments"
-    )
+    pr_comments_url = f"https://api.github.com/repos/{full_name_for_api}/issues/{pr_number}/comments"
     # headers for the request
     headers = {
         "Authorization": f"token {token}",
@@ -140,11 +148,12 @@ def leave_pr_comment(
     # check if the request was successful
     if response.status_code == 201:
         progress.console.print(
-            f"󰄬 Commented on the first pull request of {username}'s repository"
+            f"󰄬 Commented on the pull request number {pr_number} of {username}'s repository"
         )
     else:
         progress.console.print(
-            f" Failed to comment on the first pull request: {response.status_code}"
+            f" Failed to comment on pull request {pr_number} in {username}'s repository:"
+            + f" {response.status_code}"
         )
         print_json_string(response.text, progress)
 
@@ -163,6 +172,10 @@ def cli(  # noqa: PLR0913
     token: str = typer.Argument(..., help="GitHub token for authentication"),
     username: Optional[List[str]] = typer.Option(
         default=None, help="One or more usernames' accounts to modify"
+    ),
+    pr_number: int = typer.Option(
+        GitHubPullRequestNumber.DEFAULT.value,
+        help="Pull request number in GitHub repository",
     ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
@@ -208,6 +221,7 @@ def cli(  # noqa: PLR0913
                 repo_prefix,
                 current_username,
                 "Your access level has been modified.",
+                pr_number,
                 token,
                 progress,
             )
