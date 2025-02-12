@@ -211,8 +211,12 @@ def cli(  # noqa: PLR0913
         # request (PR); note that this works because GitHub
         # classroom already creates a PR when the person
         # accepts an assignment. However, it is also possible
-        # to specify the PR number on the command line
+        # to specify the PR number on the command line.
         for current_username in usernames_parsed:
+            # note that passing the progress bar to
+            # each of the following functions allows their
+            # output to be displayed as integrated to the
+            # progress bar that shows task completion
             # modify the user's access level
             modify_user_access(
                 github_org_url,
