@@ -108,6 +108,47 @@ def modify_user_access(  # noqa: PLR0913
         print_json_string(response.text, progress)
 
 
+def leave_pr_comment(
+    github_organization_url: str,
+    repo_prefix: str,
+    username: str,
+    message: str,
+    token: str,
+    progress: Progress,
+) -> None:
+    """Leave a comment on the first pull request of the repository."""
+    # extract the organization name from the URL
+    organization_name = github_organization_url.split("github.com/")[1].split(
+        "/"
+    )[0]
+    # define the full name of the repository
+    full_repository_name = f"{repo_prefix}-{username}"
+    full_name_for_api = f"{organization_name}/{full_repository_name}"
+    # define the API URL for the pull request comments
+    pr_comments_url = (
+        f"https://api.github.com/repos/{full_name_for_api}/issues/1/comments"
+    )
+    # headers for the request
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    # data for the request
+    data = {"body": message}
+    # make the POST request to leave the comment
+    response = requests.post(pr_comments_url, headers=headers, json=data)
+    # check if the request was successful
+    if response.status_code == 201:
+        progress.console.print(
+            f"󰄬 Commented on the first pull request of {username}'s repository"
+        )
+    else:
+        progress.console.print(
+            f" Failed to comment on the first pull request: {response.status_code}"
+        )
+        print_json_string(response.text, progress)
+
+
 @app.command()
 def cli(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
@@ -159,6 +200,14 @@ def cli(  # noqa: PLR0913
                 repo_prefix,
                 current_username,
                 access_level,
+                token,
+                progress,
+            )
+            leave_pr_comment(
+                github_org_url,
+                repo_prefix,
+                current_username,
+                "Your access level has been modified.",
                 token,
                 progress,
             )
