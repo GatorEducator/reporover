@@ -207,7 +207,13 @@ def cli(  # noqa: PLR0913
             "[green]Modifying User's Access", total=len(usernames_parsed)
         )
         # modify the access for the current user
+        # and then leave a comment on the existing pull
+        # request (PR); note that this works because GitHub
+        # classroom already creates a PR when the person
+        # accepts an assignment. However, it is also possible
+        # to specify the PR number on the command line
         for current_username in usernames_parsed:
+            # modify the user's access level
             modify_user_access(
                 github_org_url,
                 repo_prefix,
@@ -216,6 +222,8 @@ def cli(  # noqa: PLR0913
                 token,
                 progress,
             )
+            # leave a comment on the existing PR
+            # to notify the user of the change
             leave_pr_comment(
                 github_org_url,
                 repo_prefix,
