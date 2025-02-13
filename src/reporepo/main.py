@@ -114,14 +114,14 @@ def modify_user_access(  # noqa: PLR0913
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
         progress.console.print(
-            f"󰄬 Changed {username}'s access to '{access_level.value}' in "
+            f"󰄬 Changed {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}"
         )
     # display error message since the change of the access level did not work
     else:
         # display the basic error message
         progress.console.print(
-            f" Failed to change {username}'s access to '{access_level.value}' in "
+            f" Failed to change {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}\n"
             + f"  Diagnostic: {response.status_code}"
         )
