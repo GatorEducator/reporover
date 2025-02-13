@@ -54,10 +54,10 @@ class GitHubPullRequestNumber(Enum):
 class PullRequestMessages(Enum):
     """Define the pull request messages to leave in the GitHub repositories."""
 
-    MODIFIED_TO = (
+    MODIFIED_TO_PHRASE = (
         "Your access level for this GitHub repository has been modified to"
     )
-    ASSISTANCE = "Please contact the course instructor for assistance with access to your repository."
+    ASSISTANCE_SENTENCE = "Please contact the course instructor for assistance with access to your repository."
 
 
 def print_json_string(json_string: str, progress: Progress) -> None:
@@ -157,8 +157,8 @@ def leave_pr_comment(  # noqa: PLR0913
     }
     # build up the data for the request
     complete_message = (
-        f"Hello @{username}! {PullRequestMessages.MODIFIED_TO.value} `{access_level.value}`. "
-        + f"{PullRequestMessages.ASSISTANCE.value} "
+        f"Hello @{username}! {PullRequestMessages.MODIFIED_TO_PHRASE.value} `{access_level.value}`. "
+        + f"{PullRequestMessages.ASSISTANCE_SENTENCE.value} "
         + f"{message}"
     )
     data = {"body": complete_message}
