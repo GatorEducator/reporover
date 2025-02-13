@@ -104,13 +104,16 @@ def modify_user_access(  # noqa: PLR0913
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
         progress.console.print(
-            f"󰄬 Changed {username}'s access to '{access_level.value}'"
+            f"󰄬 Changed {username}'s access to '{access_level.value}' in "
+            + f" {full_repository_name}"
         )
     # display error message since the change of the access level did not work
     else:
         # display the basic error message
         progress.console.print(
-            f" Failed to change access for {username}: {response.status_code}"
+            f" Failed to change {username}'s access to '{access_level.value}' in "
+            + f" {full_repository_name}\n"
+            + f"  Diagnostic: {response.status_code}"
         )
         # display all of the rest of the details in the string
         # that encodes the JSON response from the GitHub API
@@ -148,12 +151,12 @@ def leave_pr_comment(  # noqa: PLR0913
     # check if the request was successful
     if response.status_code == 201:
         progress.console.print(
-            f"󰄬 Commented on the pull request number {pr_number} of {username}'s repository"
+            f"󰄬 Commented on the pull request number {pr_number} for GitHub repository {full_repository_name}"
         )
     else:
         progress.console.print(
-            f" Failed to comment on pull request {pr_number} in {username}'s repository:"
-            + f" {response.status_code}"
+            f" Failed to comment on pull request {pr_number} for GitHub repository {full_repository_name}\n"
+            + f"  Diagnostic: {response.status_code}"
         )
         print_json_string(response.text, progress)
 
@@ -184,7 +187,9 @@ def cli(  # noqa: PLR0913
 ):
     """Modify a user's access to their GitHub repository."""
     # display the welcome message
-    console.print(":sparkles: RepoRepo helps you 'repo' a GitHub repository!")
+    console.print(":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!")
+    console.print(f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}")
+    console.print(f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user")
     console.print()
     # extract the usernames from the TOML file
     usernames_parsed = read_usernames_from_json(usernames_file)
