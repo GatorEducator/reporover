@@ -22,6 +22,7 @@ console = Console()
 class StatusCode(Enum):
     """Define the status codes for the GitHub API."""
 
+    CREATED = 201
     SUCCESS = 204
     BAD_REQUEST = 400
     UNAUTHORIZED = 401
@@ -149,7 +150,7 @@ def leave_pr_comment(  # noqa: PLR0913
     # make the POST request to leave the comment
     response = requests.post(pr_comments_url, headers=headers, json=data)
     # check if the request was successful
-    if response.status_code == 201:
+    if response.status_code == StatusCode.CREATED.value:
         progress.console.print(
             f"󰄬 Commented on the pull request number {pr_number} for GitHub repository {full_repository_name}"
         )
