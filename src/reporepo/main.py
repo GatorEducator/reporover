@@ -51,6 +51,15 @@ class GitHubPullRequestNumber(Enum):
     DEFAULT = 1
 
 
+class PullRequestMessages(Enum):
+    """Define the pull request messages to leave in the GitHub repositories."""
+
+    MODIFIED_TO = (
+        "Your access level for this GitHub repository has been modified to"
+    )
+    ASSISTANCE = "Please contact the course instructor for assistance with access to your repository."
+
+
 def print_json_string(json_string: str, progress: Progress) -> None:
     """Convert JSON string to dictionary and print each key-value pair."""
     # convert the JSON string to a dictionary
@@ -125,6 +134,7 @@ def leave_pr_comment(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
+    access_level: GitHubAccessLevel,
     message: str,
     pr_number: int,
     token: str,
@@ -145,8 +155,13 @@ def leave_pr_comment(  # noqa: PLR0913
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    # data for the request
-    data = {"body": message}
+    # build up the data for the request
+    complete_message = (
+        f"Hello @{username}! {PullRequestMessages.MODIFIED_TO.value} `{access_level.value}`. "
+        + f"{PullRequestMessages.ASSISTANCE.value} "
+        + f"{message}"
+    )
+    data = {"body": complete_message}
     # make the POST request to leave the comment
     response = requests.post(pr_comments_url, headers=headers, json=data)
     # check if the request was successful
@@ -181,6 +196,10 @@ def cli(  # noqa: PLR0913
         GitHubPullRequestNumber.DEFAULT.value,
         help="Pull request number in GitHub repository",
     ),
+    pr_message: str = typer.Option(
+        None,
+        help="Pull request number in GitHub repository",
+    ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
         help="The access level for user",
@@ -189,9 +208,15 @@ def cli(  # noqa: PLR0913
     """Modify a user's access to their GitHub repository."""
     # display the welcome message
     console.print()
-    console.print(":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!")
-    console.print(f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}")
-    console.print(f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user")
+    console.print(
+        ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
+    )
+    console.print(
+        f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}"
+    )
+    console.print(
+        f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user"
+    )
     console.print()
     # extract the usernames from the TOML file
     usernames_parsed = read_usernames_from_json(usernames_file)
@@ -239,7 +264,8 @@ def cli(  # noqa: PLR0913
                 github_org_url,
                 repo_prefix,
                 current_username,
-                "Your access level has been modified.",
+                access_level,
+                pr_message,
                 pr_number,
                 token,
                 progress,
