@@ -188,6 +188,7 @@ def cli(  # noqa: PLR0913
 ):
     """Modify a user's access to their GitHub repository."""
     # display the welcome message
+    console.print()
     console.print(":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!")
     console.print(f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}")
     console.print(f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user")
