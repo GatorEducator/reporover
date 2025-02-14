@@ -197,7 +197,7 @@ def cli(  # noqa: PLR0913
         help="Pull request number in GitHub repository",
     ),
     pr_message: str = typer.Option(
-        None,
+        "",
         help="Pull request number in GitHub repository",
     ),
     access_level: GitHubAccessLevel = typer.Option(
