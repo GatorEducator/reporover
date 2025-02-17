@@ -1,13 +1,21 @@
 """Test the main module of the reporepo command-line interface."""
 
 import json
+from unittest.mock import Mock
 
 import pytest
 from rich.console import Console
 from rich.progress import Progress
 from typer.testing import CliRunner
 
-from reporepo.main import app, print_json_string, read_usernames_from_json
+from reporepo.main import (
+    GitHubAccessLevel,
+    StatusCode,
+    app,
+    modify_user_access,
+    print_json_string,
+    read_usernames_from_json,
+)
 
 runner = CliRunner()
 
@@ -105,3 +113,25 @@ def test_read_usernames_from_json_mixed_content(tmp_json_file):
     file_path = tmp_json_file({"usernames": ["user1"], "other_key": ["user2"]})
     usernames = read_usernames_from_json(file_path)
     assert usernames == ["user1"]
+
+
+def test_modify_user_access_success(progress, capsys):
+    """Test modify_user_access function with a successful response."""
+    mock_put = Mock()
+    mock_response = Mock()
+    mock_response.status_code = StatusCode.SUCCESS.value
+    mock_put.return_value = mock_response
+    modified_user_access_status = modify_user_access(
+        github_organization_url="https://github.com/org",
+        repo_prefix="repo",
+        username="user",
+        access_level=GitHubAccessLevel.READ,
+        token="fake_token",
+        progress=progress,
+        put_request_function=mock_put,
+    )
+    mock_put.assert_called_once()
+    captured = capsys.readouterr()
+    assert modified_user_access_status == StatusCode.SUCCESS
+    assert "Failed to change user's access" not in captured.out
+    assert "󰄬 Changed user's access to" in captured.out.strip()
