@@ -6,6 +6,7 @@ from reporepo.main import app
 
 runner = CliRunner()
 
+
 def test_cli():
     """Ensure that the CLI interface is working as expected when run with --help."""
     result = runner.invoke(app, ["--help"])
