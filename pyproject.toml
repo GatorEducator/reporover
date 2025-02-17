@@ -1,7 +1,7 @@
 [project]
 name = "reporepo"
 version = "0.1.0"
-description = "RepoRepo lets you repo GitHub repositories!"
+description = "RepoRepo lets you manage and comment in GitHub repositories!"
 readme = "README.md"
 authors = [
     { name = "Gregory M. Kapfhammer", email = "gkapfham@allegheny.edu" }
