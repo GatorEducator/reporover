@@ -3,7 +3,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional, Union
 
 import requests
 import typer
@@ -87,8 +87,11 @@ def modify_user_access(  # noqa: PLR0913
     access_level: GitHubAccessLevel,
     token: str,
     progress: Progress,
-) -> None:
+    put_request_function: Callable = requests.put,
+) -> Union[StatusCode, None]:
     """Change user access to read."""
+    # define the status codes for the request
+    request_status_code = None
     # extract the repository name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
         "/"
@@ -109,7 +112,7 @@ def modify_user_access(  # noqa: PLR0913
     # data for the request
     data = {"permission": access_level.value}
     # make the PUT request to change the user's permission
-    response = requests.put(api_url, headers=headers, json=data)
+    response = put_request_function(api_url, headers=headers, json=data)
     # check if the request was successful
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
@@ -117,6 +120,7 @@ def modify_user_access(  # noqa: PLR0913
             f"󰄬 Changed {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}"
         )
+        request_status_code = StatusCode.SUCCESS
     # display error message since the change of the access level did not work
     else:
         # display the basic error message
@@ -128,6 +132,7 @@ def modify_user_access(  # noqa: PLR0913
         # display all of the rest of the details in the string
         # that encodes the JSON response from the GitHub API
         print_json_string(response.text, progress)
+    return request_status_code
 
 
 def leave_pr_comment(  # noqa: PLR0913
@@ -257,6 +262,7 @@ def cli(  # noqa: PLR0913
                 access_level,
                 token,
                 progress,
+                requests.put
             )
             # leave a comment on the existing PR
             # to notify the user of the change
