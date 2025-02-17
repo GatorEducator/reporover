@@ -22,6 +22,7 @@ console = Console()
 class StatusCode(Enum):
     """Define the status codes for the GitHub API."""
 
+    WORKING = 200
     CREATED = 201
     SUCCESS = 204
     BAD_REQUEST = 400
@@ -207,7 +208,8 @@ def get_github_actions_status(
     # make the GET request to get the GitHub Actions status
     response = requests.get(api_url, headers=headers)
     # check if the request was successful
-    if response.status_code == 200:
+    if response.status_code == StatusCode.WORKING.value:
+        # there are workflow runs and they should be displayed
         runs = response.json().get("workflow_runs", [])
         if runs:
             latest_run = runs[0]
@@ -218,10 +220,12 @@ def get_github_actions_status(
                 f"  Status: {status}\n"
                 f"  Conclusion: {conclusion}"
             )
+        # could not find any workflow runs to display
         else:
             progress.console.print(
-                f"󰄬 No GitHub Actions runs found for {full_repository_name}"
+                f"? No GitHub Actions runs found for {full_repository_name}"
             )
+    # display error message since the request did not work
     else:
         progress.console.print(
             f" Failed to get GitHub Actions status for {full_repository_name}\n"
@@ -455,7 +459,7 @@ def status(
         TextColumn("[progress.completed]{task.completed}/{task.total}"),
     ) as progress:
         task = progress.add_task(
-            "[green]Getting GitHub Actions Status", total=1
+            "[green]Getting GitHub Actions Status", total=len(usernames_parsed)
         )
         for current_username in usernames_parsed:
             # get the GitHub Actions status
