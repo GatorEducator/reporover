@@ -183,7 +183,7 @@ def leave_pr_comment(  # noqa: PLR0913
 
 
 @app.command()
-def cli(  # noqa: PLR0913
+def access(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -210,7 +210,7 @@ def cli(  # noqa: PLR0913
         help="The access level for user",
     ),
 ):
-    """RepoRepo lets you manage and comment in GitHub repositories."""
+    """Modify user access to GitHub repositories."""
     # display the welcome message
     console.print()
     console.print(
@@ -264,6 +264,89 @@ def cli(  # noqa: PLR0913
                 progress,
                 requests.put
             )
+            # leave a comment on the existing PR
+            # to notify the user of the change
+            leave_pr_comment(
+                github_org_url,
+                repo_prefix,
+                current_username,
+                access_level,
+                pr_message,
+                pr_number,
+                token,
+                progress,
+            )
+            # take the next step in the progress bar
+            progress.advance(task)
+
+
+@app.command()
+def comment(  # noqa: PLR0913
+    github_org_url: str = typer.Argument(
+        ..., help="URL of GitHub organization"
+    ),
+    repo_prefix: str = typer.Argument(
+        ..., help="Prefix for GitHub repository"
+    ),
+    usernames_file: Path = typer.Argument(
+        ..., help="Path to JSON file with usernames"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    username: Optional[List[str]] = typer.Option(
+        default=None, help="One or more usernames' accounts to modify"
+    ),
+    pr_number: int = typer.Option(
+        GitHubPullRequestNumber.DEFAULT.value,
+        help="Pull request number in GitHub repository",
+    ),
+    pr_message: str = typer.Option(
+        "",
+        help="Pull request number in GitHub repository",
+    ),
+    access_level: GitHubAccessLevel = typer.Option(
+        GitHubAccessLevel.READ.value,
+        help="The access level for user",
+    ),
+):
+    """Comment on a pull request in GitHub repositories."""
+    # display the welcome message
+    console.print()
+    console.print(
+        ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
+    )
+    console.print(
+        f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}"
+    )
+    console.print(
+        f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user"
+    )
+    console.print()
+    # extract the usernames from the TOML file
+    usernames_parsed = read_usernames_from_json(usernames_file)
+    # if there exists a list of usernames only use those usernames as long
+    # as they are inside of the parsed usernames, the complete list
+    # (i.e., the username variable lets you select a subset of those
+    # names that are specified in the JSON file of usernames)
+    if username:
+        usernames_parsed = list(set(username) & set(usernames_parsed))
+    # iterate through all of the usernames
+    # display a progress bar based on the
+    # number of usernames in the JSON file
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Modifying User's Access", total=len(usernames_parsed)
+        )
+        # leave a comment on the existing pull
+        # request (PR); note that this works because GitHub
+        # classroom already creates a PR when the person
+        # accepts an assignment. However, it is also possible
+        # to specify the PR number on the command line.
+        for current_username in usernames_parsed:
             # leave a comment on the existing PR
             # to notify the user of the change
             leave_pr_comment(
