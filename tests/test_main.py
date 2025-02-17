@@ -1,11 +1,13 @@
 """Test the main module of the reporepo command-line interface."""
 
+import json
+
 import pytest
 from rich.console import Console
 from rich.progress import Progress
 from typer.testing import CliRunner
 
-from reporepo.main import app, print_json_string
+from reporepo.main import app, print_json_string, read_usernames_from_json
 
 runner = CliRunner()
 
@@ -55,3 +57,51 @@ def test_print_json_string_special_characters(progress, capsys):
     print_json_string(json_string, progress)
     captured = capsys.readouterr()
     assert "key!@#: value$%^" in captured.out
+
+
+@pytest.fixture
+def tmp_json_file(tmp_path):
+    """Fixture to create a temporary JSON file."""
+
+    def create_tmp_json_file(content):
+        file_path = tmp_path / "usernames.json"
+        with file_path.open("w") as file:
+            json.dump(content, file)
+        return file_path
+
+    return create_tmp_json_file
+
+
+def test_read_usernames_from_json_empty(tmp_json_file):
+    """Test reading usernames from an empty JSON file."""
+    file_path = tmp_json_file({})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == []
+
+
+def test_read_usernames_from_json_single_username(tmp_json_file):
+    """Test reading a single username from a JSON file."""
+    file_path = tmp_json_file({"usernames": ["user1"]})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == ["user1"]
+
+
+def test_read_usernames_from_json_multiple_usernames(tmp_json_file):
+    """Test reading multiple usernames from a JSON file."""
+    file_path = tmp_json_file({"usernames": ["user1", "user2", "user3"]})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == ["user1", "user2", "user3"]
+
+
+def test_read_usernames_from_json_no_usernames_key(tmp_json_file):
+    """Test reading usernames from a JSON file with no 'usernames' key."""
+    file_path = tmp_json_file({"other_key": ["user1", "user2"]})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == []
+
+
+def test_read_usernames_from_json_mixed_content(tmp_json_file):
+    """Test reading usernames from a JSON file with mixed content."""
+    file_path = tmp_json_file({"usernames": ["user1"], "other_key": ["user2"]})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == ["user1"]
