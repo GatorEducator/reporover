@@ -210,7 +210,7 @@ def cli(  # noqa: PLR0913
         help="The access level for user",
     ),
 ):
-    """Modify a user's access to their GitHub repository."""
+    """RepoRepo lets you manage and comment in GitHub repositories."""
     # display the welcome message
     console.print()
     console.print(
