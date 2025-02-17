@@ -15,9 +15,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.15.0",
     "pytest>=8.3.4",
+    "pytest-clarity>=1.0.1",
     "pytest-cov>=6.0.0",
+    "pytest-randomly>=3.16.0",
     "ruff>=0.9.6",
+    "symbex>=1.4",
     "taskipy>=1.14.1",
 ]
 
@@ -73,8 +77,9 @@ mypy = { cmd = "{mypy-command}", help = "Run the mypy type checker for potential
 symbex = "task symbex-typed && task symbex-documented"
 symbex-typed = { cmd = "{symbex-typed-command}", help = "Run symbex for fully typed functions", use_vars = true }
 symbex-documented = { cmd = "{symbex-documented-command}", help = "Run symbex for documentation", use_vars = true }
-test = { cmd = "pytest -x -s -vv", help = "Run the pytest test suite using order randomization and test distribution" }
-test-silent = { cmd = "pytest -x --show-capture=no -n auto", help = "Run the pytest test suite without showing output" }
+test = { cmd = "pytest -x -s -vv", help = "Run the pytest test suite using order randomization" }
+test-not-randomly = { cmd = "pytest -x -s -vv -p no:randomly", help = "Run the pytest test suite using order randomization and test distribution" }
+test-silent = { cmd = "pytest -x --show-capture=no", help = "Run the pytest test suite without showing output" }
 test-silent-not-randomly = { cmd = "pytest -x --show-capture=no -p no:randomly", help = "Run the pytest test suite without showing output and order randomization" }
 
 [tool.uv]
