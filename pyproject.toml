@@ -59,7 +59,7 @@ tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
 coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=50 --cov-report term-missing --cov-report json --cov --cov-branch"
 coverage-test-command-silent = "pytest -x --show-capture=no --cov-report term-missing --cov-report json --cov --cov-branch"
-developer-test-command = "pytest -x -s"
+developer-test-command = "pytest -x -s -vv"
 developer-test-command-not-random = "pytest -x -s -vv -p no:randomly"
 developer-test-silent-command = "pytest -x --show-capture=no"
 developer-test-silent-command-not-random = "pytest -x --show-capture=no -p no:randomly"
@@ -80,9 +80,9 @@ symbex = "task symbex-typed && task symbex-documented"
 symbex-typed = { cmd = "{symbex-typed-command}", help = "Run symbex for fully typed functions", use_vars = true }
 symbex-documented = { cmd = "{symbex-documented-command}", help = "Run symbex for documentation", use_vars = true }
 test = { cmd = "{developer-test-command}", help = "Run the pytest test suite using order randomization", use_vars = true }
-test-not-randomly = { cmd = "{developer-test-command-not-random}", help = "Run the pytest test suite without randomization", use_vars = true }
+test-not-random = { cmd = "{developer-test-command-not-random}", help = "Run the pytest test suite without randomization", use_vars = true }
 test-silent = { cmd = "{developer-test-silent-command}", help = "Run the pytest test suite without showing output", use_vars = true }
-test-silent-not-randomly = { cmd = "{developer-test-silent-command-not-random}", help = "Run the pytest test suite without showing output", use_vars = true }
+test-silent-not-random = { cmd = "{developer-test-silent-command-not-random}", help = "Run the pytest test suite without showing output", use_vars = true }
 test-coverage = { cmd = "{coverage-test-command}", help = "Run the pytest test suite with coverage monitoring", use_vars = true }
 
 [tool.uv]
