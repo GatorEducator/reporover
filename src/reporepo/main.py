@@ -391,7 +391,7 @@ def comment(  # noqa: PLR0913
         TextColumn("[progress.completed]{task.completed}/{task.total}"),
     ) as progress:
         task = progress.add_task(
-            "[green]Modifying User's Access", total=len(usernames_parsed)
+            "[green]Commenting of Pull Requests", total=len(usernames_parsed)
         )
         # leave a comment on the existing pull
         # request (PR); note that this works because GitHub
