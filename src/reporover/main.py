@@ -359,7 +359,7 @@ def comment(  # noqa: PLR0913
         ..., help="Path to JSON file with usernames"
     ),
     pr_message: str = typer.Argument(
-        "",
+        ...,
         help="Pull request number in GitHub repository",
     ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
