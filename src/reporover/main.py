@@ -1,4 +1,4 @@
-"""Main module for the reporepo command-line interface."""
+"""Main module for the reporover command-line interface."""
 
 import json
 from enum import Enum
@@ -79,6 +79,14 @@ def read_usernames_from_json(file_path: Path) -> List[str]:
         data = json.load(file)
     # return the list of usernames in JSON file
     return data.get("usernames", [])
+
+
+def display_welcome_message() -> None:
+    """Display the welcome message for all reporover commands."""
+    console.print()
+    console.print(
+        ":sparkles: RepoRover manages and analyzes remote GitHub repositories! Arf!"
+    )
 
 
 def modify_user_access(  # noqa: PLR0913
@@ -273,10 +281,8 @@ def access(  # noqa: PLR0913
 ):
     """Modify user access to GitHub repositories."""
     # display the welcome message
-    console.print()
-    console.print(
-        ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
-    )
+    display_welcome_message()
+    # display details about this command
     console.print(
         f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}"
     )
@@ -367,10 +373,7 @@ def comment(  # noqa: PLR0913
 ):
     """Comment on a pull request in GitHub repositories."""
     # display the welcome message
-    console.print()
-    console.print(
-        ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
-    )
+    display_welcome_message()
     console.print(
         f":sparkles: Commenting on pull requests in repositories in this GitHub organization: {github_org_url}"
     )
@@ -435,12 +438,9 @@ def status(
 ):
     """Get the GitHub Actions status for repositories."""
     # create a default console
-    console = Console()
+    # console = Console()
     # display the welcome message
-    console.print()
-    console.print(
-        ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
-    )
+    display_welcome_message()
     console.print(
         f":sparkles: Getting GitHub Actions status for repository: {repo_prefix}-{username}"
     )
