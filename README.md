@@ -11,7 +11,7 @@
 
 ## :sparkles: Introduction
 
-**RepoRover** is your command-line buddy for managing and analyzing multiple
+RepoRover is your command-line companion for managing and analyzing multiple
 GitHub repositories at once! Whether you're an instructor managing student
 repositories on GitHub Classroom or a developer handling multiple project
 repositories, RepoRover is here to make your life easier and more fun! 
@@ -136,8 +136,7 @@ pull request in the GitHub repository for one or more users. To run this command
 you need to provide the following arguments and options:
 
 ```bash
-Usage: reporover comment [OPTIONS] GITHUB_ORG_URL REPO_PREFIX USERNAMES_FILE
-                          [PR_MESSAGE] TOKEN
+Usage: reporover comment [OPTIONS] GITHUB_ORG_URL REPO_PREFIX USERNAMES_FILE [PR_MESSAGE] TOKEN
 
 Arguments:
 *    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
