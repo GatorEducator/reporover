@@ -71,15 +71,31 @@ permissions to manage repositories and leave comments. Keep it handy!
 
 ## :running: Running the Tool
 
-RepoRover comes with three powerful commands to make your life easier: `access`,
-`comment`, and `status`. Let's dive into each one!
+RepoRover comes with several powerful commands to make your life easier when you
+manage multiple GitHub repositories. The concrete examples of these commands use
+a synthetic GitHub personal access token of
+`ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ`. Please note that this is a fake
+token used exclusively for illustrative purposes.
 
 ### :key: Access Command
 
-Need to modify user access levels for multiple repositories? RepoRover's got you covered!
+Need to modify user access levels for multiple repositories? You can type the
+command `reporover access --help` to change the access level for one or more
+users, providing the following arguments and options:
 
 ```bash
-reporover access <github_org_url> <repo_prefix> <usernames_file> <token> --username <username> --access-level <access_level>
+Arguments:
+*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
+*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
+*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
+*    token               TEXT  GitHub token for authentication [default: None] [required]
+
+Options:
+--username            TEXT                                One or more usernames' accounts to modify [default: None]
+--pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
+--pr-message          TEXT                                Pull request number in GitHub repository
+--access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
+--help                                                    Show this message and exit.
 ```
 
 Example:
