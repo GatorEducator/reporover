@@ -1,7 +1,8 @@
-<img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="reporover Logo"
-    title="reporover Logo" />
+<div style="text-align: center;">
+    <img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="RepoRover Logo" title="RepoRover Logo" style="margin-bottom: 0;" />
+</div>
 
-# reporover
+# RepoRover
 
 [![build](https://github.com/GatorEducator/reporover/actions/workflows/build.yml/badge.svg)](https://github.com/GatorEducator/reporover/actions/workflows/build.yml)
 [![Code Style: ruff](https://img.shields.io/badge/Code%20Style-Black-blue.svg)](https://docs.astral.sh/ruff/)
