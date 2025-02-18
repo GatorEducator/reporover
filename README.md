@@ -102,10 +102,12 @@ Options:
 --help                                                    Show this message and exit.
 ```
 
-Here is a concrete example that shows how to use the `reporover access` command:
+Here is a concrete example that shows how to use the `reporover access` command.
+Please note that in this command-line example on the following examples, the `$`
+indicates that you should type the command in your terminal.
 
 ```bash
-reporover access https://github.com/my-org repo-prefix usernames.json \
+$ reporover access https://github.com/my-org repo-prefix usernames.json \
 ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ --username student1 --access-level write
 ```
 
