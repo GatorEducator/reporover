@@ -355,10 +355,6 @@ def comment(  # noqa: PLR0913
         "",
         help="Pull request number in GitHub repository",
     ),
-    access_level: GitHubAccessLevel = typer.Option(
-        GitHubAccessLevel.READ.value,
-        help="The access level for user",
-    ),
 ):
     """Comment on a pull request in GitHub repositories."""
     # display the welcome message
@@ -367,10 +363,7 @@ def comment(  # noqa: PLR0913
         ":sparkles: RepoRepo helps you [bold]repo[/bold] a GitHub repository!"
     )
     console.print(
-        f":sparkles: Modifying repositories in this GitHub organization: {github_org_url}"
-    )
-    console.print(
-        f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user"
+        f":sparkles: Commenting on pull requests in repositories in this GitHub organization: {github_org_url}"
     )
     console.print()
     # extract the usernames from the TOML file
