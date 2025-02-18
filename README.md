@@ -72,7 +72,7 @@ Install RepoRover with `uv`:
 uv tool install reporover
 ```
 
-## :running: Running the Tool
+## :dog: Running RepoRover
 
 RepoRover comes with several powerful commands to make your life easier when you
 manage multiple GitHub repositories. The concrete examples of these commands use
