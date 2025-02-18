@@ -11,3 +11,6 @@ wheels/
 
 # Pytest test coverage
 coverage.json
+
+# Uv-local configuration
+uv.toml
