@@ -74,7 +74,7 @@ mypy-command = {var = "mypy {project}", recursive = true}
 
 [tool.taskipy.tasks]
 all = "task lint && task test"
-lint = "task format && task check && task mypy"
+lint = "task format && task check && task mypy && task symbex-typed && task symbex-documented"
 check = { cmd = "{check-command}", help = "Run the ruff linting checks", use_vars = true }
 format = { cmd = "{format-command}", help = "Run the ruff formatter on source code", use_vars = true }
 format-fix = { cmd = "{fixformat-command}", help = "Run the ruff formatter to fix source code", use_vars = true }
@@ -87,6 +87,7 @@ test-not-random = { cmd = "{developer-test-command-not-random}", help = "Run the
 test-silent = { cmd = "{developer-test-silent-command}", help = "Run the pytest test suite without showing output", use_vars = true }
 test-silent-not-random = { cmd = "{developer-test-silent-command-not-random}", help = "Run the pytest test suite without showing output", use_vars = true }
 test-coverage = { cmd = "{coverage-test-command}", help = "Run the pytest test suite with coverage monitoring", use_vars = true }
+test-coverage-silent = { cmd = "{coverage-test-command-silent}", help = "Run the pytest test suite with coverage monitoring without showing output", use_vars = true }
 
 [tool.uv]
 no-binary-package = ["ruff"]
