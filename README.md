@@ -128,8 +128,10 @@ the following content:
 
 ### :speech_balloon: Comment Command
 
-Want to leave comments on pull requests for multiple repositories? RepoRover
-makes it a breeze!
+Need to leave comments on pull requests for multiple repositories? You can type
+the command `reporover comment --help` to learn how to comment on an existing
+pull request in the GitHub repository for one or more users. To run this command
+you need to provide the following arguments and options:
 
 ```bash
 reporover comment <github_org_url> <repo_prefix> <usernames_file> <pr_message> <token> --username <username> --pr-number <pr_number>
