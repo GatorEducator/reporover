@@ -75,7 +75,8 @@ RepoRover comes with several powerful commands to make your life easier when you
 manage multiple GitHub repositories. The concrete examples of these commands use
 a synthetic GitHub personal access token of
 `ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ`. Please note that this is a fake
-token used exclusively for illustrative purposes.
+token used exclusively for illustrative purposes. To run these commands you need
+to create your own GitHub personal access token and use it in the command-line.
 
 ### :key: Access Command
 
