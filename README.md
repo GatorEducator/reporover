@@ -136,7 +136,21 @@ pull request in the GitHub repository for one or more users. To run this command
 you need to provide the following arguments and options:
 
 ```bash
-reporover comment <github_org_url> <repo_prefix> <usernames_file> <pr_message> <token> --username <username> --pr-number <pr_number>
+Usage: reporover comment [OPTIONS] GITHUB_ORG_URL REPO_PREFIX USERNAMES_FILE
+                          [PR_MESSAGE] TOKEN
+
+Arguments:
+*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
+*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
+*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
+*    token               TEXT  GitHub token for authentication [default: None] [required]
+
+Options:
+--username            TEXT                                One or more usernames' accounts to modify [default: None]
+--pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
+--pr-message          TEXT                                Pull request number in GitHub repository
+--access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
+--help                                                    Show this message and exit.
 ```
 
 Example:
