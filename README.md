@@ -140,18 +140,18 @@ pull request in the GitHub repository for one or more users. To run this command
 you need to provide the following arguments and options:
 
 ```bash
-Usage: reporover comment [OPTIONS] GITHUB_ORG_URL REPO_PREFIX USERNAMES_FILE [PR_MESSAGE] TOKEN
+Usage: reporover comment [OPTIONS] github_org_url repo_prefix usernames_file pr_message token
 
 Arguments:
 *    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
 *    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
 *    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
+*    pr_message          TEXT  Pull request message for GitHub repository [default: None] [required]
 *    token               TEXT  GitHub token for authentication [default: None] [required]
 
 Options:
 --username            TEXT                                One or more usernames' accounts to modify [default: None]
 --pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
---pr-message          TEXT                                Pull request number in GitHub repository
 --access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
 --help                                                    Show this message and exit.
 ```
@@ -159,11 +159,14 @@ Options:
 Example:
 
 ```bash
-reporover comment https://github.com/my-org repo-prefix usernames.json "Great job!" my-github-token --username student1 --pr-number 1
+$ reporover comment https://github.com/my-org repo-prefix usernames.json \
+"✨Update?" ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ --pr-number 1
 ```
 
 This command will leave a comment on the specified pull request for each
-repository. Spread the love!
+matching repository. When using this command, it is important to note that, if
+configured correctly, GitHub Classroom will automatically create pull request
+number 1 that can be used for sending the comment.
 
 ### :bar_chart: Status Command
 
