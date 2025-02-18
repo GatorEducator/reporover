@@ -89,9 +89,6 @@ test-silent-not-random = { cmd = "{developer-test-silent-command-not-random}", h
 test-coverage = { cmd = "{coverage-test-command}", help = "Run the pytest test suite with coverage monitoring", use_vars = true }
 test-coverage-silent = { cmd = "{coverage-test-command-silent}", help = "Run the pytest test suite with coverage monitoring without showing output", use_vars = true }
 
-[tool.uv]
-no-binary-package = ["ruff"]
-
 [tool.mypy]
 ignore_missing_imports = true
 
