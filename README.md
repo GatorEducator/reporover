@@ -46,10 +46,14 @@ dog as it fetches the results you need.
 
 ### :wrench: Prerequisites
 
-Before we get started, make sure you have:
+To use RepoRover, you'll need the following:
 
 - Python 3.11+
 - GitHub Personal Access Token
+
+To use RepoRover, you'll need a GitHub Personal Access Token with the necessary
+permissions to complete tasks like managing repositories and leave comments on
+pull requests. Keep it handy and make sure to keep it secure!
 
 ### :inbox_tray: Installation
 
@@ -68,19 +72,14 @@ Install RepoRover with `uv`:
 uv tool install reporover
 ```
 
-### :gear: Configuration
-
-To use RepoRover, you'll need a GitHub Personal Access Token with the necessary
-permissions to manage repositories and leave comments. Keep it handy!
-
 ## :running: Running the Tool
 
 RepoRover comes with several powerful commands to make your life easier when you
 manage multiple GitHub repositories. The concrete examples of these commands use
 a synthetic GitHub personal access token of
 `ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ`. Please note that this is a fake
-token used exclusively for illustrative purposes. To run these commands you need
-to create your own GitHub personal access token and use it in the command-line.
+token used for illustrative purposes. To run these commands you need to create
+your own GitHub personal access token and use it in the command-line.
 
 ### :key: Access Command
 
@@ -103,14 +102,26 @@ Options:
 --help                                                    Show this message and exit.
 ```
 
-Example:
+Here is a concrete example that shows how to use the `reporover access` command:
 
 ```bash
-reporover access https://github.com/my-org repo-prefix usernames.json my-github-token --username student1 --access-level write
+reporover access https://github.com/my-org repo-prefix usernames.json \
+ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ --username student1 --access-level write
 ```
 
 This command will change the access level for the specified users in all
-repositories matching the prefix.
+repositories matching the prefix. An example `usernames.json` file might include
+the following content:
+
+```json
+{
+  "usernames": [
+    "gkapfham",
+    "student1",
+    "student2",
+  ]
+}
+```
 
 ### :speech_balloon: Comment Command
 
