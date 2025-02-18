@@ -23,6 +23,7 @@ dev = [
     "ruff>=0.9.6",
     "symbex>=1.4",
     "taskipy>=1.14.1",
+    "types-requests>=2.32.0.20241016",
 ]
 
 [project.scripts]
@@ -56,7 +57,7 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
-project = "src"
+project = "src/reporepo"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
 coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=50 --cov-report term-missing --cov-report json --cov --cov-branch"
@@ -89,6 +90,9 @@ test-coverage = { cmd = "{coverage-test-command}", help = "Run the pytest test s
 
 [tool.uv]
 no-binary-package = ["ruff"]
+
+[tool.mypy]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["hatchling"]
