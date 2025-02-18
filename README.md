@@ -104,7 +104,7 @@ Options:
 
 Here is a concrete example that shows how to use the `reporover access` command.
 Please note that in this command-line example on the following examples, the `$`
-indicates that you should type the command in your terminal.
+indicates that you should type the command at the prompt in your terminal window.
 
 ```bash
 $ reporover access https://github.com/my-org repo-prefix usernames.json \
