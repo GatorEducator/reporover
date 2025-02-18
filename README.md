@@ -156,7 +156,8 @@ Options:
 --help                                                    Show this message and exit.
 ```
 
-Example:
+Here is a concrete example that shows how to use the `reporover comment`
+command:
 
 ```bash
 $ reporover comment https://github.com/my-org repo-prefix usernames.json \
@@ -171,26 +172,48 @@ number 1 that can be used for sending the comment.
 ### :bar_chart: Status Command
 
 Curious about the GitHub Actions status for multiple repositories? RepoRover has
-your back!
+can fetch that information for you! You can type the command `reporover status
+--help` to learn how to comment on an existing pull request in the GitHub
+repository for one or more users. To run this command you need to provide the
+following arguments and options:
 
 ```bash
-reporover status <github_org_url> <repo_prefix> <usernames_file> <token> --username <username>
+Usage: reporover status [OPTIONS] github_org_url repo_prefix usernames_file token
+
+Get the GitHub Actions status for repositories.
+
+Arguments:
+*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
+*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
+*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
+*    token               TEXT  GitHub token for authentication [default: None] [required]
+
+Options:
+--username            TEXT                                One or more usernames' accounts to modify [default: None]
+--pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
+--pr-message          TEXT                                Pull request number in GitHub repository
+--access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
+--help                                                    Show this message and exit.
 ```
 
-Example:
+Here is a concrete example that shows how to use the `reporover status` command:
 
 ```bash
-reporover status https://github.com/my-org repo-prefix usernames.json my-github-token --username student1
+reporover status https://github.com/my-org repo-prefix usernames.json ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ 
 ```
 
 This command will fetch and display the latest GitHub Actions status for each
-repository. Stay informed!
+repository. If you are a course instructor, this will help you to quickly stay
+informed about the status of each student's project, all without leaving the
+comfort of your terminal window!
 
 ## :handshake: Contributing
 
-We welcome contributions with open arms! If you find a bug or have a feature
-request, please open an issue on our [GitHub
-repository](https://github.com/your-repo/reporover/issues). Feel free to fork
-the repository and submit a pull request. Let's make RepoRover even better
-together. For any questions or feedback, please reach out to us via GitHub
-Issues. We'd love to hear from you! Happy RepoRovering!
+The RepoRover developers we welcome contributions with wagging tails! If you
+find a bug or have a feature request, please open an issue on our [issue
+tracker](https://github.com/your-repo/reporover/issues). Potential contributions
+can fork this repository and submit a pull request with their suggested changes.
+Questions or comments about RepoRover? You can direct those to the development
+by opening an issue in our [issue
+tracker](https://github.com/your-repo/reporover/issues)  We'd love to hear from
+and collaborate with you! Happy RepoRovering!
