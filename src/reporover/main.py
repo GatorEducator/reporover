@@ -272,7 +272,7 @@ def access(  # noqa: PLR0913
     ),
     pr_message: str = typer.Option(
         "",
-        help="Pull request number in GitHub repository",
+        help="Pull message for the GitHub repository",
     ),
     access_level: GitHubAccessLevel = typer.Option(
         GitHubAccessLevel.READ.value,
