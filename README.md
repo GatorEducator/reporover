@@ -88,6 +88,8 @@ command `reporover access --help` to change the access level for one or more
 users, providing the following arguments and options:
 
 ```bash
+Usage: reporover access [OPTIONS] github_org_url repo_prefix usernames_file token
+
 Arguments:
 *    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
 *    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
