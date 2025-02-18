@@ -1,4 +1,4 @@
-<img src="https://github.com/GatorEducator/reporover/blob/master/.github/images/reporover-logo.svg" alt="reporover Logo"
+<img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="reporover Logo"
     title="reporover Logo" />
 
 # reporover
