@@ -56,9 +56,13 @@ Before we get started, make sure you have:
 Installing RepoRover is a breeze with `pipx` or `uv`! Depending on which tool
 you prefer, just run one of the following commands:
 
+Install RepoRover with `pipx`:
+
 ```bash
 pipx install reporover
 ```
+
+Install RepoRover with `uv`:
 
 ```bash
 uv tool install reporover
