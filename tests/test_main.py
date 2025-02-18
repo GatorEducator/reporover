@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.progress import Progress
 from typer.testing import CliRunner
 
-from reporepo.main import (
+from reporover.main import (
     GitHubAccessLevel,
     StatusCode,
     app,
