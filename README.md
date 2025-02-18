@@ -35,12 +35,12 @@ that people may have about the tool!
 Handy command-line tools like `gh` let you access and manipulate a GitHub
 repository. However, these tools may be limiting for certain scenarios because
 they normally operate on a single repository. In contrast, RepoRover operates on
-multiple repositories within the same organization. It's perfect for managing
-project repositories created by GitHub Classroom, making it easier to handle
-bulk operations efficiently. Say goodbye to repetitive tasks and hello to
-automation! RepoRover roves across the remote GitHub repositories for your
-student's projects, operating like a trusty robotic dog as it fetches the
-results you need.
+multiple repositories within the same GitHub organization. It's perfect for
+managing project repositories created by GitHub Classroom, making it easier to
+handle bulk operations efficiently. When you use RepoRover, you can say goodbye
+to repetitive tasks and hello to automation! RepoRover roves across the remote
+GitHub repositories for your student's projects, operating like a trusty robotic
+dog as it fetches the results you need.
 
 ## :package: Installation and Configuration
 
@@ -53,13 +53,16 @@ Before we get started, make sure you have:
 
 ### :inbox_tray: Installation
 
-Installing RepoRover is a breeze with `pipx`! Just run the following command:
+Installing RepoRover is a breeze with `pipx` or `uv`! Depending on which tool
+you prefer, just run one of the following commands:
 
 ```bash
 pipx install reporover
 ```
 
-And voila! RepoRover is ready to roll!
+```bash
+uv tool install reporover
+```
 
 ### :gear: Configuration
 
