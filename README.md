@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-    <img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="RepoRover Logo" title="RepoRover Logo" style="margin-bottom: 0;" />
+    <img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="RepoRover Logo" title="RepoRover Logo" style="margin-bottom: 0; display: block; margin-left: auto; margin-right: auto;" />
 </div>
 
 # RepoRover
