@@ -57,7 +57,7 @@ pull requests. Keep it handy and make sure to keep it secure!
 
 ### :inbox_tray: Installation
 
-Installing RepoRover is a breeze with `pipx` or `uv`! Depending on which tool
+You can easily install RepoRover with `pipx` or `uv`! Depending on which tool
 you prefer, just run one of the following commands:
 
 Install RepoRover with `pipx`:
@@ -115,8 +115,12 @@ ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ --username student1 --access-level writ
 ```
 
 This command will change the access level for the specified users in all
-repositories matching the prefix. An example `usernames.json` file might include
-the following content:
+repositories matching the prefix. In the context of GitHub Classroom, the
+`repo_prefix` is the initial part of the name of a GitHub repository that is
+shared in common by the individual repository for each student who accepted the
+assignment. Finally, an example `usernames.json` file might include the
+following content for a class that has two students and `gkapfham` as the course
+instructor:
 
 ```json
 {
