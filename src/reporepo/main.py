@@ -175,10 +175,7 @@ def leave_pr_comment(  # noqa: PLR0913
     # there is no access level specified and thus
     # only the specified message is provided
     else:
-        complete_message = (
-            f"Hello @{username}! "
-            + f"{message}"
-        )
+        complete_message = f"Hello @{username}! " + f"{message}"
     data = {"body": complete_message}
     # make the POST request to leave the comment
     response = requests.post(pr_comments_url, headers=headers, json=data)
@@ -355,16 +352,16 @@ def comment(  # noqa: PLR0913
     usernames_file: Path = typer.Argument(
         ..., help="Path to JSON file with usernames"
     ),
+    pr_message: str = typer.Argument(
+        "",
+        help="Pull request number in GitHub repository",
+    ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
     username: Optional[List[str]] = typer.Option(
         default=None, help="One or more usernames' accounts to modify"
     ),
     pr_number: int = typer.Option(
         GitHubPullRequestNumber.DEFAULT.value,
-        help="Pull request number in GitHub repository",
-    ),
-    pr_message: str = typer.Option(
-        "",
         help="Pull request number in GitHub repository",
     ),
 ):
