@@ -31,6 +31,8 @@ reporepo = "reporepo.main:app"
 [tool.ruff]
 line-length = 79
 lint.ignore = [
+    "D203", # do not check blank lines
+    "D213", # do not check multi-line docstrings
     "E501", # do not check line length
 ]
 lint.select = [
@@ -54,7 +56,7 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
-project = "reporepo"
+project = "src"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
 coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=50 --cov-report term-missing --cov-report json --cov --cov-branch"
