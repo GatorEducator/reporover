@@ -140,7 +140,7 @@ def leave_pr_comment(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
-    access_level: GitHubAccessLevel,
+    access_level: Union[GitHubAccessLevel, None],
     message: str,
     pr_number: int,
     token: str,
@@ -161,12 +161,24 @@ def leave_pr_comment(  # noqa: PLR0913
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    # build up the data for the request
-    complete_message = (
-        f"Hello @{username}! {PullRequestMessages.MODIFIED_TO_PHRASE.value} `{access_level.value}`. "
-        + f"{PullRequestMessages.ASSISTANCE_SENTENCE.value} "
-        + f"{message}"
-    )
+    # build up the data for the request,
+    # starting with an empty message
+    complete_message = ""
+    # check if the access level is specified
+    # and use it to create the complete message
+    if access_level:
+        complete_message = (
+            f"Hello @{username}! {PullRequestMessages.MODIFIED_TO_PHRASE.value} `{access_level.value}`. "
+            + f"{PullRequestMessages.ASSISTANCE_SENTENCE.value} "
+            + f"{message}"
+        )
+    # there is no access level specified and thus
+    # only the specified message is provided
+    else:
+        complete_message = (
+            f"Hello @{username}! "
+            + f"{message}"
+        )
     data = {"body": complete_message}
     # make the POST request to leave the comment
     response = requests.post(pr_comments_url, headers=headers, json=data)
@@ -398,7 +410,7 @@ def comment(  # noqa: PLR0913
                 github_org_url,
                 repo_prefix,
                 current_username,
-                access_level,
+                None,
                 pr_message,
                 pr_number,
                 token,
