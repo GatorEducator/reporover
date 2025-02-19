@@ -402,12 +402,21 @@ def generate_commit_details(  # noqa: PLR0913
                 commit_info = {
                     "organization_name": organization_name,
                     "repository_name": full_repository_name,
+                    "commit_sha": commit_data["sha"],
+                    "commit_url": commit_data["html_url"],
                     "commit_message": commit_data["commit"]["message"],
                     "author": commit_data["commit"]["author"]["name"],
+                    "author_email": commit_data["commit"]["author"]["email"],
+                    "committer": commit_data["commit"]["committer"]["name"],
+                    "committer_email": commit_data["commit"]["committer"]["email"],
                     "date": commit_data["commit"]["author"]["date"],
                     "files_changed": [
                         file["filename"] for file in commit_data["files"]
                     ],
+                    "number_files_changed": len(commit_data["files"]),
+                    "extensions_files_changed": list(set(
+                        file["filename"].split('.')[-1] for file in commit_data["files"]
+                    )),
                     "lines_changed": sum(
                         file["changes"] for file in commit_data["files"]
                     ),
@@ -418,6 +427,8 @@ def generate_commit_details(  # noqa: PLR0913
                         file["deletions"] for file in commit_data["files"]
                     ),
                     "diff": commit_data["html_url"],
+                    "parent_commits": [parent["sha"] for parent in commit_data["parents"]],
+                    "verification_status": commit_data["commit"]["verification"]["verified"],
                     "build_status": "unknown",  # add a placeholder for build status
                 }
                 # if the verbose flag is set, display the commit details
@@ -885,6 +896,7 @@ def details(  # noqa: PLR0913
     console.print(
         f":sparkles: Generating commit details for repositories in this GitHub organization: {github_org_url}"
     )
+    console.print(f":sparkles: Analyzing repositories with the following prefix in their name: {repo_prefix}")
     console.print()
     # extract the usernames from the JSON file
     usernames_parsed = read_usernames_from_json(usernames_file)
