@@ -400,6 +400,8 @@ def generate_commit_details(  # noqa: PLR0913
             if commit_response.status_code == StatusCode.WORKING.value:
                 commit_data = commit_response.json()
                 commit_info = {
+                    "organization_name": organization_name,
+                    "repository_name": full_repository_name,
                     "commit_message": commit_data["commit"]["message"],
                     "author": commit_data["commit"]["author"]["name"],
                     "date": commit_data["commit"]["author"]["date"],
