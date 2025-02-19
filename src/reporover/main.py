@@ -364,7 +364,7 @@ def clone_repo_gitpython(  # noqa: PLR0913
         )
 
 
-def generate_commit_details(
+def generate_commit_details(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
@@ -424,12 +424,24 @@ def generate_commit_details(
                 # check if the commit triggered a build and get the status
                 actions_url = f"https://api.github.com/repos/{full_name_for_api}/actions/runs"
                 actions_response = requests.get(actions_url, headers=headers)
+                # extract the build status for the commit
                 if actions_response.status_code == StatusCode.WORKING.value:
                     runs = actions_response.json().get("workflow_runs", [])
+                    found_build_status_for_run = False
+                    # iterate through all of the runs to find the build status
+                    # for the specific commit subject to analysis
                     for run in runs:
+                        # found details so record them and then also echo
+                        # details to the console if the verbose flag is set
                         if run["head_sha"] == commit_sha:
                             commit_info["build_status"] = run["conclusion"]
+                            found_build_status_for_run = True
+                            if verbose:
+                                    progress.console.print(f"󰄬 Found build status for {commit_sha}")
                             break
+                    # did not find details so echo a message if the verbose flag is set
+                    if not found_build_status_for_run:
+                        progress.console.print(f"? No build status for {commit_sha}")
                 commit_details.append(commit_info)
         progress.console.print(
             f"󰄬 Retrieved commit details for {full_repository_name}"
@@ -452,8 +464,11 @@ def save_commit_details_to_file(  # noqa: PLR0913
     progress: Progress,
 ) -> None:
     """Save commit details to a file in the specified format (JSON or CSV)."""
-    # generate the file name based on the GitHub organization and the current date
-    date_str = datetime.now().strftime("%Y-%m-%d")
+    # generate the file name based on the GitHub organization and the current date;
+    # note that this includes the minutes and seconds so as to ensure that this
+    # information makes file names different when the reporover is run multiple
+    # times within the same minute on the same day
+    date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     file_name = f"{github_org_name}_{repo_prefix}_{date_str}.{file_format}"
     file_path = output_directory / file_name
     if file_format == "json":
