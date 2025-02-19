@@ -415,7 +415,7 @@ def generate_commit_details(  # noqa: PLR0913
                     ],
                     "number_files_changed": len(commit_data["files"]),
                     "extensions_files_changed": list(set(
-                        file["filename"].split('.')[-1] for file in commit_data["files"]
+                        file["filename"].split(".")[-1] for file in commit_data["files"]
                     )),
                     "lines_changed": sum(
                         file["changes"] for file in commit_data["files"]
