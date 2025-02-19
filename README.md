@@ -21,7 +21,7 @@
   * [:inbox_tray: Installation](#inbox_tray-installation)
 * [:dog: Running RepoRover](#dog-running-reporover)
   * [:key: Access Command](#key-access-command)
-  * [:speech_balloon: Comment Command](#speech_balloon-comment-command)
+  * [:bulb: Comment Command](#speech_balloon-comment-command)
   * [:bar_chart: Status Command](#bar_chart-status-command)
 * [:handshake: Contributing](#handshake-contributing)
 
@@ -150,7 +150,7 @@ instructor:
 }
 ```
 
-### :left_speech_balloon: Comment Command
+### :bulb: Comment Command
 
 Need to leave comments on pull requests for multiple repositories? You can type
 the command `reporover comment --help` to learn how to comment on an existing
