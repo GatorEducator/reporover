@@ -370,6 +370,7 @@ def generate_commit_details(
     username: str,
     token: str,
     progress: Progress,
+    verbose: bool = False,
 ) -> List[dict]:
     """Generate commit details for a GitHub repository."""
     # extract the organization name from the URL
@@ -415,9 +416,12 @@ def generate_commit_details(
                         file["deletions"] for file in commit_data["files"]
                     ),
                     "diff": commit_data["html_url"],
-                    "build_status": "unknown",  # Placeholder for build status
+                    "build_status": "unknown",  # add a placeholder for build status
                 }
-                # Check if the commit triggered a build and get the status
+                # if the verbose flag is set, display the commit details
+                if verbose:
+                    progress.console.print(f"󰄬 Accessing commit {commit_sha}")
+                # check if the commit triggered a build and get the status
                 actions_url = f"https://api.github.com/repos/{full_name_for_api}/actions/runs"
                 actions_response = requests.get(actions_url, headers=headers)
                 if actions_response.status_code == StatusCode.WORKING.value:
@@ -439,16 +443,18 @@ def generate_commit_details(
     return commit_details
 
 
-def save_commit_details_to_file(
+def save_commit_details_to_file(  # noqa: PLR0913
     commit_details: List[dict],
     output_directory: Path,
     github_org_name: str,
+    repo_prefix: str,
     file_format: str,
+    progress: Progress,
 ) -> None:
     """Save commit details to a file in the specified format (JSON or CSV)."""
     # generate the file name based on the GitHub organization and the current date
     date_str = datetime.now().strftime("%Y-%m-%d")
-    file_name = f"{github_org_name}_{date_str}.{file_format}"
+    file_name = f"{github_org_name}_{repo_prefix}_{date_str}.{file_format}"
     file_path = output_directory / file_name
     if file_format == "json":
         # write the commit details to a JSON file
@@ -473,9 +479,9 @@ def save_commit_details_to_file(
             writer.writeheader()
             for commit_detail in commit_details:
                 writer.writerow(commit_detail)
-        console.print(f"󰄬 Commit details written to {file_path}")
+        progress.console.print(f"󰄬 Commit details written to {file_path}")
     else:
-        console.print(f" Unsupported file format: {file_format}")
+        progress.console.print(f" Unsupported file format: {file_format}")
 
 
 @app.command()
@@ -830,7 +836,7 @@ def clone(  # noqa: PLR0913
 
 
 @app.command()
-def details(
+def details(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -850,6 +856,7 @@ def details(
     username: Optional[List[str]] = typer.Option(
         default=None, help="One or more usernames' accounts to analyze"
     ),
+    verbose: bool = typer.Option(default=False, help="Display verbose output"),
 ):
     """Generate commit details for GitHub repositories and save to a file (JSON or CSV)."""
     # display the welcome message
@@ -885,6 +892,7 @@ def details(
                 current_username,
                 token,
                 progress,
+                verbose,
             )
             all_commit_details.extend(commit_details)
             # take the next step in the progress bar
@@ -892,5 +900,10 @@ def details(
     # save the commit details to the specified file format
     github_org_name = github_org_url.split("github.com/")[1].split("/")[0]
     save_commit_details_to_file(
-        all_commit_details, output_directory, github_org_name, file_format
+        all_commit_details,
+        output_directory,
+        github_org_name,
+        repo_prefix,
+        file_format,
+        progress,
     )
