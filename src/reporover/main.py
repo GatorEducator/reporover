@@ -8,6 +8,8 @@ from typing import Callable, List, Optional, Union
 
 import requests
 import typer
+from git import Repo
+from git.exc import GitCommandError
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
 from typer import Typer
@@ -322,6 +324,44 @@ def commit_files_to_repo(  # noqa: PLR0913
             print_json_string(response.text, progress)
 
 
+def clone_repo_gitpython(  # noqa: PLR0913
+    github_organization_url: str,
+    repo_prefix: str,
+    username: str,
+    token: str,
+    destination_directory: Path,
+    progress: Progress,
+) -> None:
+    """Clone a GitHub repository to a local directory."""
+    # extract the organization name from the URL
+    organization_name = github_organization_url.split("github.com/")[1].split(
+        "/"
+    )[0]
+    # define the full name of the repository
+    full_repository_name = f"{repo_prefix}-{username}"
+    # construct the repository URL with authentication token
+    repo_url = f"https://{token}@github.com/{organization_name}/{full_repository_name}.git"
+    # define the local path for the cloned repository
+    local_path = destination_directory / full_repository_name
+    # confirm that the local path does not exist
+    if local_path.exists():
+        progress.console.print(
+            f" Failed to clone {full_repository_name} to {local_path}\n"
+            f"  Diagnostic: {local_path} already exists"
+        )
+        return None
+    try:
+        # clone the repository using GitPython
+        Repo.clone_from(repo_url, local_path)
+        progress.console.print(
+            f"󰄬 Cloned {full_repository_name} to {local_path}"
+        )
+    except GitCommandError as e:
+        progress.console.print(
+            f" Failed to clone {full_repository_name}\n  Diagnostic: {e!s}"
+        )
+
+
 @app.command()
 def access(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
@@ -548,7 +588,7 @@ def status(
 
 
 @app.command()
-def commit(
+def commit(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -608,6 +648,64 @@ def commit(
                 directory,
                 files,
                 commit_message,
+                destination_directory,
+                progress,
+            )
+            # take the next step in the progress bar
+            progress.advance(task)
+
+
+@app.command()
+def clone(  # noqa: PLR0913
+    github_org_url: str = typer.Argument(
+        ..., help="URL of GitHub organization"
+    ),
+    repo_prefix: str = typer.Argument(
+        ..., help="Prefix for GitHub repository"
+    ),
+    usernames_file: Path = typer.Argument(
+        ..., help="Path to JSON file with usernames"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    destination_directory: Path = typer.Argument(
+        ..., help="Local directory to clone repositories into"
+    ),
+    username: Optional[List[str]] = typer.Option(
+        default=None, help="One or more usernames' accounts to clone"
+    ),
+):
+    """Clone GitHub repositories to a local directory."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Cloning repositories from this GitHub organization: {github_org_url}"
+    )
+    console.print()
+    # extract the usernames from the JSON file
+    usernames_parsed = read_usernames_from_json(usernames_file)
+    # if there exists a list of usernames only use those usernames as long
+    # as they are inside of the parsed usernames, the complete list
+    # (i.e., the username variable lets you select a subset of those
+    # names that are specified in the JSON file of usernames)
+    if username:
+        usernames_parsed = list(set(username) & set(usernames_parsed))
+    # create a progress bar
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Cloning Repositories", total=len(usernames_parsed)
+        )
+        for current_username in usernames_parsed:
+            # clone the repository
+            clone_repo_gitpython(
+                github_org_url,
+                repo_prefix,
+                current_username,
+                token,
                 destination_directory,
                 progress,
             )
