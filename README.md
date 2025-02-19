@@ -150,7 +150,7 @@ instructor:
 }
 ```
 
-### :speech_balloon: Comment Command
+### :left_speech_balloon: Comment Command
 
 Need to leave comments on pull requests for multiple repositories? You can type
 the command `reporover comment --help` to learn how to comment on an existing
