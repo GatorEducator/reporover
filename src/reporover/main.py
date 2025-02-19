@@ -296,17 +296,22 @@ def commit_files_to_repo(  # noqa: PLR0913
         response = requests.put(
             api_url + destination_path.as_posix(), headers=headers, json=data
         )
-        # check if the request was successful
+        # check if the request was successful and display
+        # the appropriate message based on the status code
         if response.status_code in [
             StatusCode.CREATED.value,
             StatusCode.SUCCESS.value,
         ]:
             progress.console.print(
-                f"󰄬 Committed {file_path.name} to {full_repository_name} at {destination_path}"
+                f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
             )
+        # something went wrong and thus display the error message;
+        # note that it is not possible to commit the same file if
+        # there have not been changes to it. This means that a request
+        # of this nature will lead to this error message.
         else:
             progress.console.print(
-                f" Failed to commit {file_path.name} to {full_repository_name} at {destination_path}\n"
+                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
                 f"  Diagnostic: {response.status_code}"
             )
             print_json_string(response.text, progress)
