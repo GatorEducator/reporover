@@ -2,7 +2,9 @@
 
 import base64
 import csv
+import io
 import json
+import zipfile
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -408,15 +410,20 @@ def generate_commit_details(  # noqa: PLR0913
                     "author": commit_data["commit"]["author"]["name"],
                     "author_email": commit_data["commit"]["author"]["email"],
                     "committer": commit_data["commit"]["committer"]["name"],
-                    "committer_email": commit_data["commit"]["committer"]["email"],
+                    "committer_email": commit_data["commit"]["committer"][
+                        "email"
+                    ],
                     "date": commit_data["commit"]["author"]["date"],
                     "files_changed": [
                         file["filename"] for file in commit_data["files"]
                     ],
                     "number_files_changed": len(commit_data["files"]),
-                    "extensions_files_changed": list(set(
-                        file["filename"].split(".")[-1] for file in commit_data["files"]
-                    )),
+                    "extensions_files_changed": list(
+                        set(
+                            file["filename"].split(".")[-1]
+                            for file in commit_data["files"]
+                        )
+                    ),
                     "lines_changed": sum(
                         file["changes"] for file in commit_data["files"]
                     ),
@@ -427,8 +434,12 @@ def generate_commit_details(  # noqa: PLR0913
                         file["deletions"] for file in commit_data["files"]
                     ),
                     "diff": commit_data["html_url"],
-                    "parent_commits": [parent["sha"] for parent in commit_data["parents"]],
-                    "verification_status": commit_data["commit"]["verification"]["verified"],
+                    "parent_commits": [
+                        parent["sha"] for parent in commit_data["parents"]
+                    ],
+                    "verification_status": commit_data["commit"][
+                        "verification"
+                    ]["verified"],
                     "build_status": "unknown",  # add a placeholder for build status
                 }
                 # if the verbose flag is set, display the commit details
@@ -453,6 +464,153 @@ def generate_commit_details(  # noqa: PLR0913
                                 progress.console.print(
                                     f"󰄬 Found build status for {commit_sha}"
                                 )
+                            break
+                    # did not find details so echo a message if the verbose flag is set
+                    if not found_build_status_for_run:
+                        progress.console.print(
+                            f"? No build status for {commit_sha}"
+                        )
+                commit_details.append(commit_info)
+        progress.console.print(
+            f"󰄬 Retrieved commit details for {full_repository_name}"
+        )
+    else:
+        progress.console.print(
+            f" Failed to retrieve commit details for {full_repository_name}\n"
+            f"  Diagnostic: {response.status_code}"
+        )
+        print_json_string(response.text, progress)
+    return commit_details
+
+
+def generate_commit_details_jobs(  # noqa: PLR0912, PLR0913
+    github_organization_url, repo_prefix, username, token, progress, verbose
+):
+    """Generate commit details for a GitHub repository."""
+    # extract the organization name from the URL
+    organization_name = github_organization_url.split("github.com/")[1].split(
+        "/"
+    )[0]
+    # define the full name of the repository
+    full_repository_name = f"{repo_prefix}-{username}"
+    full_name_for_api = f"{organization_name}/{full_repository_name}"
+    # define the API URL for the repository commits
+    api_url = f"https://api.github.com/repos/{full_name_for_api}/commits"
+    # headers for the request
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    # make the GET request to get the repository commits
+    response = requests.get(api_url, headers=headers)
+    commit_details = []
+    # check if the request was successful
+    if response.status_code == StatusCode.WORKING.value:
+        commits = response.json()
+        for commit in commits:
+            commit_sha = commit["sha"]
+            commit_url = f"{api_url}/{commit_sha}"
+            commit_response = requests.get(commit_url, headers=headers)
+            if commit_response.status_code == StatusCode.WORKING.value:
+                commit_data = commit_response.json()
+                commit_info = {
+                    "organization_name": organization_name,
+                    "repository_name": full_repository_name,
+                    "commit_sha": commit_data["sha"],
+                    "commit_url": commit_data["html_url"],
+                    "commit_message": commit_data["commit"]["message"],
+                    "author": commit_data["commit"]["author"]["name"],
+                    "author_email": commit_data["commit"]["author"]["email"],
+                    "committer": commit_data["commit"]["committer"]["name"],
+                    "committer_email": commit_data["commit"]["committer"][
+                        "email"
+                    ],
+                    "date": commit_data["commit"]["author"]["date"],
+                    "files_changed": [
+                        file["filename"] for file in commit_data["files"]
+                    ],
+                    "number_files_changed": len(commit_data["files"]),
+                    "extensions_files_changed": list(
+                        set(
+                            file["filename"].split(".")[-1]
+                            for file in commit_data["files"]
+                        )
+                    ),
+                    "lines_changed": sum(
+                        file["changes"] for file in commit_data["files"]
+                    ),
+                    "additions": sum(
+                        file["additions"] for file in commit_data["files"]
+                    ),
+                    "deletions": sum(
+                        file["deletions"] for file in commit_data["files"]
+                    ),
+                    "diff": commit_data["html_url"],
+                    "parent_commits": [
+                        parent["sha"] for parent in commit_data["parents"]
+                    ],
+                    "verification_status": commit_data["commit"][
+                        "verification"
+                    ]["verified"],
+                    "build_status": "unknown",  # add a placeholder for build status
+                }
+                # if the verbose flag is set, display the commit details
+                if verbose:
+                    progress.console.print(f"󰄬 Accessing commit {commit_sha}")
+                # check if the commit triggered a build and get the status
+                actions_url = f"https://api.github.com/repos/{full_name_for_api}/actions/runs"
+                actions_response = requests.get(actions_url, headers=headers)
+                # extract the build status for the commit
+                if actions_response.status_code == StatusCode.WORKING.value:
+                    runs = actions_response.json().get("workflow_runs", [])
+                    found_build_status_for_run = False
+                    # iterate through all of the runs to find the build status
+                    # for the specific commit subject to analysis
+                    for run in runs:
+                        # found details so record them and then also echo
+                        # details to the console if the verbose flag is set
+                        if run["head_sha"] == commit_sha:
+                            commit_info["build_status"] = run["conclusion"]
+                            found_build_status_for_run = True
+                            if verbose:
+                                progress.console.print(
+                                    f"󰄬 Found build status for {commit_sha}"
+                                )
+                            # collect details about the steps in the final workflow run
+                            steps_url = f"https://api.github.com/repos/{full_name_for_api}/actions/runs/{run['id']}/jobs"
+                            steps_response = requests.get(
+                                steps_url, headers=headers
+                            )
+                            if (
+                                steps_response.status_code
+                                == StatusCode.WORKING.value
+                            ):
+                                jobs = steps_response.json().get("jobs", [])
+                                if jobs:
+                                    final_job = jobs[-1]
+                                    commit_info["steps"] = []
+                                    for step in final_job["steps"]:
+                                        # display the contents of the step
+                                        # progress.console.print(step)
+                                        step_info = {
+                                            "name": step["name"],
+                                            "status": step["status"],
+                                            "conclusion": step["conclusion"],
+                                        }
+                                        # Fetch the log for the job
+                                        job_id = final_job["id"]
+                                        log_url = f"https://api.github.com/repos/{full_name_for_api}/actions/jobs/{job_id}/logs"
+                                        log_response = requests.get(
+                                            log_url, headers=headers
+                                        )
+                                        if (
+                                            log_response.status_code
+                                            == StatusCode.WORKING.value
+                                        ):
+                                            step_info["log"] = (
+                                                log_response.text
+                                            )
+                                        commit_info["steps"].append(step_info)
                             break
                     # did not find details so echo a message if the verbose flag is set
                     if not found_build_status_for_run:
@@ -896,7 +1054,9 @@ def details(  # noqa: PLR0913
     console.print(
         f":sparkles: Generating commit details for repositories in this GitHub organization: {github_org_url}"
     )
-    console.print(f":sparkles: Analyzing repositories with the following prefix in their name: {repo_prefix}")
+    console.print(
+        f":sparkles: Analyzing repositories with the following prefix in their name: {repo_prefix}"
+    )
     console.print()
     # extract the usernames from the JSON file
     usernames_parsed = read_usernames_from_json(usernames_file)
@@ -919,7 +1079,7 @@ def details(  # noqa: PLR0913
         all_commit_details = []
         for current_username in usernames_parsed:
             # generate the commit details
-            commit_details = generate_commit_details(
+            commit_details = generate_commit_details_jobs(
                 github_org_url,
                 repo_prefix,
                 current_username,
