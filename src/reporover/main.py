@@ -437,11 +437,15 @@ def generate_commit_details(  # noqa: PLR0913
                             commit_info["build_status"] = run["conclusion"]
                             found_build_status_for_run = True
                             if verbose:
-                                    progress.console.print(f"󰄬 Found build status for {commit_sha}")
+                                progress.console.print(
+                                    f"󰄬 Found build status for {commit_sha}"
+                                )
                             break
                     # did not find details so echo a message if the verbose flag is set
                     if not found_build_status_for_run:
-                        progress.console.print(f"? No build status for {commit_sha}")
+                        progress.console.print(
+                            f"? No build status for {commit_sha}"
+                        )
                 commit_details.append(commit_info)
         progress.console.print(
             f"󰄬 Retrieved commit details for {full_repository_name}"
