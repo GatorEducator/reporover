@@ -1,13 +1,14 @@
 [project]
 name = "reporover"
 version = "0.1.0"
-description = "RepoRover manages and analyzes remote GitHub repositories!"
+description = "RepoRover manages and analyzes remote GitHub repositories! Arf!"
 readme = "README.md"
 authors = [
     { name = "Gregory M. Kapfhammer", email = "gkapfham@allegheny.edu" }
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "gitpython>=3.1.44",
     "requests>=2.32.3",
     "rich>=13.9.4",
     "typer>=0.15.1",
