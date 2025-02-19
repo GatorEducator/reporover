@@ -227,11 +227,11 @@ comfort of your terminal window!
 
 ## :handshake: Contributing
 
-The RepoRover developers welcome contributions with wagging tails! If you
-find a bug or have a feature request, please open an issue on our [issue
+The RepoRover developers welcome contributions with wagging tails! If you find a
+bug or have a feature request, please open an issue on our [issue
 tracker](https://github.com/your-repo/reporover/issues). Potential contributions
 can fork this repository and submit a pull request with their suggested changes.
 Questions or comments about RepoRover? You can direct those to the development
 by opening an issue in our [issue
-tracker](https://github.com/your-repo/reporover/issues)  We'd love to hear from
+tracker](https://github.com/your-repo/reporover/issues). We'd love to hear from
 and collaborate with you! Happy RepoRovering!
