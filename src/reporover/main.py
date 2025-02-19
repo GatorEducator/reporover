@@ -1,7 +1,9 @@
 """Main module for the reporover command-line interface."""
 
 import base64
+import csv
 import json
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List, Optional, Union
@@ -362,6 +364,120 @@ def clone_repo_gitpython(  # noqa: PLR0913
         )
 
 
+def generate_commit_details(
+    github_organization_url: str,
+    repo_prefix: str,
+    username: str,
+    token: str,
+    progress: Progress,
+) -> List[dict]:
+    """Generate commit details for a GitHub repository."""
+    # extract the organization name from the URL
+    organization_name = github_organization_url.split("github.com/")[1].split(
+        "/"
+    )[0]
+    # define the full name of the repository
+    full_repository_name = f"{repo_prefix}-{username}"
+    full_name_for_api = f"{organization_name}/{full_repository_name}"
+    # define the API URL for the repository commits
+    api_url = f"https://api.github.com/repos/{full_name_for_api}/commits"
+    # headers for the request
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    # make the GET request to get the repository commits
+    response = requests.get(api_url, headers=headers)
+    commit_details = []
+    # check if the request was successful
+    if response.status_code == StatusCode.WORKING.value:
+        commits = response.json()
+        for commit in commits:
+            commit_sha = commit["sha"]
+            commit_url = f"{api_url}/{commit_sha}"
+            commit_response = requests.get(commit_url, headers=headers)
+            if commit_response.status_code == StatusCode.WORKING.value:
+                commit_data = commit_response.json()
+                commit_info = {
+                    "commit_message": commit_data["commit"]["message"],
+                    "author": commit_data["commit"]["author"]["name"],
+                    "date": commit_data["commit"]["author"]["date"],
+                    "files_changed": [
+                        file["filename"] for file in commit_data["files"]
+                    ],
+                    "lines_changed": sum(
+                        file["changes"] for file in commit_data["files"]
+                    ),
+                    "additions": sum(
+                        file["additions"] for file in commit_data["files"]
+                    ),
+                    "deletions": sum(
+                        file["deletions"] for file in commit_data["files"]
+                    ),
+                    "diff": commit_data["html_url"],
+                    "build_status": "unknown",  # Placeholder for build status
+                }
+                # Check if the commit triggered a build and get the status
+                actions_url = f"https://api.github.com/repos/{full_name_for_api}/actions/runs"
+                actions_response = requests.get(actions_url, headers=headers)
+                if actions_response.status_code == StatusCode.WORKING.value:
+                    runs = actions_response.json().get("workflow_runs", [])
+                    for run in runs:
+                        if run["head_sha"] == commit_sha:
+                            commit_info["build_status"] = run["conclusion"]
+                            break
+                commit_details.append(commit_info)
+        progress.console.print(
+            f"󰄬 Retrieved commit details for {full_repository_name}"
+        )
+    else:
+        progress.console.print(
+            f" Failed to retrieve commit details for {full_repository_name}\n"
+            f"  Diagnostic: {response.status_code}"
+        )
+        print_json_string(response.text, progress)
+    return commit_details
+
+
+def save_commit_details_to_file(
+    commit_details: List[dict],
+    output_directory: Path,
+    github_org_name: str,
+    file_format: str,
+) -> None:
+    """Save commit details to a file in the specified format (JSON or CSV)."""
+    # generate the file name based on the GitHub organization and the current date
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    file_name = f"{github_org_name}_{date_str}.{file_format}"
+    file_path = output_directory / file_name
+    if file_format == "json":
+        # write the commit details to a JSON file
+        with file_path.open("w") as jsonfile:
+            json.dump(commit_details, jsonfile, indent=4)
+        console.print(f"󰄬 Commit details written to {file_path}")
+    elif file_format == "csv":
+        # write the commit details to a CSV file
+        with file_path.open("w", newline="") as csvfile:
+            fieldnames = [
+                "commit_message",
+                "author",
+                "date",
+                "files_changed",
+                "lines_changed",
+                "additions",
+                "deletions",
+                "diff",
+                "build_status",
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for commit_detail in commit_details:
+                writer.writerow(commit_detail)
+        console.print(f"󰄬 Commit details written to {file_path}")
+    else:
+        console.print(f" Unsupported file format: {file_format}")
+
+
 @app.command()
 def access(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
@@ -711,3 +827,70 @@ def clone(  # noqa: PLR0913
             )
             # take the next step in the progress bar
             progress.advance(task)
+
+
+@app.command()
+def details(
+    github_org_url: str = typer.Argument(
+        ..., help="URL of GitHub organization"
+    ),
+    repo_prefix: str = typer.Argument(
+        ..., help="Prefix for GitHub repository"
+    ),
+    usernames_file: Path = typer.Argument(
+        ..., help="Path to JSON file with usernames"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    output_directory: Path = typer.Argument(
+        ..., help="Directory to save the output file"
+    ),
+    file_format: str = typer.Argument(
+        ..., help="Output file format (json or csv)"
+    ),
+    username: Optional[List[str]] = typer.Option(
+        default=None, help="One or more usernames' accounts to analyze"
+    ),
+):
+    """Generate commit details for GitHub repositories and save to a file (JSON or CSV)."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Generating commit details for repositories in this GitHub organization: {github_org_url}"
+    )
+    console.print()
+    # extract the usernames from the JSON file
+    usernames_parsed = read_usernames_from_json(usernames_file)
+    # if there exists a list of usernames only use those usernames as long
+    # as they are inside of the parsed usernames, the complete list
+    # (i.e., the username variable lets you select a subset of those
+    # names that are specified in the JSON file of usernames)
+    if username:
+        usernames_parsed = list(set(username) & set(usernames_parsed))
+    # create a progress bar
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Generating Commit Details", total=len(usernames_parsed)
+        )
+        all_commit_details = []
+        for current_username in usernames_parsed:
+            # generate the commit details
+            commit_details = generate_commit_details(
+                github_org_url,
+                repo_prefix,
+                current_username,
+                token,
+                progress,
+            )
+            all_commit_details.extend(commit_details)
+            # take the next step in the progress bar
+            progress.advance(task)
+    # save the commit details to the specified file format
+    github_org_name = github_org_url.split("github.com/")[1].split("/")[0]
+    save_commit_details_to_file(
+        all_commit_details, output_directory, github_org_name, file_format
+    )
