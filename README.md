@@ -9,7 +9,25 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-Yes-blue.svg)](https://github.com/gkapfham/chasten/graphs/commit-activity)
 [![License LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
-## :sparkles: Introduction
+## :sparkles: Table of Contents
+
+<!---toc start-->
+
+* [:robot: Introduction](#robot-introduction)
+* [:smile: Perspectives](#smile-perspectives)
+* [:rocket: Motivation](#rocket-motivation)
+* [:package: Installation and Configuration](#package-installation-and-configuration)
+  * [:wrench: Prerequisites](#wrench-prerequisites)
+  * [:inbox_tray: Installation](#inbox_tray-installation)
+* [:dog: Running RepoRover](#dog-running-reporover)
+  * [:key: Access Command](#key-access-command)
+  * [:speech_balloon: Comment Command](#speech_balloon-comment-command)
+  * [:bar_chart: Status Command](#bar_chart-status-command)
+* [:handshake: Contributing](#handshake-contributing)
+
+<!---toc end-->
+
+## :robot: Introduction
 
 RepoRover is your command-line companion for managing and analyzing multiple
 GitHub repositories at once! Whether you're an instructor managing student
