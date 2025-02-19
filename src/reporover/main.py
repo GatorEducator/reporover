@@ -302,6 +302,11 @@ def commit_files_to_repo(  # noqa: PLR0913
             StatusCode.CREATED.value,
             StatusCode.SUCCESS.value,
         ]:
+            # note that this print (and the one for the error case)
+            # uses the destination directory variable that was provided
+            # by the person using the program because the destination path
+            # could be the file itself if the destination directory is the
+            # root of the GitHub repository and not a contained directory
             progress.console.print(
                 f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
             )
