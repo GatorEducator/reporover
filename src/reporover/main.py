@@ -1,5 +1,6 @@
 """Main module for the reporover command-line interface."""
 
+import base64
 import json
 from enum import Enum
 from pathlib import Path
@@ -251,6 +252,66 @@ def get_github_actions_status(
         print_json_string(response.text, progress)
 
 
+def commit_files_to_repo(  # noqa: PLR0913
+    github_organization_url: str,
+    repo_prefix: str,
+    username: str,
+    token: str,
+    directory: Path,
+    files: List[Path],
+    commit_message: str,
+    destination_directory: Path,
+    progress: Progress,
+) -> None:
+    """Commit files to a GitHub repository."""
+    # extract the organization name from the URL
+    organization_name = github_organization_url.split("github.com/")[1].split(
+        "/"
+    )[0]
+    # define the full name of the repository
+    full_repository_name = f"{repo_prefix}-{username}"
+    full_name_for_api = f"{organization_name}/{full_repository_name}"
+    # define the API URL for the repository contents
+    api_url = f"https://api.github.com/repos/{full_name_for_api}/contents/"
+    # headers for the request
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    # iterate over each file to commit
+    for file_path in files:
+        # read the file content
+        file_content = (directory / file_path).read_bytes()
+        # encode the file content in base64
+        encoded_content = base64.b64encode(file_content).decode()
+        # define the data for the request
+        data = {
+            "message": commit_message,
+            "content": encoded_content,
+            "branch": "main",
+        }
+        # construct the full path for the file in the repository
+        destination_path = destination_directory / file_path.name
+        # make the PUT request to commit the file
+        response = requests.put(
+            api_url + destination_path.as_posix(), headers=headers, json=data
+        )
+        # check if the request was successful
+        if response.status_code in [
+            StatusCode.CREATED.value,
+            StatusCode.SUCCESS.value,
+        ]:
+            progress.console.print(
+                f"󰄬 Committed {file_path.name} to {full_repository_name} at {destination_path}"
+            )
+        else:
+            progress.console.print(
+                f" Failed to commit {file_path.name} to {full_repository_name} at {destination_path}\n"
+                f"  Diagnostic: {response.status_code}"
+            )
+            print_json_string(response.text, progress)
+
+
 @app.command()
 def access(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
@@ -470,6 +531,74 @@ def status(
                 repo_prefix,
                 current_username,
                 token,
+                progress,
+            )
+            # take the next step in the progress bar
+            progress.advance(task)
+
+
+@app.command()
+def commit(
+    github_org_url: str = typer.Argument(
+        ..., help="URL of GitHub organization"
+    ),
+    repo_prefix: str = typer.Argument(
+        ..., help="Prefix for GitHub repository"
+    ),
+    usernames_file: Path = typer.Argument(
+        ..., help="Path to JSON file with usernames"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    directory: Path = typer.Argument(
+        ..., help="Directory containing the file(s) to commit"
+    ),
+    files: List[Path] = typer.Argument(..., help="File(s) to commit"),
+    commit_message: str = typer.Argument(
+        ..., help="Commit message for the files"
+    ),
+    destination_directory: Path = typer.Argument(
+        ..., help="Destination directory inside the GitHub repository"
+    ),
+    username: Optional[List[str]] = typer.Option(
+        default=None, help="One or more usernames' accounts to modify"
+    ),
+):
+    """Commit files to GitHub repositories."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Committing files to repositories in this GitHub organization: {github_org_url}"
+    )
+    console.print()
+    # extract the usernames from the JSON file
+    usernames_parsed = read_usernames_from_json(usernames_file)
+    # if there exists a list of usernames only use those usernames as long
+    # as they are inside of the parsed usernames, the complete list
+    # (i.e., the username variable lets you select a subset of those
+    # names that are specified in the JSON file of usernames)
+    if username:
+        usernames_parsed = list(set(username) & set(usernames_parsed))
+    # create a progress bar
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Committing Files", total=len(usernames_parsed)
+        )
+        for current_username in usernames_parsed:
+            # commit the files to the repository
+            commit_files_to_repo(
+                github_org_url,
+                repo_prefix,
+                current_username,
+                token,
+                directory,
+                files,
+                commit_message,
+                destination_directory,
                 progress,
             )
             # take the next step in the progress bar
