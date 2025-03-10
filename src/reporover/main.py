@@ -2,9 +2,7 @@
 
 import base64
 import csv
-import io
 import json
-import zipfile
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -270,62 +268,120 @@ def commit_files_to_repo(  # noqa: PLR0913
     progress: Progress,
 ) -> None:
     """Commit files to a GitHub repository."""
-    # extract the organization name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
         "/"
     )[0]
-    # define the full name of the repository
     full_repository_name = f"{repo_prefix}-{username}"
     full_name_for_api = f"{organization_name}/{full_repository_name}"
-    # define the API URL for the repository contents
     api_url = f"https://api.github.com/repos/{full_name_for_api}/contents/"
-    # headers for the request
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    # iterate over each file to commit
     for file_path in files:
-        # read the file content
         file_content = (directory / file_path).read_bytes()
-        # encode the file content in base64
         encoded_content = base64.b64encode(file_content).decode()
-        # define the data for the request
-        data = {
-            "message": commit_message,
-            "content": encoded_content,
-            "branch": "main",
-        }
-        # construct the full path for the file in the repository
         destination_path = destination_directory / file_path.name
-        # make the PUT request to commit the file
+        get_response = requests.get(
+            api_url + destination_path.as_posix(), headers=headers
+        )
+        if get_response.status_code == 200:
+            sha = get_response.json()["sha"]
+            data = {
+                "message": commit_message,
+                "content": encoded_content,
+                "branch": "main",
+                "sha": sha,
+            }
+        else:
+            data = {
+                "message": commit_message,
+                "content": encoded_content,
+                "branch": "main",
+            }
         response = requests.put(
             api_url + destination_path.as_posix(), headers=headers, json=data
         )
-        # check if the request was successful and display
-        # the appropriate message based on the status code
-        if response.status_code in [
-            StatusCode.CREATED.value,
-            StatusCode.SUCCESS.value,
-        ]:
-            # note that this print (and the one for the error case)
-            # uses the destination directory variable that was provided
-            # by the person using the program because the destination path
-            # could be the file itself if the destination directory is the
-            # root of the GitHub repository and not a contained directory
+        if response.status_code in [201, 200]:
             progress.console.print(
                 f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
             )
-        # something went wrong and thus display the error message;
-        # note that it is not possible to commit the same file if
-        # there have not been changes to it. This means that a request
-        # of this nature will lead to this error message.
         else:
             progress.console.print(
                 f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
                 f"  Diagnostic: {response.status_code}"
             )
             print_json_string(response.text, progress)
+
+
+# def commit_files_to_repo(  # noqa: PLR0913
+#     github_organization_url: str,
+#     repo_prefix: str,
+#     username: str,
+#     token: str,
+#     directory: Path,
+#     files: List[Path],
+#     commit_message: str,
+#     destination_directory: Path,
+#     progress: Progress,
+# ) -> None:
+#     """Commit files to a GitHub repository."""
+#     # extract the organization name from the URL
+#     organization_name = github_organization_url.split("github.com/")[1].split(
+#         "/"
+#     )[0]
+#     # define the full name of the repository
+#     full_repository_name = f"{repo_prefix}-{username}"
+#     full_name_for_api = f"{organization_name}/{full_repository_name}"
+#     # define the API URL for the repository contents
+#     api_url = f"https://api.github.com/repos/{full_name_for_api}/contents/"
+#     # headers for the request
+#     headers = {
+#         "Authorization": f"token {token}",
+#         "Accept": "application/vnd.github.v3+json",
+#     }
+#     # iterate over each file to commit
+#     for file_path in files:
+#         # read the file content
+#         file_content = (directory / file_path).read_bytes()
+#         # encode the file content in base64
+#         encoded_content = base64.b64encode(file_content).decode()
+#         # define the data for the request
+#         data = {
+#             "message": commit_message,
+#             "content": encoded_content,
+#             "branch": "main",
+#         }
+#         # construct the full path for the file in the repository
+#         destination_path = destination_directory / file_path.name
+#         # make the PUT request to commit the file
+#         response = requests.put(
+#             api_url + destination_path.as_posix(), headers=headers, json=data
+#         )
+#         # check if the request was successful and display
+#         # the appropriate message based on the status code
+#         if response.status_code in [
+#             StatusCode.CREATED.value,
+#             StatusCode.SUCCESS.value,
+#         ]:
+#             # note that this print (and the one for the error case)
+#             # uses the destination directory variable that was provided
+#             # by the person using the program because the destination path
+#             # could be the file itself if the destination directory is the
+#             # root of the GitHub repository and not a contained directory
+#             progress.console.print(
+#                 f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
+#             )
+#         # something went wrong and thus display the error message;
+#         # note that it is not possible to commit the same file if
+#         # there have not been changes to it. This means that a request
+#         # of this nature will lead to this error message.
+#         else:
+#             progress.console.print(
+#                 f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
+#                 f"  Diagnostic: {response.status_code}"
+#             )
+#             print_json_string(response.text, progress)
 
 
 def clone_repo_gitpython(  # noqa: PLR0913
