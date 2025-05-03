@@ -470,7 +470,12 @@ def generate_commit_details(  # noqa: PLR0913
 
 
 def generate_commit_details_jobs(  # noqa: PLR0912, PLR0913
-    github_organization_url, repo_prefix, username, token, progress, verbose
+    github_organization_url: str,
+    repo_prefix: str,
+    username: str,
+    token: str,
+    progress: Progress,
+    verbose: bool,
 ):
     """Generate commit details for a GitHub repository."""
     # extract the organization name from the URL
