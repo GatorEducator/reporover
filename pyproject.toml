@@ -16,6 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.135.0",
     "mypy>=1.15.0",
     "pytest>=8.3.4",
     "pytest-clarity>=1.0.1",
@@ -92,6 +93,11 @@ test-coverage-silent = { cmd = "{coverage-test-command-silent}", help = "Run the
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "property: marks tests as property-based tests (deselect with '-m \"not property\"')",
+]
 
 [build-system]
 requires = ["hatchling"]
