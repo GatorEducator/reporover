@@ -89,8 +89,8 @@ def test_modify_user_access_failure(mock_progress, sample_request_data):
             progress=mock_progress,
             put_request_function=mock_put,
         )
-    # verify the result is None (failure case)
-    assert result is None
+    # verify the result is a failure
+    assert result is StatusCode.FAILURE
     # verify error message was printed
     mock_progress.console.print.assert_called_once()
     error_message = mock_progress.console.print.call_args[0][0]
@@ -287,7 +287,7 @@ def test_modify_user_access_various_status_codes(
                 put_request_function=mock_put,
             )
         # verify failure result
-        assert result is None
+        assert result is StatusCode.FAILURE
         # verify error message contains status code
         error_message = mock_progress.console.print.call_args[0][0]
         assert f"Diagnostic: {status_code}" in error_message
