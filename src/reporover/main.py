@@ -68,8 +68,6 @@ class PullRequestMessages(Enum):
     ASSISTANCE_SENTENCE = "Please contact the course instructor for assistance with access to your repository."
 
 
-
-
 def display_welcome_message() -> None:
     """Display the welcome message for all reporover commands."""
     console.print()
