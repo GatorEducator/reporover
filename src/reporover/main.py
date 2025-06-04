@@ -598,7 +598,7 @@ def access(  # noqa: PLR0913
         f":sparkles: Changing all repository access levels to '{access_level.value}' for each valid user"
     )
     console.print()
-    # extract the usernames from the TOML file
+    # extract the usernames from the JSON file
     usernames_parsed = read_usernames_from_json(usernames_file)
     # if there exists a list of usernames only use those usernames as long
     # as they are inside of the parsed usernames, the complete list
