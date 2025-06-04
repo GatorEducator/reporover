@@ -1,7 +1,7 @@
 """Test suite for the utility functions in the util module."""
 
 import json
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from hypothesis import given
@@ -122,3 +122,26 @@ def test_print_json_string_property(test_dict):
         assert mock_console.print.call_count == len(test_dict)
         for key, value in test_dict.items():
             mock_console.print.assert_any_call(f"  {key}: {value}")
+
+
+@pytest.mark.property
+@given(st.lists(st.text()))
+def test_read_usernames_from_json_property(username_list):
+    """Property-based test for read_usernames_from_json with arbitrary username lists."""
+    # create mock file path and mock file operations;
+    # note that this also mocks the context manager behavior of
+    # file opening since that is used in the function under test
+    mock_path = Mock()
+    mock_file = Mock()
+    mock_context_manager = Mock()
+    mock_context_manager.__enter__ = Mock(return_value=mock_file)
+    mock_context_manager.__exit__ = Mock(return_value=None)
+    mock_path.open.return_value = mock_context_manager
+    # mock json.load to return our test data
+    with patch("reporover.util.json.load") as mock_json_load:
+        mock_json_load.return_value = {"usernames": username_list}
+        # test the function
+        result = read_usernames_from_json(mock_path)
+        # confirm that the user names are correctly
+        # inside of the list after calling the function
+        assert result == username_list
