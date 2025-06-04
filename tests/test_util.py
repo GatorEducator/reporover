@@ -1,7 +1,6 @@
 """Test suite for the utility functions in the util module."""
 
 import json
-from unittest.mock import Mock
 
 import pytest
 from rich.console import Console
