@@ -35,7 +35,9 @@ def sample_request_data():
     }
 
 
-def test_leave_pr_comment_success_with_access_level(mock_progress, sample_request_data):
+def test_leave_pr_comment_success_with_access_level(
+    mock_progress, sample_request_data
+):
     """Test successful PR comment with access level specified."""
     # create mock response
     mock_response = Mock()
@@ -45,7 +47,9 @@ def test_leave_pr_comment_success_with_access_level(mock_progress, sample_reques
     # call the function with patch
     with patch("reporover.pullrequest.requests.post", mock_post):
         leave_pr_comment(
-            github_organization_url=sample_request_data["github_organization_url"],
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
             repo_prefix=sample_request_data["repo_prefix"],
             username=sample_request_data["username"],
             access_level=sample_request_data["access_level"],
@@ -66,17 +70,20 @@ def test_leave_pr_comment_success_with_access_level(mock_progress, sample_reques
     )
     expected_data = {"body": expected_message}
     mock_post.assert_called_once_with(
-        expected_url,
-        headers=expected_headers,
-        json=expected_data
+        expected_url, headers=expected_headers, json=expected_data
     )
     # verify success message was printed
     mock_progress.console.print.assert_called_once()
     success_message = mock_progress.console.print.call_args[0][0]
-    assert "Commented on the pull request number 1 for GitHub repository assignment-testuser" in success_message
+    assert (
+        "Commented on the pull request number 1 for GitHub repository assignment-testuser"
+        in success_message
+    )
 
 
-def test_leave_pr_comment_success_without_access_level(mock_progress, sample_request_data):
+def test_leave_pr_comment_success_without_access_level(
+    mock_progress, sample_request_data
+):
     """Test successful PR comment without access level specified."""
     # create mock response
     mock_response = Mock()
@@ -86,7 +93,9 @@ def test_leave_pr_comment_success_without_access_level(mock_progress, sample_req
     # call the function with patch and no access level
     with patch("reporover.pullrequest.requests.post", mock_post):
         leave_pr_comment(
-            github_organization_url=sample_request_data["github_organization_url"],
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
             repo_prefix=sample_request_data["repo_prefix"],
             username=sample_request_data["username"],
             access_level=None,
@@ -107,7 +116,10 @@ def test_leave_pr_comment_success_without_access_level(mock_progress, sample_req
     # verify success message was printed
     mock_progress.console.print.assert_called_once()
     success_message = mock_progress.console.print.call_args[0][0]
-    assert "Commented on the pull request number 1 for GitHub repository assignment-testuser" in success_message
+    assert (
+        "Commented on the pull request number 1 for GitHub repository assignment-testuser"
+        in success_message
+    )
 
 
 def test_leave_pr_comment_failure(mock_progress, sample_request_data):
@@ -122,7 +134,9 @@ def test_leave_pr_comment_failure(mock_progress, sample_request_data):
     with patch("reporover.pullrequest.print_json_string") as mock_print_json:
         with patch("reporover.pullrequest.requests.post", mock_post):
             leave_pr_comment(
-                github_organization_url=sample_request_data["github_organization_url"],
+                github_organization_url=sample_request_data[
+                    "github_organization_url"
+                ],
                 repo_prefix=sample_request_data["repo_prefix"],
                 username=sample_request_data["username"],
                 access_level=sample_request_data["access_level"],
@@ -134,13 +148,20 @@ def test_leave_pr_comment_failure(mock_progress, sample_request_data):
     # verify error message was printed
     mock_progress.console.print.assert_called_once()
     error_message = mock_progress.console.print.call_args[0][0]
-    assert "Failed to comment on pull request 1 for GitHub repository assignment-testuser" in error_message
+    assert (
+        "Failed to comment on pull request 1 for GitHub repository assignment-testuser"
+        in error_message
+    )
     assert "Diagnostic: 404" in error_message
     # verify print_json_string was called with response text
-    mock_print_json.assert_called_once_with("{\"message\": \"Not Found\"}", mock_progress)
+    mock_print_json.assert_called_once_with(
+        '{"message": "Not Found"}', mock_progress
+    )
 
 
-def test_leave_pr_comment_different_access_levels(mock_progress, sample_request_data):
+def test_leave_pr_comment_different_access_levels(
+    mock_progress, sample_request_data
+):
     """Test PR comment with different access levels."""
     access_levels = [
         GitHubAccessLevel.READ,
@@ -158,7 +179,9 @@ def test_leave_pr_comment_different_access_levels(mock_progress, sample_request_
         # call the function with patch
         with patch("reporover.pullrequest.requests.post", mock_post):
             leave_pr_comment(
-                github_organization_url=sample_request_data["github_organization_url"],
+                github_organization_url=sample_request_data[
+                    "github_organization_url"
+                ],
                 repo_prefix=sample_request_data["repo_prefix"],
                 username=sample_request_data["username"],
                 access_level=access_level,
@@ -178,16 +201,16 @@ def test_leave_pr_comment_url_parsing(mock_progress):
     test_cases = [
         {
             "url": "https://github.com/allegheny-college/repo",
-            "expected_org": "allegheny-college"
+            "expected_org": "allegheny-college",
         },
         {
             "url": "https://github.com/test-org-name/some-repo",
-            "expected_org": "test-org-name"
+            "expected_org": "test-org-name",
         },
         {
             "url": "https://github.com/user123/project",
-            "expected_org": "user123"
-        }
+            "expected_org": "user123",
+        },
     ]
     for case in test_cases:
         # create mock response
@@ -213,12 +236,26 @@ def test_leave_pr_comment_url_parsing(mock_progress):
         assert call_args[0][0] == expected_url
 
 
-def test_leave_pr_comment_repository_name_construction(mock_progress, sample_request_data):
+def test_leave_pr_comment_repository_name_construction(
+    mock_progress, sample_request_data
+):
     """Test proper repository name construction."""
     test_cases = [
-        {"prefix": "assignment", "username": "john", "expected": "assignment-john"},
-        {"prefix": "lab", "username": "mary_smith", "expected": "lab-mary_smith"},
-        {"prefix": "project1", "username": "user123", "expected": "project1-user123"},
+        {
+            "prefix": "assignment",
+            "username": "john",
+            "expected": "assignment-john",
+        },
+        {
+            "prefix": "lab",
+            "username": "mary_smith",
+            "expected": "lab-mary_smith",
+        },
+        {
+            "prefix": "project1",
+            "username": "user123",
+            "expected": "project1-user123",
+        },
     ]
     for case in test_cases:
         # create mock response
@@ -229,7 +266,9 @@ def test_leave_pr_comment_repository_name_construction(mock_progress, sample_req
         # call the function with patch
         with patch("reporover.pullrequest.requests.post", mock_post):
             leave_pr_comment(
-                github_organization_url=sample_request_data["github_organization_url"],
+                github_organization_url=sample_request_data[
+                    "github_organization_url"
+                ],
                 repo_prefix=case["prefix"],
                 username=case["username"],
                 access_level=GitHubAccessLevel.READ,
@@ -254,7 +293,9 @@ def test_leave_pr_comment_headers_and_data(mock_progress, sample_request_data):
     # call the function with patch
     with patch("reporover.pullrequest.requests.post", mock_post):
         leave_pr_comment(
-            github_organization_url=sample_request_data["github_organization_url"],
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
             repo_prefix=sample_request_data["repo_prefix"],
             username=sample_request_data["username"],
             access_level=GitHubAccessLevel.WRITE,
@@ -277,7 +318,9 @@ def test_leave_pr_comment_headers_and_data(mock_progress, sample_request_data):
     assert data["body"] == expected_message
 
 
-def test_leave_pr_comment_different_pr_numbers(mock_progress, sample_request_data):
+def test_leave_pr_comment_different_pr_numbers(
+    mock_progress, sample_request_data
+):
     """Test PR comment with different pull request numbers."""
     pr_numbers = [1, 2, 3, 5, 10]
     for pr_number in pr_numbers:
@@ -289,7 +332,9 @@ def test_leave_pr_comment_different_pr_numbers(mock_progress, sample_request_dat
         # call the function with patch
         with patch("reporover.pullrequest.requests.post", mock_post):
             leave_pr_comment(
-                github_organization_url=sample_request_data["github_organization_url"],
+                github_organization_url=sample_request_data[
+                    "github_organization_url"
+                ],
                 repo_prefix=sample_request_data["repo_prefix"],
                 username=sample_request_data["username"],
                 access_level=GitHubAccessLevel.READ,
@@ -307,7 +352,9 @@ def test_leave_pr_comment_different_pr_numbers(mock_progress, sample_request_dat
         assert f"pull request number {pr_number}" in success_message
 
 
-def test_leave_pr_comment_various_status_codes(mock_progress, sample_request_data):
+def test_leave_pr_comment_various_status_codes(
+    mock_progress, sample_request_data
+):
     """Test handling of various HTTP status codes."""
     status_codes = [
         StatusCode.BAD_REQUEST.value,
@@ -328,7 +375,9 @@ def test_leave_pr_comment_various_status_codes(mock_progress, sample_request_dat
         with patch("reporover.pullrequest.print_json_string"):
             with patch("reporover.pullrequest.requests.post", mock_post):
                 leave_pr_comment(
-                    github_organization_url=sample_request_data["github_organization_url"],
+                    github_organization_url=sample_request_data[
+                        "github_organization_url"
+                    ],
                     repo_prefix=sample_request_data["repo_prefix"],
                     username=sample_request_data["username"],
                     access_level=sample_request_data["access_level"],
@@ -342,7 +391,9 @@ def test_leave_pr_comment_various_status_codes(mock_progress, sample_request_dat
         assert f"Diagnostic: {status_code}" in error_message
 
 
-def test_leave_pr_comment_message_formatting_with_access_level(mock_progress, sample_request_data):
+def test_leave_pr_comment_message_formatting_with_access_level(
+    mock_progress, sample_request_data
+):
     """Test proper message formatting when access level is provided."""
     # create mock response
     mock_response = Mock()
@@ -352,7 +403,9 @@ def test_leave_pr_comment_message_formatting_with_access_level(mock_progress, sa
     # call the function with patch
     with patch("reporover.pullrequest.requests.post", mock_post):
         leave_pr_comment(
-            github_organization_url=sample_request_data["github_organization_url"],
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
             repo_prefix=sample_request_data["repo_prefix"],
             username="alice",
             access_level=GitHubAccessLevel.ADMIN,
@@ -369,13 +422,15 @@ def test_leave_pr_comment_message_formatting_with_access_level(mock_progress, sa
         PullRequestMessages.MODIFIED_TO_PHRASE.value,
         "`admin`",
         PullRequestMessages.ASSISTANCE_SENTENCE.value,
-        "Your work looks great!"
+        "Your work looks great!",
     ]
     for part in expected_parts:
         assert part in message_body
 
 
-def test_leave_pr_comment_message_formatting_without_access_level(mock_progress, sample_request_data):
+def test_leave_pr_comment_message_formatting_without_access_level(
+    mock_progress, sample_request_data
+):
     """Test proper message formatting when no access level is provided."""
     # create mock response
     mock_response = Mock()
@@ -385,7 +440,9 @@ def test_leave_pr_comment_message_formatting_without_access_level(mock_progress,
     # call the function with patch
     with patch("reporover.pullrequest.requests.post", mock_post):
         leave_pr_comment(
-            github_organization_url=sample_request_data["github_organization_url"],
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
             repo_prefix=sample_request_data["repo_prefix"],
             username="bob",
             access_level=None,
