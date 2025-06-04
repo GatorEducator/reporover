@@ -110,7 +110,7 @@ def test_modify_user_access_failure(progress, capsys):
     )
     mock_put.assert_called_once()
     captured = capsys.readouterr()
-    assert modified_user_access_status is None
+    assert modified_user_access_status is StatusCode.FAILURE
     assert captured.out is not None
     assert "Failed to change user's access to" in captured.out
     assert "read" in captured.out
@@ -152,4 +152,75 @@ def test_cli_access_command_with_all_parameters_success_read():
         assert result.exit_code == 0
         # verify the mocked functions were called
         mock_modify_user.assert_called()
+        mock_leave_pr.assert_called()
+
+
+def test_cli_access_command_with_all_parameters_success_write():
+    """Test the access command with all parameters provided for success case."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.modify_user_access") as mock_modify_user,
+        patch("reporover.main.leave_pr_comment") as mock_leave_pr,
+    ):
+        # configure the mocks to simulate success
+        mock_modify_user.return_value = StatusCode.SUCCESS
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "access",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--access-level",
+                "write",
+                "--pr-number",
+                "1",
+                "--pr-message",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked functions were called
+        mock_modify_user.assert_called()
+        mock_leave_pr.assert_called()
+
+
+def test_cli_access_command_with_all_parameters_failure():
+    """Test the access command with all parameters provided for failure case."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.modify_user_access") as mock_modify_user,
+        patch("reporover.main.leave_pr_comment") as mock_leave_pr,
+    ):
+        # configure the mocks to simulate failure
+        mock_modify_user.return_value = StatusCode.FAILURE
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "access",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--access-level",
+                "write",
+                "--pr-number",
+                "1",
+                "--pr-message",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+            ],
+        )
+        # verify the command executed without crashing
+        assert result.exit_code == 1
+        # verify the modify_user_access function was called
+        mock_modify_user.assert_called()
+        # verify leave_pr_comment was not called due to the failure
         mock_leave_pr.assert_called()
