@@ -16,6 +16,8 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
 from typer import Typer
 
+from reporover.util import print_json_string, read_usernames_from_json
+
 # define the Typer app that will be used
 # to run the Typer-based command-line interface
 app = Typer()
@@ -66,24 +68,6 @@ class PullRequestMessages(Enum):
     ASSISTANCE_SENTENCE = "Please contact the course instructor for assistance with access to your repository."
 
 
-def print_json_string(json_string: str, progress: Progress) -> None:
-    """Convert JSON string to dictionary and print each key-value pair."""
-    # convert the JSON string to a dictionary
-    dictionary = json.loads(json_string)
-    # display each key-value pair in the dictionary;
-    # useful for debugging purposes when there is a
-    # response back from the GitHub API after an error
-    for key, value in dictionary.items():
-        progress.console.print(f"  {key}: {value}")
-
-
-def read_usernames_from_json(file_path: Path) -> List[str]:
-    """Read usernames from a JSON file."""
-    # read the JSON file and load contents
-    with file_path.open("r") as file:
-        data = json.load(file)
-    # return the list of usernames in JSON file
-    return data.get("usernames", [])
 
 
 def display_welcome_message() -> None:
