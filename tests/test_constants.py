@@ -144,6 +144,7 @@ def test_status_code_members():
     expected_members = {
         "WORKING",
         "CREATED",
+        "FAILURE",
         "SUCCESS",
         "BAD_REQUEST",
         "UNAUTHORIZED",
