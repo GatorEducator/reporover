@@ -6,6 +6,8 @@ from typing import List
 
 from rich.progress import Progress
 
+from reporover.constants import UsernameData
+
 
 def print_json_string(json_string: str, progress: Progress) -> None:
     """Convert JSON string to dictionary and print each key-value pair."""
@@ -24,4 +26,7 @@ def read_usernames_from_json(file_path: Path) -> List[str]:
     with file_path.open("r") as file:
         data = json.load(file)
     # return the list of usernames in JSON file
-    return data.get("usernames", [])
+    if "usernames" in data:
+        return data.get(UsernameData.USERNAMES.value, [])
+    # return an empty list if 'usernames' key is not present
+    return []
