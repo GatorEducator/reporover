@@ -621,6 +621,10 @@ def access(  # noqa: PLR0913
     # if there was an overall failure then return a non-zero exit code
     # to indicate that the command did not complete successfully
     if overall_failure:
+        progress.console.print(
+            f"\n Failed to change at least one access level to '{access_level.value}' in"
+            + f" {github_org_url}"
+        )
         raise typer.Exit(code=1)
 
 
