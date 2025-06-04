@@ -1,5 +1,7 @@
 """Test cases for constants module."""
 
+# ruff: noqa: PLR2004
+
 from enum import Enum
 
 from reporover.constants import (
