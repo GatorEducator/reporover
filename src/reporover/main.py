@@ -562,6 +562,9 @@ def access(  # noqa: PLR0913
         task = progress.add_task(
             "[green]Modifying User's Access", total=len(usernames_parsed)
         )
+        # create a list to keep track of the status codes
+        # returned across each of the following iterations
+        status_codes = []
         # modify the access for the current user
         # and then leave a comment on the existing pull
         # request (PR); note that this works because GitHub
@@ -574,7 +577,7 @@ def access(  # noqa: PLR0913
             # output to be displayed as integrated to the
             # progress bar that shows task completion
             # modify the user's access level
-            modify_user_access(
+            modify_user_status_code = modify_user_access(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -585,7 +588,7 @@ def access(  # noqa: PLR0913
             )
             # leave a comment on the existing PR
             # to notify the user of the change
-            leave_pr_comment(
+            leave_pr_comment_status_code = leave_pr_comment(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -595,8 +598,30 @@ def access(  # noqa: PLR0913
                 token,
                 progress,
             )
+            # add the status code to the list
+            # as a tuple of two status code values;
+            # the first one is the status code from the
+            # modify_user_access function and the
+            # second one is the status code from the
+            # leave_pr_comment function
+            status_codes.append(
+                (modify_user_status_code, leave_pr_comment_status_code)
+            )
             # take the next step in the progress bar
             progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list by using iteration
+    overall_failure = False
+    for status_code in status_codes:
+        if (
+            status_code[0] == StatusCode.FAILURE
+            or status_code[1] == StatusCode.FAILURE
+        ):
+            overall_failure = True
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        raise typer.Exit(code=1)
 
 
 @app.command()
