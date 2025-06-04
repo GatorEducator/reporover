@@ -27,7 +27,7 @@ def test_print_json_string_empty(progress, capsys):
 
 
 def test_print_json_string_single_key_value(progress, capsys):
-    """Confirm that print_json_string function works correctly with a single key-value pair."""
+    """Confirm that print_json_string works correctly with a single key-value pair."""
     json_string = '{"key": "value"}'
     print_json_string(json_string, progress)
     captured = capsys.readouterr()
@@ -35,7 +35,7 @@ def test_print_json_string_single_key_value(progress, capsys):
 
 
 def test_print_json_string_multiple_key_values(progress, capsys):
-    """Confirm that the print_json_string function works correctly with multiple key-value pairs."""
+    """Confirm that print_json_string works correctly with multiple key-value pairs."""
     json_string = '{"key1": "value1", "key2": "value2"}'
     print_json_string(json_string, progress)
     captured = capsys.readouterr()
@@ -43,7 +43,7 @@ def test_print_json_string_multiple_key_values(progress, capsys):
 
 
 def test_print_json_string_special_characters(progress, capsys):
-    """Confirm that the print_json_string function works correctly with special characters in the JSON string."""
+    """Confirm that print_json_string works correctly with special characters in JSON string."""
     json_string = '{"key!@#": "value$%^"}'
     print_json_string(json_string, progress)
     captured = capsys.readouterr()
