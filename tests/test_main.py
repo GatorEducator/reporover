@@ -1,6 +1,8 @@
 """Test the main module of the reporepo command-line interface."""
 
-from unittest.mock import Mock
+# ruff: noqa: PLR2004
+
+from unittest.mock import Mock, patch
 
 import pytest
 from rich.console import Console
@@ -11,10 +13,19 @@ from reporover.main import (
     GitHubAccessLevel,
     StatusCode,
     app,
+    display_welcome_message,
     modify_user_access,
 )
 
 runner = CliRunner()
+
+
+@pytest.fixture
+def progress():
+    """Create a fixture to set up the Progress object for testing."""
+    console = Console()
+    progress = Progress(console=console)
+    return progress
 
 
 def test_cli_provides_help_no_error():
@@ -24,12 +35,39 @@ def test_cli_provides_help_no_error():
     assert "Usage" in result.output
 
 
-@pytest.fixture
-def progress():
-    """Create a fixture to set up the Progress object for testing."""
-    console = Console()
-    progress = Progress(console=console)
-    return progress
+def test_display_welcome_message():
+    """Test that display_welcome_message prints the correct content."""
+    # mock the console object used in the function
+    with patch("reporover.main.console") as mock_console:
+        # call the function
+        display_welcome_message()
+        # verify console.print was called twice
+        assert mock_console.print.call_count == 2
+        # verify first call was with no arguments (empty line)
+        first_call = mock_console.print.call_args_list[0]
+        assert first_call[0] == ()
+        # verify second call was with the welcome message
+        second_call = mock_console.print.call_args_list[1]
+        expected_message = ":sparkles: RepoRover manages and analyzes remote GitHub repositories! Arf!"
+        assert second_call[0][0] == expected_message
+
+
+def test_display_welcome_message_console_calls():
+    """Test the specific console calls made by display_welcome_message."""
+    # mock the console object
+    with patch("reporover.main.console") as mock_console:
+        # call the function
+        display_welcome_message()
+        # verify console.print was called exactly twice
+        assert mock_console.print.call_count == 2
+        # verify first call was with no arguments (empty line)
+        first_call_args = mock_console.print.call_args_list[0][0]
+        assert first_call_args == ()
+        # verify second call was with the welcome message
+        second_call_args = mock_console.print.call_args_list[1][0]
+        expected_message = ":sparkles: RepoRover manages and analyzes remote GitHub repositories! Arf!"
+        assert len(second_call_args) == 1
+        assert second_call_args[0] == expected_message
 
 
 def test_modify_user_access_success(progress, capsys):
