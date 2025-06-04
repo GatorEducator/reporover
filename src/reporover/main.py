@@ -285,7 +285,7 @@ def commit_files_to_repo(  # noqa: PLR0913
         get_response = requests.get(
             api_url + destination_path.as_posix(), headers=headers
         )
-        if get_response.status_code == StatusCode.WORKING:
+        if get_response.status_code == StatusCode.WORKING.value:
             sha = get_response.json()["sha"]
             data = {
                 "message": commit_message,
@@ -302,7 +302,10 @@ def commit_files_to_repo(  # noqa: PLR0913
         response = requests.put(
             api_url + destination_path.as_posix(), headers=headers, json=data
         )
-        if response.status_code in [StatusCode.WORKING, StatusCode.CREATED]:
+        if response.status_code in [
+            StatusCode.WORKING.value,
+            StatusCode.CREATED.value,
+        ]:
             progress.console.print(
                 f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
             )
