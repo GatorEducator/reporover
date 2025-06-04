@@ -59,6 +59,13 @@ def test_print_json_string_invalid_json(progress):
         print_json_string(json_string, progress)
 
 
+def test_read_usernames_from_json_empty(tmp_json_file):
+    """Test reading usernames from an empty JSON file."""
+    file_path = tmp_json_file({})
+    usernames = read_usernames_from_json(file_path)
+    assert usernames == []
+
+
 @pytest.fixture
 def tmp_json_file(tmp_path):
     """Fixture to create a temporary JSON file."""
@@ -70,13 +77,6 @@ def tmp_json_file(tmp_path):
         return file_path
 
     return create_tmp_json_file
-
-
-def test_read_usernames_from_json_empty(tmp_json_file):
-    """Test reading usernames from an empty JSON file."""
-    file_path = tmp_json_file({})
-    usernames = read_usernames_from_json(file_path)
-    assert usernames == []
 
 
 def test_read_usernames_from_json_single_username(tmp_json_file):
