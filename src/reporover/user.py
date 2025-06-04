@@ -21,7 +21,7 @@ def modify_user_access(  # noqa: PLR0913
     progress: Progress,
     put_request_function: Callable = requests.put,
 ) -> Union[StatusCode, None]:
-    """Change user access to read."""
+    """Change user access to the specified level."""
     # define the status codes for the request
     request_status_code = None
     # extract the repository name from the URL
