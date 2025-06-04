@@ -1,8 +1,11 @@
 """Test suite for the utility functions in the util module."""
 
 import json
+from unittest.mock import Mock
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from rich.console import Console
 from rich.progress import Progress
 
@@ -102,3 +105,20 @@ def test_read_usernames_from_json_mixed_content(tmp_json_file):
     file_path = tmp_json_file({"usernames": ["user1"], "other_key": ["user2"]})
     usernames = read_usernames_from_json(file_path)
     assert usernames == ["user1"]
+
+
+@pytest.mark.property
+@given(st.dictionaries(st.text(), st.text()))
+def test_print_json_string_property(test_dict):
+    """Property-based test for print_json_string with arbitrary dictionaries."""
+    mock_console = Mock()
+    progress = Mock()
+    progress.console = mock_console
+    json_string = json.dumps(test_dict)
+    print_json_string(json_string, progress)
+    if not test_dict:
+        mock_console.print.assert_not_called()
+    else:
+        assert mock_console.print.call_count == len(test_dict)
+        for key, value in test_dict.items():
+            mock_console.print.assert_any_call(f"  {key}: {value}")
