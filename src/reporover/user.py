@@ -52,6 +52,9 @@ def modify_user_access(  # noqa: PLR0913
             f"󰄬 Changed {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}"
         )
+        # indicate that the success occurred to
+        # the calling function for follow-on
+        # computation and return of status code
         request_status_code = StatusCode.SUCCESS
     # display error message since the change of the access level did not work
     else:
@@ -64,4 +67,9 @@ def modify_user_access(  # noqa: PLR0913
         # display all of the rest of the details in the string
         # that encodes the JSON response from the GitHub API
         print_json_string(response.text, progress)
+        # indicate that the failure occurred to
+        # the calling function for follow-on
+        # computation and return of status code
+        request_status_code = StatusCode.FAILURE
+    # return the status code of the request
     return request_status_code
