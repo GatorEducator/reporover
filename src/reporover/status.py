@@ -6,14 +6,14 @@ from reporover.constants import StatusCode
 
 
 def get_status_from_codes(
-    status_codes: List[List[StatusCode]],
+    status_codes: List[List[StatusCode | None]],
 ) -> bool:
-    """Determine the status of program runs based on codes."""
+    """Determine the status of sub-command runs based on codes."""
     # determine if there was at least one error
     # in the status codes list by using iteration
     overall_failure = False
     for internal_status_code in status_codes:
-        if any(
+        if internal_status_code is not None and any(
             status_code == StatusCode.FAILURE
             for status_code in internal_status_code
         ):
