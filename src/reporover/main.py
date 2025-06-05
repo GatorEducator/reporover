@@ -698,7 +698,19 @@ def comment(  # noqa: PLR0913
             # take the next step in the progress bar
             progress.advance(task)
             # store the status code for this iteration
-            status_codes.append(leave_pr_comment_status_code)
+            status_codes.append([leave_pr_comment_status_code])
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            "\n Failed to comment on at least one pull request of a repository in"
+            + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command()
