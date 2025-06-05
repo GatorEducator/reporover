@@ -21,6 +21,7 @@ from reporover.constants import (
     StatusCode,
 )
 from reporover.pullrequest import leave_pr_comment
+from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import print_json_string, read_usernames_from_json
 
@@ -599,25 +600,20 @@ def access(  # noqa: PLR0913
                 progress,
             )
             # add the status code to the list
-            # as a tuple of two status code values;
+            # as a list of two status code values;
             # the first one is the status code from the
             # modify_user_access function and the
             # second one is the status code from the
             # leave_pr_comment function
             status_codes.append(
-                (modify_user_status_code, leave_pr_comment_status_code)
+                [modify_user_status_code, leave_pr_comment_status_code]
             )
             # take the next step in the progress bar
             progress.advance(task)
     # determine if there was at least one error
-    # in the status codes list by using iteration
-    overall_failure = False
-    for status_code in status_codes:
-        if (
-            status_code[0] == StatusCode.FAILURE
-            or status_code[1] == StatusCode.FAILURE
-        ):
-            overall_failure = True
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)
     # if there was an overall failure then return a non-zero exit code
     # to indicate that the command did not complete successfully
     if overall_failure:
@@ -679,6 +675,8 @@ def comment(  # noqa: PLR0913
         task = progress.add_task(
             "[green]Commenting of Pull Requests", total=len(usernames_parsed)
         )
+        # create a list to keep track of the status codes
+        status_codes = []
         # leave a comment on the existing pull
         # request (PR); note that this works because GitHub
         # classroom already creates a PR when the person
@@ -687,7 +685,7 @@ def comment(  # noqa: PLR0913
         for current_username in usernames_parsed:
             # leave a comment on the existing PR
             # to notify the user of the change
-            leave_pr_comment(
+            leave_pr_comment_status_code = leave_pr_comment(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -699,6 +697,8 @@ def comment(  # noqa: PLR0913
             )
             # take the next step in the progress bar
             progress.advance(task)
+            # store the status code for this iteration
+            status_codes.append(leave_pr_comment_status_code)
 
 
 @app.command()
