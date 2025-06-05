@@ -75,14 +75,16 @@ format-command = { var = "ruff format --check {project} {tests}", recursive = tr
 symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recursive = true}
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
+ty-command = {var = "ty check {project} {tests}", recursive = true}
 
 [tool.taskipy.tasks]
 all = "task lint && task test"
-lint = "task format && task format && task check && task mypy && task symbex-typed && task symbex-documented"
+lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented"
 check = { cmd = "{check-command}", help = "Run the ruff linting checks", use_vars = true }
 format = { cmd = "{format-command}", help = "Run the ruff formatter on source code", use_vars = true }
 format-fix = { cmd = "{fixformat-command}", help = "Run the ruff formatter to fix source code", use_vars = true }
 mypy = { cmd = "{mypy-command}", help = "Run the mypy type checker for potential type errors", use_vars = true }
+ty = { cmd = "{ty-command}", help = "Run the ty type checker for potential type errors", use_vars = true }
 symbex = "task symbex-typed && task symbex-documented"
 symbex-typed = { cmd = "{symbex-typed-command}", help = "Run symbex for fully typed functions", use_vars = true }
 symbex-documented = { cmd = "{symbex-documented-command}", help = "Run symbex for documentation", use_vars = true }
