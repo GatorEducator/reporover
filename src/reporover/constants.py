@@ -38,7 +38,7 @@ class PullRequestMessages(Enum):
 
 
 class StatusCode(Enum):
-    """Define the status codes for the GitHub API."""
+    """Define the status codes for the GitHub API and an extra code for overall failure."""
 
     WORKING = 200
     CREATED = 201
