@@ -685,10 +685,10 @@ def status(
     # display the welcome message
     display_welcome_message()
     console.print(
-        f":sparkles: Getting GitHub Actions status for repository: {repo_prefix}-{username}"
+        f":sparkles: Retrieving GitHub Actions status for repositories in this organization: {github_org_url}"
     )
     console.print()
-    # extract the usernames from the TOML file
+    # extract the usernames from the JSON file
     usernames_parsed = read_usernames_from_json(usernames_file)
     # if there exists a list of usernames only use those usernames as long
     # as they are inside of the parsed usernames, the complete list
