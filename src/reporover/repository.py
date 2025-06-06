@@ -110,6 +110,9 @@ def clone_repo_gitpython(  # noqa: PLR0913
             f" Failed to clone {full_repository_name} to {local_path}\n"
             f"  Diagnostic: {local_path} already exists"
         )
+        # return failure status code because of the
+        # fact that this function cannot clone to a
+        # directory that already exists
         return StatusCode.FAILURE
     try:
         # clone the repository using GitPython
@@ -117,9 +120,13 @@ def clone_repo_gitpython(  # noqa: PLR0913
         progress.console.print(
             f"󰄬 Cloned {full_repository_name} to {local_path}"
         )
+        # return success status code because the clone
+        # to the provided directory worked correctly
         return StatusCode.WORKING
     except GitCommandError as e:
         progress.console.print(
             f" Failed to clone {full_repository_name}\n  Diagnostic: {e!s}"
         )
+        # return failure status code because the clone
+        # to the provided directory did not work
         return StatusCode.FAILURE
