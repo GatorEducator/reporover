@@ -56,7 +56,7 @@ from reporover.status import get_status_from_codes
     ],
 )
 def test_get_status_from_codes(
-    status_codes: List[List[StatusCode | None]], expected: bool
+    status_codes: List[List[StatusCode]], expected: bool
 ) -> None:
     """Test the get_status_from_codes function with various inputs."""
     # get the result of the function under test
@@ -78,7 +78,7 @@ def test_get_status_from_codes(
     )
 )
 def test_get_status_from_codes_property(
-    status_codes: List[List[StatusCode | None]],
+    status_codes: List[List[StatusCode]],
 ) -> None:
     """Use property-based testing to verify the get_status_from_codes function."""
     # calculate the expected result manually based on our property
