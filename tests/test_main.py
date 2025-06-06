@@ -647,3 +647,181 @@ def test_cli_commit_command_multiple_files():
         assert result.exit_code == 0
         # verify the mocked function was called
         mock_commit_files.assert_called()
+
+
+def test_cli_clone_command_with_all_parameters_success():
+    """Test the clone command with all parameters provided for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+        # configure the mocks to simulate success
+        mock_clone_repo.return_value = StatusCode.SUCCESS
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+                "--username",
+                "gkapfham",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called
+        mock_clone_repo.assert_called()
+
+
+def test_cli_clone_command_with_all_parameters_failure():
+    """Test the clone command with all parameters provided for failure case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+        # configure the mocks to simulate failure
+        mock_clone_repo.return_value = StatusCode.FAILURE
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+                "--username",
+                "gkapfham",
+            ],
+        )
+        # verify the command executed with failure exit code
+        assert result.exit_code == 1
+        # verify the mocked function was called
+        mock_clone_repo.assert_called()
+
+
+def test_cli_clone_command_multiple_usernames_success():
+    """Test the clone command with multiple usernames for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+        # configure the mocks to simulate success
+        mock_clone_repo.return_value = StatusCode.SUCCESS
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called multiple times
+        assert mock_clone_repo.call_count >= 1
+
+
+def test_cli_clone_command_mixed_success_failure():
+    """Test the clone command with mixed success and failure results."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.clone_repo_gitpython") as mock_clone_repo,
+        patch(
+            "reporover.main.read_usernames_from_json"
+        ) as mock_read_usernames,
+    ):
+        # configure the mocks to simulate mixed results
+        mock_read_usernames.return_value = ["gkapfham", "student1"]
+        mock_clone_repo.side_effect = [StatusCode.SUCCESS, StatusCode.FAILURE]
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+            ],
+        )
+        # verify the command executed with failure exit code due to mixed results
+        assert result.exit_code == 1
+        # verify the mocked function was called multiple times
+        assert mock_clone_repo.call_count == 2
+
+
+def test_cli_clone_command_no_username_filter():
+    """Test the clone command without username filter uses all usernames."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.clone_repo_gitpython") as mock_clone_repo,
+        patch(
+            "reporover.main.read_usernames_from_json"
+        ) as mock_read_usernames,
+    ):
+        # configure the mocks to simulate success with multiple usernames
+        mock_read_usernames.return_value = ["student1", "student2", "student3"]
+        mock_clone_repo.return_value = StatusCode.SUCCESS
+        # define the command arguments without username filter
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called for all usernames
+        assert mock_clone_repo.call_count == 3
+
+
+def test_cli_clone_command_username_intersection():
+    """Test the clone command filters usernames correctly."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.clone_repo_gitpython") as mock_clone_repo,
+        patch(
+            "reporover.main.read_usernames_from_json"
+        ) as mock_read_usernames,
+    ):
+        # configure the mocks with usernames where only some match
+        mock_read_usernames.return_value = ["student1", "student2", "student3"]
+        mock_clone_repo.return_value = StatusCode.SUCCESS
+        # define the command arguments with specific usernames
+        result = runner.invoke(
+            app,
+            [
+                "clone",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "/tmp/cloned-repos",
+                "--username",
+                "student1",
+                "--username",
+                "student4",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called only for existing username
+        assert mock_clone_repo.call_count == 1
