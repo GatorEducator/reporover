@@ -1,6 +1,5 @@
 """Main module for the reporover command-line interface."""
 
-import base64
 import csv
 import json
 from datetime import datetime
@@ -22,6 +21,7 @@ from reporover.constants import (
     StatusCode,
 )
 from reporover.pullrequest import leave_pr_comment
+from reporover.repository import commit_files_to_repo
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import print_json_string, read_usernames_from_json
@@ -40,67 +40,6 @@ def display_welcome_message() -> None:
     console.print(
         ":sparkles: RepoRover manages and analyzes remote GitHub repositories! Arf!"
     )
-
-
-def commit_files_to_repo(  # noqa: PLR0913
-    github_organization_url: str,
-    repo_prefix: str,
-    username: str,
-    token: str,
-    directory: Path,
-    files: List[Path],
-    commit_message: str,
-    destination_directory: Path,
-    progress: Progress,
-) -> None:
-    """Commit files to a GitHub repository."""
-    organization_name = github_organization_url.split("github.com/")[1].split(
-        "/"
-    )[0]
-    full_repository_name = f"{repo_prefix}-{username}"
-    full_name_for_api = f"{organization_name}/{full_repository_name}"
-    api_url = f"https://api.github.com/repos/{full_name_for_api}/contents/"
-    headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-    for file_path in files:
-        file_content = (directory / file_path).read_bytes()
-        encoded_content = base64.b64encode(file_content).decode()
-        destination_path = destination_directory / file_path.name
-        get_response = requests.get(
-            api_url + destination_path.as_posix(), headers=headers
-        )
-        if get_response.status_code == StatusCode.WORKING.value:
-            sha = get_response.json()["sha"]
-            data = {
-                "message": commit_message,
-                "content": encoded_content,
-                "branch": "main",
-                "sha": sha,
-            }
-        else:
-            data = {
-                "message": commit_message,
-                "content": encoded_content,
-                "branch": "main",
-            }
-        response = requests.put(
-            api_url + destination_path.as_posix(), headers=headers, json=data
-        )
-        if response.status_code in [
-            StatusCode.WORKING.value,
-            StatusCode.CREATED.value,
-        ]:
-            progress.console.print(
-                f"󰄬 Committed {file_path.name} to {full_repository_name} in directory '{destination_directory}'"
-            )
-        else:
-            progress.console.print(
-                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
-                f"  Diagnostic: {response.status_code}"
-            )
-            print_json_string(response.text, progress)
 
 
 def clone_repo_gitpython(  # noqa: PLR0913
@@ -769,7 +708,7 @@ def commit(  # noqa: PLR0913
     # display the welcome message
     display_welcome_message()
     console.print(
-        f":sparkles: Committing files to repositories in this GitHub organization: {github_org_url}"
+        f":sparkles: Committing file(s) to repositories in this GitHub organization: {github_org_url}"
     )
     console.print()
     # extract the usernames from the JSON file
