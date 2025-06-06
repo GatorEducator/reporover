@@ -376,3 +376,113 @@ def test_cli_comment_command_mixed_success_failure():
         assert result.exit_code == 1
         # verify the mocked function was called multiple times
         assert mock_leave_pr.call_count == 2
+
+
+def test_cli_status_command_with_all_parameters_success():
+    """Test the status command with all parameters provided for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.get_github_actions_status") as mock_get_status:
+        # configure the mocks to simulate success
+        mock_get_status.return_value = StatusCode.SUCCESS
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "status",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called
+        mock_get_status.assert_called()
+
+
+def test_cli_status_command_with_all_parameters_failure():
+    """Test the status command with all parameters provided for failure case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.get_github_actions_status") as mock_get_status:
+        # configure the mocks to simulate failure
+        mock_get_status.return_value = StatusCode.FAILURE
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "status",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+            ],
+        )
+        # verify the command executed with failure exit code
+        assert result.exit_code == 1
+        # verify the mocked function was called
+        mock_get_status.assert_called()
+
+
+def test_cli_status_command_multiple_usernames_success():
+    """Test the status command with multiple usernames for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.get_github_actions_status") as mock_get_status:
+        # configure the mocks to simulate success
+        mock_get_status.return_value = StatusCode.SUCCESS
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "status",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called multiple times
+        assert mock_get_status.call_count >= 1
+
+
+def test_cli_status_command_mixed_success_failure():
+    """Test the status command with mixed success and failure results."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.get_github_actions_status") as mock_get_status,
+        patch(
+            "reporover.main.read_usernames_from_json"
+        ) as mock_read_usernames,
+    ):
+        # configure the mocks to simulate mixed results
+        mock_read_usernames.return_value = ["gkapfham", "student1"]
+        mock_get_status.side_effect = [StatusCode.SUCCESS, StatusCode.FAILURE]
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "status",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+            ],
+        )
+        # verify the command executed with failure exit code due to mixed results
+        assert result.exit_code == 1
+        # verify the mocked function was called multiple times
+        assert mock_get_status.call_count == 2
