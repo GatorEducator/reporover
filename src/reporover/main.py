@@ -1,8 +1,5 @@
 """Main module for the reporover command-line interface."""
 
-import csv
-import json
-from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
@@ -505,80 +502,3 @@ def clone(  # noqa: PLR0913
             )
             # take the next step in the progress bar
             progress.advance(task)
-
-
-@app.command()
-def details(  # noqa: PLR0913
-    github_org_url: str = typer.Argument(
-        ..., help="URL of GitHub organization"
-    ),
-    repo_prefix: str = typer.Argument(
-        ..., help="Prefix for GitHub repository"
-    ),
-    usernames_file: Path = typer.Argument(
-        ..., help="Path to JSON file with usernames"
-    ),
-    token: str = typer.Argument(..., help="GitHub token for authentication"),
-    output_directory: Path = typer.Argument(
-        ..., help="Directory to save the output file"
-    ),
-    file_format: str = typer.Argument(
-        ..., help="Output file format (json or csv)"
-    ),
-    username: Optional[List[str]] = typer.Option(
-        default=None, help="One or more usernames' accounts to analyze"
-    ),
-    verbose: bool = typer.Option(default=False, help="Display verbose output"),
-):
-    """Generate commit details for GitHub repositories and save to a file (JSON or CSV)."""
-    # display the welcome message
-    display_welcome_message()
-    console.print(
-        f":sparkles: Generating commit details for repositories in this GitHub organization: {github_org_url}"
-    )
-    console.print(
-        f":sparkles: Analyzing repositories with the following prefix in their name: {repo_prefix}"
-    )
-    console.print()
-    # extract the usernames from the JSON file
-    usernames_parsed = read_usernames_from_json(usernames_file)
-    # if there exists a list of usernames only use those usernames as long
-    # as they are inside of the parsed usernames, the complete list
-    # (i.e., the username variable lets you select a subset of those
-    # names that are specified in the JSON file of usernames)
-    if username:
-        usernames_parsed = list(set(username) & set(usernames_parsed))
-    # create a progress bar
-    with Progress(
-        "[progress.description]{task.description}",
-        BarColumn(),
-        "[progress.percentage]{task.percentage:>3.0f}%",
-        TextColumn("[progress.completed]{task.completed}/{task.total}"),
-    ) as progress:
-        task = progress.add_task(
-            "[green]Generating Commit Details", total=len(usernames_parsed)
-        )
-        all_commit_details = []
-        for current_username in usernames_parsed:
-            # generate the commit details
-            commit_details = generate_commit_details_jobs(
-                github_org_url,
-                repo_prefix,
-                current_username,
-                token,
-                progress,
-                verbose,
-            )
-            all_commit_details.extend(commit_details)
-            # take the next step in the progress bar
-            progress.advance(task)
-    # save the commit details to the specified file format
-    github_org_name = github_org_url.split("github.com/")[1].split("/")[0]
-    save_commit_details_to_file(
-        all_commit_details,
-        output_directory,
-        github_org_name,
-        repo_prefix,
-        file_format,
-        progress,
-    )
