@@ -6,7 +6,7 @@ from reporover.constants import StatusCode
 
 
 def get_status_from_codes(
-    status_codes: List[List[StatusCode | None]],
+    status_codes: List[List[StatusCode]],
 ) -> bool:
     """Determine the status of sub-command runs based on codes."""
     # determine if there was at least one error
