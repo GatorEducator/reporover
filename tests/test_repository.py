@@ -8,9 +8,12 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from git.exc import GitCommandError
 
-from reporover.constants import StatusCode
-from reporover.repository import commit_files_to_repo
+from reporover.constants import (
+    StatusCode,
+)
+from reporover.repository import clone_repo_gitpython, commit_files_to_repo
 
 
 @pytest.fixture
@@ -424,3 +427,32 @@ def test_commit_files_to_repo_file_read_error(
     error_message = mock_progress.console.print.call_args[0][0]
     assert "Failed to read file" in error_message
     assert "nonexistent.txt" in error_message
+
+
+def test_clone_repo_gitpython_success(mock_progress):
+    """Test successful repository cloning."""
+    # create mock for Repo.clone_from
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure the mock to simulate successful cloning
+        mock_clone.return_value = Mock()
+        # call the function
+        result = clone_repo_gitpython(
+            github_organization_url="https://github.com/test-org/repo",
+            repo_prefix="assignment",
+            username="testuser",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify successful cloning
+        assert result == StatusCode.WORKING
+        # verify git clone was called with correct parameters
+        expected_clone_url = "https://test_token_123@github.com/test-org/assignment-testuser.git"
+        expected_destination = Path("/tmp/assignment-testuser")
+        mock_clone.assert_called_once_with(
+            expected_clone_url, expected_destination
+        )
+        # verify success message was printed
+        mock_progress.console.print.assert_called()
+        success_message = mock_progress.console.print.call_args[0][0]
+        assert "Cloned assignment-testuser" in success_message
