@@ -604,3 +604,32 @@ def test_clone_repo_gitpython_token_authentication(mock_progress):
         clone_call_args = mock_clone.call_args[0]
         expected_clone_url = "https://custom_token_456@github.com/test-org/assignment-testuser.git"
         assert clone_call_args[0] == expected_clone_url
+
+
+def test_clone_repo_gitpython_directory_already_exists(mock_progress):
+    """Test repository cloning failure when destination directory already exists."""
+    # create mock for git.Repo.clone_from and Path.exists
+    with (
+        patch("reporover.repository.Repo.clone_from") as mock_clone,
+        patch("pathlib.Path.exists") as mock_exists,
+    ):
+        # configure the mock to simulate directory already exists
+        mock_exists.return_value = True
+        # call the function
+        result = clone_repo_gitpython(
+            github_organization_url="https://github.com/test-org/repo",
+            repo_prefix="assignment",
+            username="testuser",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify failure status is returned
+        assert result == StatusCode.FAILURE
+        # verify git clone was never called since directory exists
+        mock_clone.assert_not_called()
+        # verify error message was printed
+        mock_progress.console.print.assert_called_once()
+        error_message = mock_progress.console.print.call_args[0][0]
+        assert "Failed to clone assignment-testuser to" in error_message
+        assert "already exists" in error_message
