@@ -167,7 +167,7 @@ def test_commit_files_to_repo_failure(
     assert all("Failed to commit" in msg for msg in error_messages)
     assert all("Diagnostic: 403" in msg for msg in error_messages)
     # verify print_json_string was called
-    assert mock_print_json.call_count == 2
+    assert mock_print_json.call_count == 1
 
 
 def test_commit_files_to_repo_url_parsing(mock_progress, mock_file_content):
