@@ -75,7 +75,7 @@ def commit_files_to_repo(  # noqa: PLR0913
             )
         else:
             progress.console.print(
-                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
+                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
                 f"  Diagnostic: {response.status_code}"
             )
             print_json_string(response.text, progress)
