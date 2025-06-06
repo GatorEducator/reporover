@@ -92,7 +92,7 @@ def clone_repo_gitpython(  # noqa: PLR0913
     token: str,
     destination_directory: Path,
     progress: Progress,
-) -> None:
+) -> StatusCode:
     """Clone a GitHub repository to a local directory."""
     # extract the organization name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
@@ -110,14 +110,16 @@ def clone_repo_gitpython(  # noqa: PLR0913
             f" Failed to clone {full_repository_name} to {local_path}\n"
             f"  Diagnostic: {local_path} already exists"
         )
-        return None
+        return StatusCode.FAILURE
     try:
         # clone the repository using GitPython
         Repo.clone_from(repo_url, local_path)
         progress.console.print(
             f"󰄬 Cloned {full_repository_name} to {local_path}"
         )
+        return StatusCode.WORKING
     except GitCommandError as e:
         progress.console.print(
             f" Failed to clone {full_repository_name}\n  Diagnostic: {e!s}"
         )
+        return StatusCode.FAILURE
