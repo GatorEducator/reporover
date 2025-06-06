@@ -23,7 +23,7 @@ def commit_files_to_repo(  # noqa: PLR0913
     commit_message: str,
     destination_directory: Path,
     progress: Progress,
-) -> None:
+) -> StatusCode:
     """Commit files to a GitHub repository."""
     organization_name = github_organization_url.split("github.com/")[1].split(
         "/"
@@ -36,7 +36,14 @@ def commit_files_to_repo(  # noqa: PLR0913
         "Accept": "application/vnd.github.v3+json",
     }
     for file_path in files:
-        file_content = (directory / file_path).read_bytes()
+        try:
+            file_content = (directory / file_path).read_bytes()
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            progress.console.print(
+                f" Failed to read file {file_path} from directory {directory}\n"
+                f"  Diagnostic: {str(e)}"
+            )
+            return StatusCode.FAILURE
         encoded_content = base64.b64encode(file_content).decode()
         destination_path = destination_directory / file_path.name
         get_response = requests.get(
@@ -68,7 +75,9 @@ def commit_files_to_repo(  # noqa: PLR0913
             )
         else:
             progress.console.print(
-                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
+                f" Failed to commit {file_path.name} to {full_repository_name} in directory '{destination_directory}'\n"
                 f"  Diagnostic: {response.status_code}"
             )
             print_json_string(response.text, progress)
+            return StatusCode.FAILURE
+    return StatusCode.WORKING
