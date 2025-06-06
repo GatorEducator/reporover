@@ -393,3 +393,34 @@ def test_commit_files_to_repo_destination_path_construction(
     expected_path_suffix = "docs/examples/test.txt"
     assert expected_path_suffix in get_call_args[0][0]
     assert expected_path_suffix in put_call_args[0][0]
+
+
+def test_commit_files_to_repo_file_read_error(
+    mock_progress, sample_request_data
+):
+    """Test file commit failure when file cannot be read."""
+    # mock file reading to raise FileNotFoundError
+    with patch(
+        "pathlib.Path.read_bytes",
+        side_effect=FileNotFoundError("File not found"),
+    ):
+        result = commit_files_to_repo(
+            github_organization_url=sample_request_data[
+                "github_organization_url"
+            ],
+            repo_prefix=sample_request_data["repo_prefix"],
+            username=sample_request_data["username"],
+            token=sample_request_data["token"],
+            directory=sample_request_data["directory"],
+            files=[Path("nonexistent.txt")],
+            commit_message=sample_request_data["commit_message"],
+            destination_directory=sample_request_data["destination_directory"],
+            progress=mock_progress,
+        )
+    # verify failure status is returned
+    assert result == StatusCode.FAILURE
+    # verify error message was printed
+    mock_progress.console.print.assert_called_once()
+    error_message = mock_progress.console.print.call_args[0][0]
+    assert "Failed to read file" in error_message
+    assert "nonexistent.txt" in error_message
