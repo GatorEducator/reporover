@@ -24,7 +24,7 @@ from reporover.pullrequest import leave_pr_comment
 from reporover.repository import commit_files_to_repo
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
-from reporover.util import print_json_string, read_usernames_from_json
+from reporover.util import read_usernames_from_json
 
 # define the Typer app that will be used
 # to run the Typer-based command-line interface
