@@ -9,9 +9,12 @@ from rich.console import Console
 from rich.progress import Progress
 from typer.testing import CliRunner
 
-from reporover.constants import StatusCode
-from reporover.main import (
+from reporover.constants import (
     GitHubAccessLevel,
+    GitHubPullRequestNumber,
+    StatusCode,
+)
+from reporover.main import (
     app,
     display_welcome_message,
     modify_user_access,
@@ -224,3 +227,152 @@ def test_cli_access_command_with_all_parameters_failure():
         mock_modify_user.assert_called()
         # verify leave_pr_comment was not called due to the failure
         mock_leave_pr.assert_called()
+
+
+def test_cli_comment_command_with_all_parameters_success():
+    """Test the comment command with all parameters provided for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.leave_pr_comment") as mock_leave_pr:
+        # configure the mocks to simulate success
+        mock_leave_pr.return_value = StatusCode.SUCCESS
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "comment",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--pr-number",
+                "1",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called
+        mock_leave_pr.assert_called()
+
+
+def test_cli_comment_command_with_all_parameters_failure():
+    """Test the comment command with all parameters provided for failure case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.leave_pr_comment") as mock_leave_pr:
+        # configure the mocks to simulate failure
+        mock_leave_pr.return_value = StatusCode.FAILURE
+        # define the command arguments that match the real usage
+        result = runner.invoke(
+            app,
+            [
+                "comment",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--pr-number",
+                "1",
+            ],
+        )
+        # verify the command executed with failure exit code
+        assert result.exit_code == 1
+        # verify the mocked function was called
+        mock_leave_pr.assert_called()
+
+
+def test_cli_comment_command_multiple_usernames_success():
+    """Test the comment command with multiple usernames for success case."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.leave_pr_comment") as mock_leave_pr:
+        # configure the mocks to simulate success
+        mock_leave_pr.return_value = StatusCode.SUCCESS
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "comment",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+                "--pr-number",
+                "2",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called multiple times
+        assert mock_leave_pr.call_count >= 1
+
+
+def test_cli_comment_command_default_pr_number():
+    """Test the comment command with default PR number."""
+    # mock the functions called by the CLI
+    with patch("reporover.main.leave_pr_comment") as mock_leave_pr:
+        # configure the mocks to simulate success
+        mock_leave_pr.return_value = StatusCode.SUCCESS
+        # define the command arguments without specifying pr-number
+        result = runner.invoke(
+            app,
+            [
+                "comment",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+            ],
+        )
+        # verify the command executed successfully
+        assert result.exit_code == 0
+        # verify the mocked function was called with default PR number
+        mock_leave_pr.assert_called()
+        call_args = mock_leave_pr.call_args
+        # check that the pr_number argument (index 5) is the default value
+        assert call_args[0][5] == GitHubPullRequestNumber.DEFAULT.value
+
+
+def test_cli_comment_command_mixed_success_failure():
+    """Test the comment command with mixed success and failure results."""
+    # mock the functions called by the CLI
+    with (
+        patch("reporover.main.leave_pr_comment") as mock_leave_pr,
+        patch(
+            "reporover.main.read_usernames_from_json"
+        ) as mock_read_usernames,
+    ):
+        # configure the mocks to simulate mixed results
+        mock_read_usernames.return_value = ["gkapfham", "student1"]
+        mock_leave_pr.side_effect = [StatusCode.SUCCESS, StatusCode.FAILURE]
+        # define the command arguments with multiple usernames
+        result = runner.invoke(
+            app,
+            [
+                "comment",
+                "https://github.com/Allegheny-Computer-Science-202-S2025/",
+                "computer-science-202-algorithm-analysis-executable-exam-3",
+                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
+                "github_access_token_fake_1234",
+                "--username",
+                "gkapfham",
+                "--username",
+                "student1",
+            ],
+        )
+        # verify the command executed with failure exit code due to mixed results
+        assert result.exit_code == 1
+        # verify the mocked function was called multiple times
+        assert mock_leave_pr.call_count == 2
