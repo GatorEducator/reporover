@@ -515,7 +515,7 @@ def access(  # noqa: PLR0913
         )
         # create a list to keep track of the status codes
         # returned across each of the following iterations
-        status_codes = []
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         # modify the access for the current user
         # and then leave a comment on the existing pull
         # request (PR); note that this works because GitHub
@@ -563,7 +563,7 @@ def access(  # noqa: PLR0913
     # determine if there was at least one error
     # in the status codes list, which would designate
     # that there was an overall failure in this command
-    overall_failure = get_status_from_codes(status_codes)
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
     # if there was an overall failure then return a non-zero exit code
     # to indicate that the command did not complete successfully
     if overall_failure:
@@ -706,20 +706,37 @@ def status(
         task = progress.add_task(
             "[green]Getting GitHub Actions Status", total=len(usernames_parsed)
         )
+        # create a list to keep track of the status codes
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         # for each username, determine the status of their GitHub Actions
         # build for the repository associated with the user in the
         # specified GitHub organization
         for current_username in usernames_parsed:
-            # get the GitHub Actions status
-            get_github_actions_status(
+            # get the GitHub Actions status, making sure to store
+            # the status of the attempt to access the GitHub Actions' status
+            access_github_actions_status = get_github_actions_status(
                 github_org_url,
                 repo_prefix,
                 current_username,
                 token,
                 progress,
             )
+            # store the status code for this iteration
+            status_codes.append([access_github_actions_status])
             # take the next step in the progress bar
             progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            "\n Failed to access the status of GitHub Actions of at least one repository in"
+            + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command()
