@@ -22,7 +22,7 @@ def leave_pr_comment(  # noqa: PLR0913
     pr_number: int,
     token: str,
     progress: Progress,
-) -> Union[StatusCode, None]:
+) -> StatusCode:
     """Leave a comment on the first pull request of the repository."""
     # extract the organization name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
@@ -61,7 +61,8 @@ def leave_pr_comment(  # noqa: PLR0913
         progress.console.print(
             f"󰄬 Commented on the pull request number {pr_number} for GitHub repository {full_repository_name}"
         )
-        # return the status code of the request
+        # return the status code of the request, which will
+        # indicate that the comment was successfully created
         return StatusCode.CREATED
     else:
         progress.console.print(
@@ -69,5 +70,7 @@ def leave_pr_comment(  # noqa: PLR0913
             + f"  Diagnostic: {response.status_code}"
         )
         print_json_string(response.text, progress)
-        # return the status code of the request
+        # return the status code of the request, which will
+        # indicate that there was some type of failure; this
+        # code can then be managed by the caller of this function
         return StatusCode.FAILURE
