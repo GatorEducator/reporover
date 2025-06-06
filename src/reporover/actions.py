@@ -1,4 +1,4 @@
-"""Manage GitHub Actions."""
+"""Determine status of GitHub Actions for GitHub Repositories."""
 
 import requests
 from rich.progress import Progress
@@ -15,7 +15,7 @@ def get_github_actions_status(
     username: str,
     token: str,
     progress: Progress,
-) -> None:
+) -> StatusCode:
     """Report the GitHub Actions status for a repository."""
     # extract the organization name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
@@ -46,11 +46,17 @@ def get_github_actions_status(
                 f"  Status: {status}\n"
                 f"  Conclusion: {conclusion}"
             )
-        # could not find any workflow runs to display
+        # could not find any workflow runs to display, note that this
+        # does not correspond to an error because of the fact that
+        # it was possible to access the GitHub API and get a response
         else:
             progress.console.print(
                 f"? No GitHub Actions runs found for {full_repository_name}"
             )
+        # return success status code, to indicate that it was
+        # possible to access the GitHub Actions status for
+        # this specific GitHub repository
+        return StatusCode.WORKING
     # display error message since the request did not work
     else:
         progress.console.print(
@@ -58,3 +64,7 @@ def get_github_actions_status(
             f"  Diagnostic: {response.status_code}"
         )
         print_json_string(response.text, progress)
+        # return failure status code, to indicate that it was
+        # not possible to access the GitHub Actions status for
+        # this specific GitHub repository
+        return StatusCode.FAILURE
