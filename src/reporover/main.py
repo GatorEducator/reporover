@@ -696,7 +696,7 @@ def status(
     # names that are specified in the JSON file of usernames)
     if username:
         usernames_parsed = list(set(username) & set(usernames_parsed))
-    # create a progress bar
+    # create a progress bar for the GitHub Actions status retrieval
     with Progress(
         "[progress.description]{task.description}",
         BarColumn(),
@@ -706,6 +706,9 @@ def status(
         task = progress.add_task(
             "[green]Getting GitHub Actions Status", total=len(usernames_parsed)
         )
+        # for each username, determine the status of their GitHub Actions
+        # build for the repository associated with the user in the
+        # specified GitHub organization
         for current_username in usernames_parsed:
             # get the GitHub Actions status
             get_github_actions_status(
