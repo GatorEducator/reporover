@@ -456,3 +456,151 @@ def test_clone_repo_gitpython_success(mock_progress):
         mock_progress.console.print.assert_called()
         success_message = mock_progress.console.print.call_args[0][0]
         assert "Cloned assignment-testuser" in success_message
+
+
+def test_clone_repo_gitpython_git_command_error(mock_progress):
+    """Test repository cloning failure with GitCommandError."""
+    # create mock for git.Repo.clone_from that raises GitCommandError
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure the mock to raise GitCommandError
+        mock_clone.side_effect = GitCommandError(
+            "clone", "Repository not found"
+        )
+        # call the function
+        result = clone_repo_gitpython(
+            github_organization_url="https://github.com/test-org/repo",
+            repo_prefix="assignment",
+            username="testuser",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify failure status is returned
+        assert result == StatusCode.FAILURE
+        # verify error messages were printed
+        assert mock_progress.console.print.call_count == 1
+        error_messages = [
+            call[0][0] for call in mock_progress.console.print.call_args_list
+        ]
+        assert "Failed to clone assignment-testuser" in error_messages[0]
+
+
+def test_clone_repo_gitpython_url_parsing(mock_progress):
+    """Test proper URL parsing for different organization URLs."""
+    test_cases = [
+        {
+            "url": "https://github.com/allegheny-college/repo",
+            "expected_org": "allegheny-college",
+        },
+        {
+            "url": "https://github.com/test-org-name/some-repo",
+            "expected_org": "test-org-name",
+        },
+        {
+            "url": "https://github.com/user123/project/",
+            "expected_org": "user123",
+        },
+    ]
+    for case in test_cases:
+        # create mock for git.Repo.clone_from
+        with patch("reporover.repository.Repo.clone_from") as mock_clone:
+            # configure the mock to simulate successful cloning
+            mock_clone.return_value = Mock()
+            # call the function
+            clone_repo_gitpython(
+                github_organization_url=case["url"],
+                repo_prefix="hw",
+                username="student",
+                token="token",
+                destination_directory=Path("/tmp"),
+                progress=mock_progress,
+            )
+            # verify correct organization was used in clone URL
+            clone_call_args = mock_clone.call_args[0]
+            expected_clone_url = f"https://token@github.com/{case['expected_org']}/hw-student.git"
+            assert clone_call_args[0] == expected_clone_url
+
+
+def test_clone_repo_gitpython_repository_name_construction(mock_progress):
+    """Test proper repository name construction."""
+    test_cases = [
+        {
+            "prefix": "assignment",
+            "username": "john",
+            "expected": "assignment-john",
+        },
+        {
+            "prefix": "lab",
+            "username": "mary_smith",
+            "expected": "lab-mary_smith",
+        },
+        {
+            "prefix": "project1",
+            "username": "user123",
+            "expected": "project1-user123",
+        },
+    ]
+    for case in test_cases:
+        # create mock for git.Repo.clone_from
+        with patch("reporover.repository.Repo.clone_from") as mock_clone:
+            # configure the mock to simulate successful cloning
+            mock_clone.return_value = Mock()
+            # call the function
+            clone_repo_gitpython(
+                github_organization_url="https://github.com/test-org/repo",
+                repo_prefix=case["prefix"],
+                username=case["username"],
+                token="token",
+                destination_directory=Path("/tmp"),
+                progress=mock_progress,
+            )
+            # verify correct repository name in clone URL and destination path
+            clone_call_args = mock_clone.call_args[0]
+            expected_clone_url = (
+                f"https://token@github.com/test-org/{case['expected']}.git"
+            )
+            expected_destination = Path(f"/tmp/{case['expected']}")
+            assert clone_call_args[0] == expected_clone_url
+            assert clone_call_args[1] == expected_destination
+
+
+def test_clone_repo_gitpython_destination_path_construction(mock_progress):
+    """Test proper destination path construction."""
+    # create mock for git.Repo.clone_from
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure the mock to simulate successful cloning
+        mock_clone.return_value = Mock()
+        # call the function with specific directory
+        clone_repo_gitpython(
+            github_organization_url="https://github.com/test-org/repo",
+            repo_prefix="assignment",
+            username="testuser",
+            token="token",
+            destination_directory=Path("/home/user/projects"),
+            progress=mock_progress,
+        )
+        # verify correct destination path
+        clone_call_args = mock_clone.call_args[0]
+        expected_destination = Path("/home/user/projects/assignment-testuser")
+        assert clone_call_args[1] == expected_destination
+
+
+def test_clone_repo_gitpython_token_authentication(mock_progress):
+    """Test proper token authentication in clone URL."""
+    # create mock for git.Repo.clone_from
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure the mock to simulate successful cloning
+        mock_clone.return_value = Mock()
+        # call the function with specific token
+        clone_repo_gitpython(
+            github_organization_url="https://github.com/test-org/repo",
+            repo_prefix="assignment",
+            username="testuser",
+            token="custom_token_456",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify correct token in clone URL
+        clone_call_args = mock_clone.call_args[0]
+        expected_clone_url = "https://custom_token_456@github.com/test-org/assignment-testuser.git"
+        assert clone_call_args[0] == expected_clone_url
