@@ -40,8 +40,8 @@ def commit_files_to_repo(  # noqa: PLR0913
             file_content = (directory / file_path).read_bytes()
         except (FileNotFoundError, PermissionError, OSError) as e:
             progress.console.print(
-                f" Failed to read file {file_path} from directory {directory}\n"
-                f"  Diagnostic: {str(e)}"
+                f" Failed to read file {file_path} from directory {directory}\n"
+                f"  Diagnostic: {e!s}"
             )
             return StatusCode.FAILURE
         encoded_content = base64.b64encode(file_content).decode()
