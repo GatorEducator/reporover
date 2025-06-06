@@ -450,9 +450,10 @@ def clone(  # noqa: PLR0913
         task = progress.add_task(
             "[green]Cloning Repositories", total=len(usernames_parsed)
         )
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         for current_username in usernames_parsed:
             # clone the repository
-            clone_repo_gitpython(
+            clone_repo_status_code = clone_repo_gitpython(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -460,5 +461,19 @@ def clone(  # noqa: PLR0913
                 destination_directory,
                 progress,
             )
+            # store the status code for this iteration
+            status_codes.append([clone_repo_status_code])
             # take the next step in the progress bar
             progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            "\n Failed to clone at least one repository in"
+            + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
