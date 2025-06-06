@@ -1,6 +1,6 @@
 """User management module for RepoRover."""
 
-from typing import Callable, Union
+from typing import Callable
 
 import requests
 from rich.progress import Progress
@@ -20,7 +20,7 @@ def modify_user_access(  # noqa: PLR0913
     token: str,
     progress: Progress,
     put_request_function: Callable = requests.put,
-) -> Union[StatusCode, None]:
+) -> StatusCode:
     """Change user access to the specified level."""
     # define the status codes for the request
     request_status_code = None
