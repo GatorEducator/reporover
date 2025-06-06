@@ -16,7 +16,7 @@ from reporover.constants import (
     StatusCode,
 )
 from reporover.pullrequest import leave_pr_comment
-from reporover.repository import commit_files_to_repo
+from reporover.repository import clone_repo_gitpython, commit_files_to_repo
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import read_usernames_from_json
