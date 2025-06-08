@@ -481,7 +481,7 @@ def clone(  # noqa: PLR0913
 
 
 @app.command()
-def search(
+def search(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -494,6 +494,12 @@ def search(
     ),
     match_all: bool = typer.Option(
         False, help="Require all patterns to match (default: any pattern)"
+    ),
+    max_repos_to_search: int = typer.Option(
+        None, help="Maximum number of repositories to search"
+    ),
+    max_matching_repos: int = typer.Option(
+        None, help="Maximum number of matching repositories to return"
     ),
 ):
     """Search GitHub repositories for files matching specified patterns."""
@@ -513,6 +519,10 @@ def search(
         console.print(
             f"Looking for ANY of these patterns: {', '.join(file_patterns)}"
         )
+    if max_repos_to_search:
+        console.print(f"Limiting search to first {max_repos_to_search} repositories")
+    if max_matching_repos:
+        console.print(f"Returning at most {max_matching_repos} matching repositories")
     console.print()
     # create a progress bar
     with Progress(
@@ -530,6 +540,8 @@ def search(
             file_patterns,
             progress,
             match_all,
+            max_repos_to_search,
+            max_matching_repos,
         )
         # complete the progress bar
         progress.advance(task)
