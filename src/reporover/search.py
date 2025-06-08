@@ -161,7 +161,7 @@ def get_all_files_recursive(  # noqa: PLR0913
     max_depth: int = 2,
 ) -> List[str]:
     """Recursively get all file names from a repository up to a specified depth."""
-    all_files = []
+    all_files: List[str] = []
     contents_url = f"https://api.github.com/repos/{organization_name}/{repo_name}/contents"
     if path:
         contents_url += f"/{path}"
@@ -375,7 +375,9 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
             "Debug: Searching across all GitHub repositories (no organization specified)"
         )
     if language:
-        progress.console.print(f"Debug: Filtering repositories by language: {language}")
+        progress.console.print(
+            f"Debug: Filtering repositories by language: {language}"
+        )
     # set up headers for GitHub API requests
     headers = {
         "Authorization": f"token {token}",
@@ -477,7 +479,7 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
                 "No repositories found with the specified file patterns"
             )
         return StatusCode.SUCCESS
-    except requests.exceptions.RequestException as request_error:
+    except requests.exceptions.RequestException as request_error:  # type: ignore[attr-defined]
         progress.console.print(
             "Failed to search repositories: Network error occurred"
         )
