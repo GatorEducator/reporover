@@ -17,6 +17,7 @@ from reporover.constants import (
 )
 from reporover.pullrequest import leave_pr_comment
 from reporover.repository import clone_repo_gitpython, commit_files_to_repo
+from reporover.search import search_repositories_for_files
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import read_usernames_from_json
@@ -475,5 +476,67 @@ def clone(  # noqa: PLR0913
         progress.console.print(
             "\n Failed to clone at least one repository in"
             + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def search(
+    github_org_url: str = typer.Argument(
+        ..., help="URL of GitHub organization"
+    ),
+    repo_name_fragment: str = typer.Argument(
+        ..., help="Fragment of repository name to search for"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    file_patterns: List[str] = typer.Argument(
+        ..., help="File patterns to search for (regex supported)"
+    ),
+    match_all: bool = typer.Option(
+        False, help="Require all patterns to match (default: any pattern)"
+    ),
+):
+    """Search GitHub repositories for files matching specified patterns."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Searching repositories in this GitHub organization: {github_org_url}"
+    )
+    console.print(
+        f"Looking for repositories with name fragment: {repo_name_fragment}"
+    )
+    if match_all:
+        console.print(
+            f"Requiring ALL patterns to match: {', '.join(file_patterns)}"
+        )
+    else:
+        console.print(
+            f"Looking for ANY of these patterns: {', '.join(file_patterns)}"
+        )
+    console.print()
+    # create a progress bar
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task("[green]Searching Repositories", total=1)
+        # search repositories for the specified file patterns
+        search_status_code = search_repositories_for_files(
+            github_org_url,
+            repo_name_fragment,
+            token,
+            file_patterns,
+            progress,
+            match_all,
+        )
+        # complete the progress bar
+        progress.advance(task)
+    # if there was a failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if search_status_code == StatusCode.FAILURE:
+        progress.console.print(
+            f"\n Failed to search repositories in {github_org_url}"
         )
         raise typer.Exit(code=1)
