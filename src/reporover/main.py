@@ -586,7 +586,8 @@ def search(  # noqa: PLR0913
         help="Maximum depth to search in repository directories (0=root only, 1=1 level deep, etc.)",
     ),
     language: Optional[str] = typer.Option(
-        None, help="Filter repositories by programming language (e.g., 'Python', 'JavaScript', 'Java')"
+        None,
+        help="Filter repositories by programming language (e.g., 'Python', 'JavaScript', 'Java')",
     ),
 ):
     """Search GitHub repositories for files matching specified patterns."""
