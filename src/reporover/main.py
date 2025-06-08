@@ -520,9 +520,13 @@ def search(  # noqa: PLR0913
             f"Looking for ANY of these patterns: {', '.join(file_patterns)}"
         )
     if max_repos_to_search:
-        console.print(f"Limiting search to first {max_repos_to_search} repositories")
+        console.print(
+            f"Limiting search to first {max_repos_to_search} repositories"
+        )
     if max_matching_repos:
-        console.print(f"Returning at most {max_matching_repos} matching repositories")
+        console.print(
+            f"Returning at most {max_matching_repos} matching repositories"
+        )
     console.print()
     # create a progress bar
     with Progress(
