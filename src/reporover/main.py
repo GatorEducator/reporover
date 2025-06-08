@@ -581,6 +581,13 @@ def search(  # noqa: PLR0913
     max_matching_repos: int = typer.Option(
         100, help="Maximum number of matching repositories to return"
     ),
+    max_directory_depth: int = typer.Option(
+        2,
+        help="Maximum depth to search in repository directories (0=root only, 1=1 level deep, etc.)",
+    ),
+    language: Optional[str] = typer.Option(
+        None, help="Filter repositories by programming language (e.g., 'Python', 'JavaScript', 'Java')"
+    ),
 ):
     """Search GitHub repositories for files matching specified patterns."""
     # display the welcome message
@@ -612,6 +619,10 @@ def search(  # noqa: PLR0913
         console.print(
             f"Returning at most {max_matching_repos} matching repositories"
         )
+    if max_directory_depth >= 0:
+        console.print(
+            f"Limiting directory search depth to {max_directory_depth} levels"
+        )
     console.print()
     # create a progress bar
     with Progress(
@@ -631,6 +642,8 @@ def search(  # noqa: PLR0913
             match_all,
             max_repos_to_search,
             max_matching_repos,
+            max_directory_depth,
+            language,
         )
         # complete the progress bar
         progress.advance(task)
