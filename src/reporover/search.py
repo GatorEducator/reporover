@@ -16,6 +16,7 @@ def get_all_repositories(
     headers: dict,
     progress: Progress,
     max_repos: int = 100,
+    language: Optional[str] = None,
 ) -> List[dict]:
     """Get all repositories from an organization or search globally using pagination."""
     all_repositories = []
@@ -24,9 +25,14 @@ def get_all_repositories(
         if organization_name:
             # search within specific organization
             repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
+            if language:
+                repos_url += f"&language={language}"
         else:
             # search all public repositories on GitHub
-            repos_url = f"https://api.github.com/search/repositories?q=is:public&per_page=100&page={page}"
+            search_query = "is:public"
+            if language:
+                search_query += f" language:{language}"
+            repos_url = f"https://api.github.com/search/repositories?q={search_query}&per_page=100&page={page}"
         progress.console.print(f"Debug: Making request to: {repos_url}")
         repos_response = requests.get(repos_url, headers=headers)
         progress.console.print(
@@ -57,6 +63,54 @@ def get_all_repositories(
             break
         page += 1
     return all_repositories
+
+
+# def get_all_repositories(
+#     organization_name: Optional[str],
+#     headers: dict,
+#     progress: Progress,
+#     max_repos: int = 100,
+# ) -> List[dict]:
+#     """Get all repositories from an organization or search globally using pagination."""
+#     all_repositories = []
+#     page = 1
+#     while True:
+#         if organization_name:
+#             # search within specific organization
+#             repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
+#         else:
+#             # search all public repositories on GitHub
+#             repos_url = f"https://api.github.com/search/repositories?q=is:public&per_page=100&page={page}"
+#         progress.console.print(f"Debug: Making request to: {repos_url}")
+#         repos_response = requests.get(repos_url, headers=headers)
+#         progress.console.print(
+#             f"Debug: Response status code: {repos_response.status_code}"
+#         )
+#         if repos_response.status_code != StatusCode.WORKING.value:
+#             progress.console.print(f"Failed to fetch repositories page {page}")
+#             progress.console.print(f"Diagnostic: {repos_response.status_code}")
+#             break
+#         response_data = repos_response.json()
+#         if organization_name:
+#             repositories = response_data
+#         else:
+#             # for search API, repositories are in 'items' field
+#             repositories = response_data.get("items", [])
+#         if not repositories:
+#             break
+#         all_repositories.extend(repositories)
+#         progress.console.print(
+#             f"Debug: Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}"
+#         )
+#         # check if we've reached the maximum number of repositories
+#         if max_repos and len(all_repositories) >= max_repos:
+#             all_repositories = all_repositories[:max_repos]
+#             progress.console.print(
+#                 f"Debug: Reached maximum repository limit of {max_repos}"
+#             )
+#             break
+#         page += 1
+#     return all_repositories
 
 
 # def get_all_repositories(
@@ -97,19 +151,23 @@ def get_all_repositories(
 #     return all_repositories
 
 
-def get_all_files_recursive(
+def get_all_files_recursive(  # noqa: PLR0913
     organization_name: str,
     repo_name: str,
     headers: dict,
     progress: Progress,
     path: str = "",
+    current_depth: int = 0,
+    max_depth: int = 2,
 ) -> List[str]:
-    """Recursively get all file names from a repository."""
+    """Recursively get all file names from a repository up to a specified depth."""
     all_files = []
     contents_url = f"https://api.github.com/repos/{organization_name}/{repo_name}/contents"
     if path:
         contents_url += f"/{path}"
-    progress.console.print(f"Debug: Getting contents from: {contents_url}")
+    progress.console.print(
+        f"Debug: Getting contents from: {contents_url} (depth: {current_depth})"
+    )
     contents_response = requests.get(contents_url, headers=headers)
     if contents_response.status_code != StatusCode.WORKING.value:
         progress.console.print(
@@ -122,14 +180,27 @@ def get_all_files_recursive(
             file_path = f"{path}/{item['name']}" if path else item["name"]
             all_files.append(file_path)
             progress.console.print(f"Debug: Found file: {file_path}")
-        elif item["type"] == "dir":
+        elif item["type"] == "dir" and current_depth < max_depth:
             dir_path = f"{path}/{item['name']}" if path else item["name"]
-            progress.console.print(f"Debug: Exploring directory: {dir_path}")
+            progress.console.print(
+                f"Debug: Exploring directory: {dir_path} (depth: {current_depth + 1})"
+            )
             # recursively get files from sub-directory
             subdir_files = get_all_files_recursive(
-                organization_name, repo_name, headers, progress, dir_path
+                organization_name,
+                repo_name,
+                headers,
+                progress,
+                dir_path,
+                current_depth + 1,
+                max_depth,
             )
             all_files.extend(subdir_files)
+        elif item["type"] == "dir":
+            dir_path = f"{path}/{item['name']}" if path else item["name"]
+            progress.console.print(
+                f"Debug: Skipping directory: {dir_path} (max depth {max_depth} reached)"
+            )
     return all_files
 
 
@@ -283,6 +354,8 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
     match_all: bool = False,
     max_repos_to_search: int = 100,
     max_matching_repos: int = 100,
+    max_directory_depth: int = 2,
+    language: Optional[str] = None,
 ) -> StatusCode:
     """Search GitHub repositories for files matching specified patterns."""
     # extract the organization name from the GitHub organization URL
@@ -301,6 +374,8 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
         progress.console.print(
             "Debug: Searching across all GitHub repositories (no organization specified)"
         )
+    if language:
+        progress.console.print(f"Debug: Filtering repositories by language: {language}")
     # set up headers for GitHub API requests
     headers = {
         "Authorization": f"token {token}",
@@ -309,7 +384,7 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
     try:
         # get all repositories from the organization using pagination
         repositories = get_all_repositories(
-            organization_name, headers, progress, max_repos_to_search
+            organization_name, headers, progress, max_repos_to_search, language
         )
         progress.console.print(
             f"Debug: Total repositories found: {len(repositories)}"
@@ -351,7 +426,13 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
             )
             # get all files recursively from the repository
             all_files = get_all_files_recursive(
-                repo_owner, repo_name, headers, progress
+                repo_owner,
+                repo_name,
+                headers,
+                progress,
+                "",
+                0,
+                max_directory_depth,
             )
             progress.console.print(
                 f"Debug: Total files found in {repo_name}: {len(all_files)}"
@@ -410,7 +491,7 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
         return StatusCode.FAILURE
 
 
-# def search_repositories_for_files(  # noqa: PLR0913
+# def search_repositories_for_files(
 #     github_organization_url: str,
 #     repo_name_fragment: str,
 #     token: str,
