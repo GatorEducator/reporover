@@ -231,7 +231,7 @@ def search_repositories_for_files(  # noqa: PLR0913
                 "No repositories found with the specified file patterns"
             )
         return StatusCode.SUCCESS
-    except requests.exceptions.RequestException as request_error:
+    except requests.exceptions.RequestException as request_error:  # type: ignore[attr-defined]
         progress.console.print(
             "Failed to search repositories: Network error occurred"
         )
