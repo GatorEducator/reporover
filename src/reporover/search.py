@@ -10,7 +10,12 @@ from reporover.constants import (
 )
 
 
-def get_all_repositories(organization_name: str, headers: dict, progress: Progress) -> List[dict]:
+def get_all_repositories(
+    organization_name: str,
+    headers: dict,
+    progress: Progress,
+    max_repos: int = 100,
+) -> List[dict]:
     """Get all repositories from an organization using pagination."""
     all_repositories = []
     page = 1
@@ -18,7 +23,9 @@ def get_all_repositories(organization_name: str, headers: dict, progress: Progre
         repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
         progress.console.print(f"Debug: Making request to: {repos_url}")
         repos_response = requests.get(repos_url, headers=headers)
-        progress.console.print(f"Debug: Response status code: {repos_response.status_code}")
+        progress.console.print(
+            f"Debug: Response status code: {repos_response.status_code}"
+        )
         if repos_response.status_code != StatusCode.WORKING.value:
             progress.console.print(f"Failed to fetch repositories page {page}")
             progress.console.print(f"Diagnostic: {repos_response.status_code}")
@@ -27,12 +34,27 @@ def get_all_repositories(organization_name: str, headers: dict, progress: Progre
         if not repositories:
             break
         all_repositories.extend(repositories)
-        progress.console.print(f"Debug: Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}")
+        progress.console.print(
+            f"Debug: Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}"
+        )
+        # check if we've reached the maximum number of repositories
+        if max_repos and len(all_repositories) >= max_repos:
+            all_repositories = all_repositories[:max_repos]
+            progress.console.print(
+                f"Debug: Reached maximum repository limit of {max_repos}"
+            )
+            break
         page += 1
     return all_repositories
 
 
-def get_all_files_recursive(organization_name: str, repo_name: str, headers: dict, progress: Progress, path: str = "") -> List[str]:
+def get_all_files_recursive(
+    organization_name: str,
+    repo_name: str,
+    headers: dict,
+    progress: Progress,
+    path: str = "",
+) -> List[str]:
     """Recursively get all file names from a repository."""
     all_files = []
     contents_url = f"https://api.github.com/repos/{organization_name}/{repo_name}/contents"
@@ -41,7 +63,9 @@ def get_all_files_recursive(organization_name: str, repo_name: str, headers: dic
     progress.console.print(f"Debug: Getting contents from: {contents_url}")
     contents_response = requests.get(contents_url, headers=headers)
     if contents_response.status_code != StatusCode.WORKING.value:
-        progress.console.print(f"Debug: Failed to get contents for path '{path}' in {repo_name}")
+        progress.console.print(
+            f"Debug: Failed to get contents for path '{path}' in {repo_name}"
+        )
         return all_files
     contents = contents_response.json()
     for item in contents:
@@ -53,12 +77,19 @@ def get_all_files_recursive(organization_name: str, repo_name: str, headers: dic
             dir_path = f"{path}/{item['name']}" if path else item["name"]
             progress.console.print(f"Debug: Exploring directory: {dir_path}")
             # recursively get files from subdirectory
-            subdir_files = get_all_files_recursive(organization_name, repo_name, headers, progress, dir_path)
+            subdir_files = get_all_files_recursive(
+                organization_name, repo_name, headers, progress, dir_path
+            )
             all_files.extend(subdir_files)
     return all_files
 
 
-def check_patterns_match(file_names: List[str], file_patterns: List[str], match_all: bool, progress: Progress) -> List[str]:
+def check_patterns_match(
+    file_names: List[str],
+    file_patterns: List[str],
+    match_all: bool,
+    progress: Progress,
+) -> List[str]:
     """Check if file patterns match the given file names."""
     matched_files = []
     if match_all:
@@ -66,12 +97,15 @@ def check_patterns_match(file_names: List[str], file_patterns: List[str], match_
         all_patterns_found = True
         for pattern in file_patterns:
             pattern_matches = [
-                name for name in file_names
+                name
+                for name in file_names
                 if pattern.lower() in name.lower() or name == pattern
             ]
             if pattern_matches:
                 matched_files.extend(pattern_matches)
-                progress.console.print(f"Debug: Pattern '{pattern}' matched: {pattern_matches}")
+                progress.console.print(
+                    f"Debug: Pattern '{pattern}' matched: {pattern_matches}"
+                )
             else:
                 # if any pattern doesn't match, return empty list
                 progress.console.print(f"Debug: Pattern '{pattern}' not found")
@@ -83,12 +117,15 @@ def check_patterns_match(file_names: List[str], file_patterns: List[str], match_
         # any pattern can match
         for pattern in file_patterns:
             pattern_matches = [
-                name for name in file_names
+                name
+                for name in file_names
                 if pattern.lower() in name.lower() or name == pattern
             ]
             matched_files.extend(pattern_matches)
             if pattern_matches:
-                progress.console.print(f"Debug: Pattern '{pattern}' matched: {pattern_matches}")
+                progress.console.print(
+                    f"Debug: Pattern '{pattern}' matched: {pattern_matches}"
+                )
     return list(set(matched_files))
 
 
@@ -99,11 +136,15 @@ def search_repositories_for_files(  # noqa: PLR0913
     file_patterns: List[str],
     progress: Progress,
     match_all: bool = False,
+    max_repos_to_search: int = 100,
+    max_matching_repos: int = 100,
 ) -> StatusCode:
     """Search GitHub repositories for files matching specified patterns."""
     # extract the organization name from the GitHub organization URL
     organization_name = github_organization_url.rstrip("/").split("/")[-1]
-    progress.console.print(f"Debug: Organization name extracted: {organization_name}")
+    progress.console.print(
+        f"Debug: Organization name extracted: {organization_name}"
+    )
     # set up headers for GitHub API requests
     headers = {
         "Authorization": f"token {token}",
@@ -111,20 +152,26 @@ def search_repositories_for_files(  # noqa: PLR0913
     }
     try:
         # get all repositories from the organization using pagination
-        repositories = get_all_repositories(organization_name, headers, progress)
-        progress.console.print(f"Debug: Total repositories found: {len(repositories)}")
+        repositories = get_all_repositories(
+            organization_name, headers, progress, max_repos_to_search
+        )
+        progress.console.print(
+            f"Debug: Total repositories found: {len(repositories)}"
+        )
         # print first few repository names for debugging
         if repositories:
             progress.console.print("Debug: First few repository names:")
             for i, repo in enumerate(repositories[:5]):
-                progress.console.print(f"  {i+1}. {repo['name']}")
+                progress.console.print(f"  {i + 1}. {repo['name']}")
         # filter repositories by name fragment
         matching_repos = [
             repo
             for repo in repositories
             if repo_name_fragment.lower() in repo["name"].lower()
         ]
-        progress.console.print(f"Debug: Repositories matching '{repo_name_fragment}': {len(matching_repos)}")
+        progress.console.print(
+            f"Debug: Repositories matching '{repo_name_fragment}': {len(matching_repos)}"
+        )
         if not matching_repos:
             progress.console.print(
                 f"No repositories found matching fragment '{repo_name_fragment}'"
@@ -139,10 +186,16 @@ def search_repositories_for_files(  # noqa: PLR0913
             repo_name = repo["name"]
             progress.console.print(f"Searching repository: {repo_name}")
             # get all files recursively from the repository
-            all_files = get_all_files_recursive(organization_name, repo_name, headers, progress)
-            progress.console.print(f"Debug: Total files found in {repo_name}: {len(all_files)}")
+            all_files = get_all_files_recursive(
+                organization_name, repo_name, headers, progress
+            )
+            progress.console.print(
+                f"Debug: Total files found in {repo_name}: {len(all_files)}"
+            )
             # check if file patterns match
-            matched_files = check_patterns_match(all_files, file_patterns, match_all, progress)
+            matched_files = check_patterns_match(
+                all_files, file_patterns, match_all, progress
+            )
             if matched_files:
                 found_repositories.append(
                     {
@@ -154,6 +207,15 @@ def search_repositories_for_files(  # noqa: PLR0913
                 progress.console.print(
                     f"  ✓ Found patterns in {repo_name}: {matched_files}"
                 )
+                # check if we've reached the maximum number of matching repositories
+                if (
+                    max_matching_repos
+                    and len(found_repositories) >= max_matching_repos
+                ):
+                    progress.console.print(
+                        f"Debug: Reached maximum matching repository limit of {max_matching_repos}"
+                    )
+                    break
         # display summary results
         if found_repositories:
             progress.console.print(
