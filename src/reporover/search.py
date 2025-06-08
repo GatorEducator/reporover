@@ -56,7 +56,7 @@ def get_all_files_recursive(
     path: str = "",
 ) -> List[str]:
     """Recursively get all file names from a repository."""
-    all_files = []
+    all_files: List[str] = []
     contents_url = f"https://api.github.com/repos/{organization_name}/{repo_name}/contents"
     if path:
         contents_url += f"/{path}"
