@@ -28,6 +28,12 @@ class GitHubPullRequestNumber(Enum):
     DEFAULT = 1
 
 
+class GitHubRepositoryDetails(Enum):
+    """Define the details for the GitHub repository."""
+
+    BRANCH_DEFAULT = "main"
+
+
 class PullRequestMessages(Enum):
     """Define the pull request messages to leave in the GitHub repositories."""
 
@@ -50,3 +56,10 @@ class StatusCode(Enum):
     UNPROCESSABLE_ENTITY = 422
     INTERNAL_SERVER_ERROR = 500
     FAILURE = 600
+
+
+class Symbols(Enum):
+    """Define the symbols used in the RepoRover application."""
+
+    ERROR = ""
+    CHECK = "󰄬"
