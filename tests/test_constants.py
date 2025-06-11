@@ -8,6 +8,7 @@ from reporover.constants import (
     Data,
     GitHubAccessLevel,
     GitHubPullRequestNumber,
+    GitHubRepositoryDetails,
     PullRequestMessages,
     StatusCode,
 )
@@ -53,6 +54,23 @@ def test_github_access_level_members():
     """Test that GitHubAccessLevel enum has exactly the expected members."""
     expected_members = {"READ", "TRIAGE", "WRITE", "MAINTAIN", "ADMIN"}
     actual_members = {member.name for member in GitHubAccessLevel}
+    assert actual_members == expected_members
+
+
+def test_github_repositority_details_is_enum():
+    """Test that GitHubRepositoryDetails is an Enum class."""
+    assert issubclass(GitHubRepositoryDetails, Enum)
+
+
+def test_github_repository_details_values():
+    """Test that GitHubRepositoryDetails has the correct values."""
+    assert GitHubRepositoryDetails.BRANCH_DEFAULT.value == "main"
+
+
+def test_github_repository_details_members():
+    """Test that GitHubRepositoryDetails enum has exactly the expected members."""
+    expected_members = {"BRANCH_DEFAULT"}
+    actual_members = {member.name for member in GitHubRepositoryDetails}
     assert actual_members == expected_members
 
 
