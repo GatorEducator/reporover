@@ -9,9 +9,7 @@ from git import Repo
 from git.exc import GitCommandError
 from rich.progress import Progress
 
-from reporover.constants import (
-    StatusCode,
-)
+from reporover.constants import GitHubRepositoryDetails, StatusCode
 from reporover.util import print_json_string
 
 
@@ -27,9 +25,11 @@ def commit_files_to_repo(  # noqa: PLR0913
     progress: Progress,
 ) -> StatusCode:
     """Commit files to a GitHub repository."""
+    # extract the organization name from the URL
     organization_name = github_organization_url.split("github.com/")[1].split(
         "/"
     )[0]
+    # build the full repository name and the full name for the API
     full_repository_name = f"{repo_prefix}-{username}"
     full_name_for_api = f"{organization_name}/{full_repository_name}"
     api_url = f"https://api.github.com/repos/{full_name_for_api}/contents/"
@@ -37,7 +37,10 @@ def commit_files_to_repo(  # noqa: PLR0913
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
+    # iteratively attempt to commit each file
     for file_path in files:
+        # ensure the file path is relative to the directory
+        # and attempt to create the file content if possible
         try:
             file_content = (directory / file_path).read_bytes()
         except (FileNotFoundError, PermissionError, OSError) as e:
@@ -46,28 +49,34 @@ def commit_files_to_repo(  # noqa: PLR0913
                 f"  Diagnostic: {e!s}"
             )
             return StatusCode.FAILURE
+        # encode the file content to base64 and prepare the destination path
         encoded_content = base64.b64encode(file_content).decode()
         destination_path = destination_directory / file_path.name
         get_response = requests.get(
             api_url + destination_path.as_posix(), headers=headers
         )
+        # the commit data will differ based on whether the file already exists
+        # in the repository or not; if it exists, we need to provide the SHA
+        # to update the file, otherwise we can just create it as a new file
         if get_response.status_code == StatusCode.WORKING.value:
             sha = get_response.json()["sha"]
             data = {
                 "message": commit_message,
                 "content": encoded_content,
-                "branch": "main",
+                "branch": GitHubRepositoryDetails.BRANCH_DEFAULT.value,
                 "sha": sha,
             }
         else:
             data = {
                 "message": commit_message,
                 "content": encoded_content,
-                "branch": "main",
+                "branch": GitHubRepositoryDetails.BRANCH_DEFAULT.value,
             }
         response = requests.put(
             api_url + destination_path.as_posix(), headers=headers, json=data
         )
+        # the commit worked if the status code is either 200 (OK)
+        # or 201 (Created); otherwise, it failed
         if response.status_code in [
             StatusCode.WORKING.value,
             StatusCode.CREATED.value,
