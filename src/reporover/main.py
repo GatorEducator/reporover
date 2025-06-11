@@ -482,20 +482,20 @@ def clone(  # noqa: PLR0913
 
 @app.command()
 def search(  # noqa: PLR0913
-    repo_name_fragment: str = typer.Argument(
-        ...,
-        help="Fragment of repository name to search for (supports wildcards like '*')",
-    ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
-    file_patterns: List[str] = typer.Argument(
-        ..., help="File patterns to search for with wildcard support wildcards"
+    repo_name: str = typer.Argument(
+        None,
+        help="(Partial) name of GitHub repository (None for all repositories)",
     ),
     github_org_url: str = typer.Option(
-        "",
-        help="URL of GitHub organization (empty string searches all GitHub)",
+        None,
+        help="URL of GitHub organization (None searches all GitHub)",
+    ),
+    file_pattern: List[str] = typer.Option(
+        None, help="File pattern to search for with wildcard support"
     ),
     match_all: bool = typer.Option(
-        False, help="Require all patterns to match (default: any pattern)"
+        False, help="Require all file patterns to match (default: any file pattern)"
     ),
     max_repos_to_search: int = typer.Option(
         100, help="Maximum number of matching repositories to search"
@@ -507,7 +507,7 @@ def search(  # noqa: PLR0913
         2,
         help="Maximum directory depth to search in directories (default: root is 0)",
     ),
-    language: Optional[str] = typer.Option(
+    programming_language: Optional[str] = typer.Option(
         None,
         help="Filter repositories by specified programming language",
     ),
@@ -526,18 +526,23 @@ def search(  # noqa: PLR0913
             ":sparkles: Searching across all public GitHub repositories"
         )
     console.print()
+    # display additional details about the search parameters
+    console.print(":tada: Details about the search parameters:\n")
     # --> Repository name fragment
-    console.print(
-        f"- Looking for repositories with name fragment: '{repo_name_fragment}'"
-    )
+    if repo_name:
+        console.print(
+            f"- Looking for repositories with name fragment: '{repo_name}'"
+        )
+    else:
+        console.print("- Accepting all repositories regardless of name")
     # --> File patterns and how they will be matched
     if match_all:
         console.print(
-            f"- Requiring all of these patterns to match: {', '.join(file_patterns)}"
+            f"- Requiring all of these patterns to match: '{', '.join(file_pattern)}'"
         )
     else:
         console.print(
-            f"- Looking for any of these patterns to match: {', '.join(file_patterns)}"
+            f"- Looking for any of these patterns to match: '{', '.join(file_pattern)}'"
         )
     # --> Limiting search results, note that this controls
     # the amount of pagination that is done with the GitHub API
@@ -564,21 +569,20 @@ def search(  # noqa: PLR0913
     with Progress(
         "[progress.description]{task.description}",
         BarColumn(),
-        "[progress.percentage]{task.percentage:>3.0f}%",
-        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+        TextColumn("[progress.completed]{task.completed}"),
     ) as progress:
         # search repositories for the specified file patterns
         search_status_code = search_repositories_for_files(
             github_org_url,
-            repo_name_fragment,
+            repo_name,
             token,
-            file_patterns,
+            file_pattern,
             progress,
-            match_all,
             max_repos_to_search,
             max_matching_repos,
             max_directory_depth,
-            language,
+            match_all,
+            programming_language,
         )
         # complete the progress bar
         # progress.advance(task)
