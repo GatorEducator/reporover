@@ -488,33 +488,36 @@ def search(  # noqa: PLR0913
     ),
     token: str = typer.Argument(..., help="GitHub token for authentication"),
     file_patterns: List[str] = typer.Argument(
-        ..., help="File patterns to search for (supports wildcards)"
+        ..., help="File patterns to search for with wildcard support wildcards"
     ),
     github_org_url: str = typer.Option(
         "",
-        help="URL of GitHub organization (leave empty to search all GitHub)",
+        help="URL of GitHub organization (empty string searches all GitHub)",
     ),
     match_all: bool = typer.Option(
         False, help="Require all patterns to match (default: any pattern)"
     ),
     max_repos_to_search: int = typer.Option(
-        100, help="Maximum number of repositories to search"
+        100, help="Maximum number of matching repositories to search"
     ),
     max_matching_repos: int = typer.Option(
         100, help="Maximum number of matching repositories to return"
     ),
     max_directory_depth: int = typer.Option(
         2,
-        help="Maximum depth to search in repository directories (0=root only, 1=1 level deep, etc.)",
+           help="Maximum directory depth to search in directories (default: root is 0)",
     ),
     language: Optional[str] = typer.Option(
         None,
-        help="Filter repositories by programming language (e.g., 'Python', 'JavaScript', 'Java')",
+        help="Filter repositories by specified programming language",
     ),
 ):
     """Search GitHub repositories for files matching specified patterns."""
     # display the welcome message
     display_welcome_message()
+    # display diagnostic information about configuration parameters
+    console.print()
+    # --> Github organization URL
     if github_org_url:
         console.print(
             f":sparkles: Searching repositories in this GitHub organization: {github_org_url}"
@@ -523,29 +526,38 @@ def search(  # noqa: PLR0913
         console.print(
             ":sparkles: Searching across all public GitHub repositories"
         )
+    # --> Repository name fragment
     console.print(
-        f"Looking for repositories with name fragment: {repo_name_fragment}"
+        f":sparkles: Looking for repositories with name fragment: {repo_name_fragment}"
     )
+    # --> File patterns and how they will be matched
     if match_all:
         console.print(
-            f"Requiring ALL patterns to match: {', '.join(file_patterns)}"
+            f":sparkles: Requiring all of these patterns to match: {', '.join(file_patterns)}"
         )
     else:
         console.print(
-            f"Looking for ANY of these patterns: {', '.join(file_patterns)}"
+            f":sparkles: Looking for any of these patterns to match: {', '.join(file_patterns)}"
         )
+    # --> Limiting search results, note that this controls
+    # the amount of pagination that is done with the GitHub API
     if max_repos_to_search:
         console.print(
-            f"Limiting search to first {max_repos_to_search} repositories"
+            f":sparkles: Limiting search to first {max_repos_to_search} repositories"
         )
+    # --> Limiting the number of matching repositories that
+    # are returned and/or saved to a file
     if max_matching_repos:
         console.print(
-            f"Returning at most {max_matching_repos} matching repositories"
+            f":sparkles: Returning at most {max_matching_repos} matching repositories"
         )
+    # --> Limiting the directory depth that controls how many
+    # directories deep the files will be searched for matching the pattern
     if max_directory_depth >= 0:
         console.print(
-            f"Limiting directory search depth to {max_directory_depth} levels"
+            f":sparkles: Limiting directory search depth to {max_directory_depth} levels"
         )
+        console.print("Note: root directory is considered level 0")
     console.print()
     # create a progress bar
     with Progress(
