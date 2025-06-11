@@ -543,7 +543,7 @@ def search(  # noqa: PLR0913
     # the amount of pagination that is done with the GitHub API
     if max_repos_to_search:
         console.print(
-            f"- Limiting search to first {max_repos_to_search} repositories"
+            f"- Limiting search to the first {max_repos_to_search} repositories"
         )
     # --> Limiting the number of matching repositories that
     # are returned and/or saved to a file
@@ -567,9 +567,6 @@ def search(  # noqa: PLR0913
         "[progress.percentage]{task.percentage:>3.0f}%",
         TextColumn("[progress.completed]{task.completed}/{task.total}"),
     ) as progress:
-        _ = progress.add_task(
-            "[green]Searching Repositories", total=max_repos_to_search
-        )
         # search repositories for the specified file patterns
         search_status_code = search_repositories_for_files(
             github_org_url,
