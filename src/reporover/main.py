@@ -505,7 +505,7 @@ def search(  # noqa: PLR0913
     ),
     max_directory_depth: int = typer.Option(
         2,
-           help="Maximum directory depth to search in directories (default: root is 0)",
+        help="Maximum directory depth to search in directories (default: root is 0)",
     ),
     language: Optional[str] = typer.Option(
         None,
@@ -559,14 +559,17 @@ def search(  # noqa: PLR0913
         )
         console.print("  (Note: root directory is considered level 0)")
     console.print()
-    # create a progress bar
+    # create a progress bar that will start off the phases of the search
+    # and then be updated as the levels of the search progress
     with Progress(
         "[progress.description]{task.description}",
         BarColumn(),
         "[progress.percentage]{task.percentage:>3.0f}%",
         TextColumn("[progress.completed]{task.completed}/{task.total}"),
     ) as progress:
-        task = progress.add_task("[green]Searching Repositories", total=1)
+        _ = progress.add_task(
+            "[green]Searching Repositories", total=max_repos_to_search
+        )
         # search repositories for the specified file patterns
         search_status_code = search_repositories_for_files(
             github_org_url,
@@ -581,7 +584,7 @@ def search(  # noqa: PLR0913
             language,
         )
         # complete the progress bar
-        progress.advance(task)
+        # progress.advance(task)
     # if there was a failure then return a non-zero exit code
     # to indicate that the command did not complete successfully
     if search_status_code == StatusCode.FAILURE:
