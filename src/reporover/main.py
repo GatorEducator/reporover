@@ -516,7 +516,6 @@ def search(  # noqa: PLR0913
     # display the welcome message
     display_welcome_message()
     # display diagnostic information about configuration parameters
-    console.print()
     # --> Github organization URL
     if github_org_url:
         console.print(
@@ -526,38 +525,39 @@ def search(  # noqa: PLR0913
         console.print(
             ":sparkles: Searching across all public GitHub repositories"
         )
+    console.print()
     # --> Repository name fragment
     console.print(
-        f":sparkles: Looking for repositories with name fragment: {repo_name_fragment}"
+        f"- Looking for repositories with name fragment: '{repo_name_fragment}'"
     )
     # --> File patterns and how they will be matched
     if match_all:
         console.print(
-            f":sparkles: Requiring all of these patterns to match: {', '.join(file_patterns)}"
+            f"- Requiring all of these patterns to match: {', '.join(file_patterns)}"
         )
     else:
         console.print(
-            f":sparkles: Looking for any of these patterns to match: {', '.join(file_patterns)}"
+            f"- Looking for any of these patterns to match: {', '.join(file_patterns)}"
         )
     # --> Limiting search results, note that this controls
     # the amount of pagination that is done with the GitHub API
     if max_repos_to_search:
         console.print(
-            f":sparkles: Limiting search to first {max_repos_to_search} repositories"
+            f"- Limiting search to first {max_repos_to_search} repositories"
         )
     # --> Limiting the number of matching repositories that
     # are returned and/or saved to a file
     if max_matching_repos:
         console.print(
-            f":sparkles: Returning at most {max_matching_repos} matching repositories"
+            f"- Returning at most {max_matching_repos} matching repositories"
         )
     # --> Limiting the directory depth that controls how many
     # directories deep the files will be searched for matching the pattern
     if max_directory_depth >= 0:
         console.print(
-            f":sparkles: Limiting directory search depth to {max_directory_depth} levels"
+            f"- Limiting directory search depth to {max_directory_depth} levels"
         )
-        console.print("Note: root directory is considered level 0")
+        console.print("  (Note: root directory is considered level 0)")
     console.print()
     # create a progress bar
     with Progress(
