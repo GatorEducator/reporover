@@ -8,7 +8,19 @@ from rich.progress import Progress
 
 from reporover.constants import (
     StatusCode,
+    Symbols,
 )
+
+
+def matches_repo_pattern(repo_name: str, repo_name_fragment: str) -> bool:
+    """Check if repository name matches the fragment pattern (supports wildcards)."""
+    if not repo_name_fragment or repo_name_fragment == "*":
+        return True
+    # support wildcard matching
+    if "*" in repo_name_fragment or "?" in repo_name_fragment:
+        return fnmatch.fnmatch(repo_name.lower(), repo_name_fragment.lower())
+    # fallback to substring matching
+    return repo_name_fragment.lower() in repo_name.lower()
 
 
 def get_all_repositories(
@@ -19,49 +31,67 @@ def get_all_repositories(
     language: Optional[str] = None,
 ) -> List[dict]:
     """Get all repositories from an organization or search globally using pagination."""
+    task = progress.add_task("[green]Searching Repositories", total=max_repos)
+    # initialize the list to hold all repositories
     all_repositories = []
+    # start with the first page of results in the
+    # pagination system used by the GitHub API
     page = 1
+    # configure the parts of the API string for the
+    # GitHub API request that are not going to change
+    # based on the search parameters
     while True:
+        # search within specific organization
         if organization_name:
-            # search within specific organization
             repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
             if language:
                 repos_url += f"&language={language}"
+        # search all public repositories on GitHub
         else:
-            # search all public repositories on GitHub
             search_query = "is:public"
             if language:
                 search_query += f" language:{language}"
             repos_url = f"https://api.github.com/search/repositories?q={search_query}&per_page=100&page={page}"
-        progress.console.print(f"Debug: Making request to: {repos_url}")
         repos_response = requests.get(repos_url, headers=headers)
-        progress.console.print(
-            f"Debug: Response status code: {repos_response.status_code}"
-        )
         if repos_response.status_code != StatusCode.WORKING.value:
-            progress.console.print(f"Failed to fetch repositories page {page}")
+            progress.console.print(
+                f"{Symbols.ERROR.value} Failed to fetch page {page} of repositories"
+            )
             progress.console.print(f"Diagnostic: {repos_response.status_code}")
+            progress.stop_task(task)
             break
+        # extract and parse the JSON response data
         response_data = repos_response.json()
         if organization_name:
             repositories = response_data
         else:
             # for search API, repositories are in 'items' field
             repositories = response_data.get("items", [])
+        # there were no repositories from this round of the search
+        # and this means that the search is complete
         if not repositories:
+            progress.console.print(
+                f"{Symbols.CHECK.value} No further repositories on page {page}"
+            )
+            progress.stop_task(task)
             break
+        # add all of the repositories from this page to the list
+        # of all repositories found so far
         all_repositories.extend(repositories)
         progress.console.print(
-            f"Debug: Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}"
+            f"{Symbols.CHECK.value} Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}"
         )
         # check if we've reached the maximum number of repositories
         if max_repos and len(all_repositories) >= max_repos:
             all_repositories = all_repositories[:max_repos]
             progress.console.print(
-                f"Debug: Reached maximum repository limit of {max_repos}"
+                f"{Symbols.CHECK.value} Reached maximum repository limit of {max_repos}"
             )
             break
         page += 1
+        # indicate that we've completed a round of pagination, which
+        # is going to handle 100 items at a time
+        progress.advance(task, 100)
     return all_repositories
 
 
@@ -167,17 +197,6 @@ def check_patterns_match(
     return list(set(matched_files))
 
 
-def matches_repo_pattern(repo_name: str, repo_name_fragment: str) -> bool:
-    """Check if repository name matches the fragment pattern (supports wildcards)."""
-    if not repo_name_fragment or repo_name_fragment == "*":
-        return True
-    # support wildcard matching
-    if "*" in repo_name_fragment or "?" in repo_name_fragment:
-        return fnmatch.fnmatch(repo_name.lower(), repo_name_fragment.lower())
-    # fallback to substring matching
-    return repo_name_fragment.lower() in repo_name.lower()
-
-
 def search_repositories_for_files(  # noqa: PLR0912, PLR0913
     github_organization_url: str,
     repo_name_fragment: str,
@@ -192,7 +211,8 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
 ) -> StatusCode:
     """Search GitHub repositories for files matching specified patterns."""
     # extract the organization name from the GitHub organization URL
-    # if url is empty or just a placeholder, search globally
+    # if url is empty or just a placeholder of a wildcard (designated
+    # through the use of an asterisk), then search globally
     organization_name = None
     if (
         github_organization_url
@@ -216,8 +236,9 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
+    # attempt to complete the multiple-stage search process
     try:
-        # get all repositories from the organization using pagination
+        # --> STEP 1: get all repositories from the organization using pagination
         repositories = get_all_repositories(
             organization_name, headers, progress, max_repos_to_search, language
         )
