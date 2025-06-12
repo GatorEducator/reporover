@@ -23,36 +23,51 @@ def matches_repo_pattern(repo_name: str, repo_name_fragment: str) -> bool:
     return repo_name_fragment.lower() in repo_name.lower()
 
 
+def create_repository_url(
+    organization_name: Optional[str], language: Optional[str], page: int
+) -> str:
+    """Create the full URL for a GitHub repository."""
+    # search within specific organization
+    if organization_name:
+        repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
+        if language:
+            repos_url += f"&language={language}"
+    # search all public repositories on GitHub because
+    # of the fact that the organization name is not provided
+    else:
+        search_query = "is:public"
+        if language:
+            search_query += f" language:{language}"
+        repos_url = f"https://api.github.com/search/repositories?q={search_query}&per_page=100&page={page}"
+    # return the URL for a specific page of results
+    # to be requested from the GitHub API with pagination
+    return repos_url
+
+
 def get_all_repositories(
     organization_name: Optional[str],
     headers: dict,
     progress: Progress,
-    max_repos: int = 100,
+    max_repos: int,
     language: Optional[str] = None,
 ) -> List[dict]:
     """Get all repositories from an organization or search globally using pagination."""
-    task = progress.add_task("[green]Searching Repositories", total=max_repos)
+    task = progress.add_task("[green]Searching Repositories", total=None)
     # initialize the list to hold all repositories
     all_repositories = []
     # start with the first page of results in the
     # pagination system used by the GitHub API
     page = 1
-    # configure the parts of the API string for the
-    # GitHub API request that are not going to change
-    # based on the search parameters
+    # repeatedly query the GitHub API for repositories
+    # until one of the stop conditions is met
     while True:
-        # search within specific organization
-        if organization_name:
-            repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
-            if language:
-                repos_url += f"&language={language}"
-        # search all public repositories on GitHub
-        else:
-            search_query = "is:public"
-            if language:
-                search_query += f" language:{language}"
-            repos_url = f"https://api.github.com/search/repositories?q={search_query}&per_page=100&page={page}"
+        # define the URL for the GitHub API request
+        repos_url = create_repository_url(organization_name, language, page)
+        # run the query against the GitHub API
+        # and obtain the response
         repos_response = requests.get(repos_url, headers=headers)
+        # it was not possible to obtain the list of repositories
+        # and thus the overall iterative search is now completed
         if repos_response.status_code != StatusCode.WORKING.value:
             progress.console.print(
                 f"{Symbols.ERROR.value} Failed to fetch page {page} of repositories"
@@ -62,16 +77,20 @@ def get_all_repositories(
             break
         # extract and parse the JSON response data
         response_data = repos_response.json()
+        # there was an organization specified
+        # for the search and thus the list of
+        # repositories is the response data itself
         if organization_name:
             repositories = response_data
+        # for the GitHub search API, the chosen repositories are
+        # in 'items' field, which is what we want for the next step
         else:
-            # for search API, repositories are in 'items' field
             repositories = response_data.get("items", [])
         # there were no repositories from this round of the search
         # and this means that the search is complete
         if not repositories:
             progress.console.print(
-                f"{Symbols.CHECK.value} No further repositories on page {page}"
+                f"{Symbols.CHECK.value} Did not find further repositories on page {page}"
             )
             progress.stop_task(task)
             break
@@ -79,7 +98,7 @@ def get_all_repositories(
         # of all repositories found so far
         all_repositories.extend(repositories)
         progress.console.print(
-            f"{Symbols.CHECK.value} Found {len(repositories)} repos on page {page}, total so far: {len(all_repositories)}"
+            f"{Symbols.CHECK.value} Found {len(repositories):3} repos on page {page}, total so far: {len(all_repositories)}"
         )
         # check if we've reached the maximum number of repositories
         if max_repos and len(all_repositories) >= max_repos:
@@ -88,6 +107,7 @@ def get_all_repositories(
                 f"{Symbols.CHECK.value} Reached maximum repository limit of {max_repos}"
             )
             break
+        # go to the next page in the paginated list of GitHub repositories
         page += 1
         # indicate that we've completed a round of pagination, which
         # is going to handle 100 items at a time
@@ -197,46 +217,35 @@ def check_patterns_match(
     return list(set(matched_files))
 
 
-def search_repositories_for_files(  # noqa: PLR0912, PLR0913
+def search_repositories_for_files(  # noqa: PLR0913
     github_organization_url: str,
     repo_name_fragment: str,
     token: str,
     file_patterns: List[str],
     progress: Progress,
+    max_repos_to_search: int,
+    max_matching_repos: int,
+    max_directory_depth: int,
     match_all: bool = False,
-    max_repos_to_search: int = 100,
-    max_matching_repos: int = 100,
-    max_directory_depth: int = 2,
     language: Optional[str] = None,
 ) -> StatusCode:
     """Search GitHub repositories for files matching specified patterns."""
     # extract the organization name from the GitHub organization URL
-    # if url is empty or just a placeholder of a wildcard (designated
-    # through the use of an asterisk), then search globally
+    # if url is the empty string, then search globally
     organization_name = None
     if (
         github_organization_url
         and github_organization_url.strip()
-        and github_organization_url != "*"
+        and github_organization_url != ""
     ):
         organization_name = github_organization_url.rstrip("/").split("/")[-1]
-        progress.console.print(
-            f"Debug: Organization name extracted: {organization_name}"
-        )
-    else:
-        progress.console.print(
-            "Debug: Searching across all GitHub repositories (no organization specified)"
-        )
-    if language:
-        progress.console.print(
-            f"Debug: Filtering repositories by language: {language}"
-        )
     # set up headers for GitHub API requests
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    # attempt to complete the multiple-stage search process
+    # attempt to complete the multiple-stage search process by running
+    # both queries against the GitHub API and then searches in the results
     try:
         # --> STEP 1: get all repositories from the organization using pagination
         repositories = get_all_repositories(
@@ -245,11 +254,6 @@ def search_repositories_for_files(  # noqa: PLR0912, PLR0913
         progress.console.print(
             f"Debug: Total repositories found: {len(repositories)}"
         )
-        # print first few repository names for debugging
-        if repositories:
-            progress.console.print("Debug: First few repository names:")
-            for i, repo in enumerate(repositories[:5]):
-                progress.console.print(f"  {i + 1}. {repo['name']}")
         # filter repositories by name fragment (supports wildcards)
         matching_repos = [
             repo
