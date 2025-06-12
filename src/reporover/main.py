@@ -508,7 +508,7 @@ def search(  # noqa: PLR0913
         2,
         help="Maximum directory depth to search in directories (root is 0)",
     ),
-    programming_language: Optional[List[str]] = typer.Option(
+    programming_language: Optional[str] = typer.Option(
         None,
         help="Filter repositories by specified programming language",
     ),
