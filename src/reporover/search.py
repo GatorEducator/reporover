@@ -1,7 +1,7 @@
 """Search GitHub repositories for files matching specified patterns."""
 
 import fnmatch
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 from rich.progress import Progress
@@ -50,7 +50,7 @@ def get_all_repositories(
     progress: Progress,
     max_repos: int,
     language: Optional[str] = None,
-) -> List[dict]:
+) -> List[Dict[str, Any]]:
     """Get all repositories from an organization or search globally using pagination."""
     task = progress.add_task("[green]Searching Repositories", total=None)
     # initialize the list to hold all repositories
