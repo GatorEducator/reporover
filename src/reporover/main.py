@@ -495,7 +495,8 @@ def search(  # noqa: PLR0913
         None, help="File pattern to search for with wildcard support"
     ),
     match_all: bool = typer.Option(
-        False, help="Require all file patterns to match (default: any file pattern)"
+        False,
+        help="Require all file patterns to match (default: any file pattern)",
     ),
     max_repos_to_search: int = typer.Option(
         100, help="Maximum number of matching repositories to search"
@@ -534,7 +535,9 @@ def search(  # noqa: PLR0913
             f"- Looking for repositories with name fragment: '{repo_name}'"
         )
     else:
-        console.print("- Accepting all repositories regardless of their having a matching name")
+        console.print(
+            "- Accepting all repositories regardless of their having a matching name"
+        )
     # --> File patterns and how they will be matched to control whether
     # or not a repository is considered a match for the search
     if file_pattern:
@@ -547,7 +550,9 @@ def search(  # noqa: PLR0913
                 f"- Requiring a repository to contain a file name matching all patterns: '{', '.join(file_pattern)}'"
             )
     else:
-        console.print("- Accepting all repositories regardless of containing files with matching names")
+        console.print(
+            "- Accepting all repositories regardless of containing files with matching names"
+        )
     # --> Limiting search results, note that this controls
     # the amount of pagination that is done with the GitHub API
     if max_repos_to_search:
