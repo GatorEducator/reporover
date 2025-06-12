@@ -30,8 +30,6 @@ def create_repository_url(
     # search within specific organization
     if organization_name:
         repos_url = f"https://api.github.com/orgs/{organization_name}/repos?per_page=100&page={page}"
-        if language:
-            repos_url += f"&language={language}"
     # search all public repositories on GitHub because
     # of the fact that the organization name is not provided
     else:
