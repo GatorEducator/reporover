@@ -534,16 +534,20 @@ def search(  # noqa: PLR0913
             f"- Looking for repositories with name fragment: '{repo_name}'"
         )
     else:
-        console.print("- Accepting all repositories regardless of name")
-    # --> File patterns and how they will be matched
-    if match_all:
-        console.print(
-            f"- Requiring all of these patterns to match: '{', '.join(file_pattern)}'"
-        )
+        console.print("- Accepting all repositories regardless of their having a matching name")
+    # --> File patterns and how they will be matched to control whether
+    # or not a repository is considered a match for the search
+    if file_pattern:
+        if match_all:
+            console.print(
+                f"- Requiring a repository to contain a file name matching all patterns: '{', '.join(file_pattern)}'"
+            )
+        else:
+            console.print(
+                f"- Requiring a repository to contain a file name matching all patterns: '{', '.join(file_pattern)}'"
+            )
     else:
-        console.print(
-            f"- Looking for any of these patterns to match: '{', '.join(file_pattern)}'"
-        )
+        console.print("- Accepting all repositories regardless of containing files with matching names")
     # --> Limiting search results, note that this controls
     # the amount of pagination that is done with the GitHub API
     if max_repos_to_search:
