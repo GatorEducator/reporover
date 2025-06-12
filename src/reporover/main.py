@@ -593,8 +593,6 @@ def search(  # noqa: PLR0913
             match_all,
             programming_language,
         )
-        # complete the progress bar
-        # progress.advance(task)
     # if there was a failure then return a non-zero exit code
     # to indicate that the command did not complete successfully
     if search_status_code == StatusCode.FAILURE:
