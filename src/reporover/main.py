@@ -483,9 +483,9 @@ def clone(  # noqa: PLR0913
 @app.command()
 def search(  # noqa: PLR0913
     token: str = typer.Argument(..., help="GitHub token for authentication"),
-    repo_name: str = typer.Argument(
+    repo_name: str = typer.Option(
         None,
-        help="(Partial) name of GitHub repository (None for all repositories)",
+        help="Name of GitHub repository (Partial okay, None for all repositories)",
     ),
     github_org_url: str = typer.Option(
         None,
@@ -506,9 +506,9 @@ def search(  # noqa: PLR0913
     ),
     max_directory_depth: int = typer.Option(
         2,
-        help="Maximum directory depth to search in directories (default: root is 0)",
+        help="Maximum directory depth to search in directories (root is 0)",
     ),
-    programming_language: Optional[str] = typer.Option(
+    programming_language: Optional[List[str]] = typer.Option(
         None,
         help="Filter repositories by specified programming language",
     ),
