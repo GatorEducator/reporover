@@ -1,6 +1,6 @@
 [project]
 name = "reporover"
-version = "0.1.0"
+version = "0.1.1"
 description = "RepoRover manages and analyzes remote GitHub repositories! Arf!"
 readme = "README.md"
 authors = [
