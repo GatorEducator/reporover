@@ -175,7 +175,6 @@ Arguments:
 Options:
 --username            TEXT                                One or more usernames' accounts to modify [default: None]
 --pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
---access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
 --help                                                    Show this message and exit.
 ```
 
