@@ -37,7 +37,7 @@ repositories, RepoRover is here to make your life easier and more fun!
 
 ## :smile: Perspectives
 
-- RepoRover is a tool that automatically manages and analyzes multiple GitHub
+RepoRover is a tool that automatically manages and analyzes multiple GitHub
 repositories within a GitHub organization. Here are three different perspectives
 that people may have about the tool!
 
