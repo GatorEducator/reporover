@@ -39,13 +39,16 @@ repositories, RepoRover is here to make your life easier and more fun!
 
 - RepoRover is a tool that automatically manages and analyzes multiple GitHub
 repositories within a GitHub organization. Here are three different perspectives
-that people may have about the tool! - **Student perspective**: "I'm glad RepoRover made it easy for me to
-quickly receive feedback on my project repositories from GitHub Classroom." - **Instructor perspective**: "RepoRover
-makes it much easier for me to
-oversee my students' repositories, manage access levels, and leave feedback
-on their pull requests." - **Developer perspective**: "Since RepoRover uses `uv` to manage its
-development, I found that it is very easy to add features, saving me a lot
-of time and effort."
+that people may have about the tool!
+
+- **Student perspective**: "I'm glad RepoRover made it easy for me to quickly
+receive feedback on my project repositories from GitHub Classroom."
+- **Instructor perspective**: "RepoRover makes it much easier for me to oversee
+my students' repositories, manage access levels, and leave feedback on their
+pull requests."
+- **Developer perspective**: "Since RepoRover uses `uv` to manage its
+development, I found that it is very easy to add features, saving me a lot of
+time and effort."
 
 ## :rocket: Motivation
 
