@@ -31,6 +31,15 @@ def progress():
     return progress
 
 
+@pytest.fixture
+def temp_usernames_file(tmp_path):
+    """Create a temporary JSON file with test usernames."""
+    usernames_data = ["gkapfham", "student1", "student2", "student3"]
+    usernames_file = tmp_path / "github_usernames_test.json"
+    usernames_file.write_text(str(usernames_data).replace("'", '"'))
+    return usernames_file
+
+
 def test_cli_provides_help_no_error():
     """Ensure that the CLI interface is working as expected when run with --help."""
     result = runner.invoke(app, ["--help"])
