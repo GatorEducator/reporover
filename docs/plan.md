@@ -1,5 +1,25 @@
 # RepoRover Plan
 
+## Documentation Requirements
+
+All documentation should follow these standards:
+
+- README files should use clear section headers with emoji prefixes for visual organization.
+- Code examples in documentation should be complete and runnable.
+- All command-line examples should include the `$` prompt prefix to indicate terminal commands.
+- Documentation should specify exact file paths when referencing project files.
+- All URLs in documentation should be complete and functional.
+
+## Structure Requirements
+
+The project should maintain this structure:
+
+- Source code should be in `src/reporover/` directory.
+- Tests should be in `tests/` directory with matching structure to source.
+- Documentation should be in `docs/` directory.
+- Configuration files should be in the project root.
+- GitHub Actions workflows should be in `.github/workflows/` directory.
+
 ## Infrastructure Requirements
 
 - Use `uv` for managing the dependencies, virtual environments, and task running
@@ -28,5 +48,5 @@ requirements above.
 - Test cases should be ordered in a way that makes sense to the reader.
 - Test cases should be independent of each other so that they can be
 run in a random order without affecting the results or each other.
-- Test cases must work both on a local machine and in a CI environment, 
+- Test cases must work both on a local machine and in a CI environment,
 meaning that they should work on a laptop and in GitHub Actions.
