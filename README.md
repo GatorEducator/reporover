@@ -171,7 +171,7 @@ Arguments:
 * token TEXT GitHub token for authentication [default: None] [required]
 
 Options:
---username TEXT One or more usernames' accounts to modify [default: None]
+--username TEXT One or more usernames accounts to modify [default: None]
 --pr-number INTEGER Pull request number in GitHub repository [default: 1]
 --help Show this message and exit.
 ```
@@ -208,7 +208,7 @@ Arguments:
 * destination_directory PATH Local directory to clone repositories into [default: None] [required]
 
 Options:
---username TEXT One or more usernames' accounts to clone [default: None]
+--username TEXT One or more usernames accounts to clone [default: None]
 --help Show this message and exit.
 ```
 
@@ -249,7 +249,7 @@ Arguments:
 * destination_directory PATH Destination directory inside the GitHub repository [default: None] [required]
 
 Options:
---username TEXT One or more usernames' accounts to modify [default: None]
+--username TEXT One or more usernames accounts to modify [default: None]
 --help Show this message and exit.
 ```
 
@@ -286,7 +286,7 @@ Arguments:
 * token TEXT GitHub token for authentication [default: None] [required]
 
 Options:
---username TEXT One or more usernames' accounts to modify [default: None]
+--username TEXT One or more usernames accounts to modify [default: None]
 --pr-number INTEGER Pull request number in GitHub repository [default: 1]
 --pr-message TEXT Pull request number in GitHub repository
 --access-level [read|triage|write|maintain|admin] The access level for user [default: read]
