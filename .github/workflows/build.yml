@@ -101,3 +101,18 @@ jobs:
             echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
             CURRENT_GITHUB_STEP_SUMMARY="\`\`\`\n$(cat coverage.txt)\n\`\`\`"
             echo "$CURRENT_GITHUB_STEP_SUMMARY" >> $GITHUB_STEP_SUMMARY
+        # Generate the coverage badge
+        # Important: only report the monitored test coverage on Linux
+        - name: Display Collected Test Coverage - Linux Only
+          if: always() && matrix.os == 'ubuntu-latest'
+          uses: tj-actions/coverage-badge-py@v2
+          with:
+            output: coverage.svg
+        # Upload the coverage badge
+        # Important: only report the monitored test coverage on Linux
+        - name: Upload badge
+          if: always() && matrix.os == 'ubuntu-latest'
+          uses: actions/upload-artifact@v4
+          with:
+            name: coverage-badge
+            path: coverage.svg
