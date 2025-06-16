@@ -2,7 +2,7 @@
 name = "reporover"
 version = "0.1.1"
 description = "RepoRover manages and analyzes remote GitHub repositories! Arf!"
-readme = "README.md"
+readme = "README_PYPI.md"
 authors = [
     { name = "Gregory M. Kapfhammer", email = "gkapfham@allegheny.edu" }
 ]
