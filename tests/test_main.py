@@ -34,9 +34,13 @@ def progress():
 @pytest.fixture
 def temp_usernames_file(tmp_path):
     """Create a temporary JSON file with test usernames."""
-    usernames_data = ["gkapfham", "student1", "student2", "student3"]
+    import json
+
+    usernames_data = {
+        "usernames": ["gkapfham", "student1", "student2", "student3"]
+    }
     usernames_file = tmp_path / "github_usernames_test.json"
-    usernames_file.write_text(str(usernames_data).replace("'", '"'))
+    usernames_file.write_text(json.dumps(usernames_data))
     return usernames_file
 
 
@@ -132,7 +136,9 @@ def test_modify_user_access_failure(progress, capsys):
     assert "documentation_url" in captured.out
 
 
-def test_cli_access_command_with_all_parameters_success_read():
+def test_cli_access_command_with_all_parameters_success_read(
+    temp_usernames_file,
+):
     """Test the access command with all parameters provided for success case."""
     # mock the functions called by the CLI
     with (
@@ -148,7 +154,7 @@ def test_cli_access_command_with_all_parameters_success_read():
                 "access",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "--username",
                 "gkapfham",
