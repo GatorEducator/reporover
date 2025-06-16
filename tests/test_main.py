@@ -445,7 +445,7 @@ def test_cli_status_command_with_all_parameters_failure(temp_usernames_file):
         mock_get_status.assert_called()
 
 
-def test_cli_status_command_multiple_usernames_success():
+def test_cli_status_command_multiple_usernames_success(temp_usernames_file):
     """Test the status command with multiple usernames for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.get_github_actions_status") as mock_get_status:
@@ -458,7 +458,7 @@ def test_cli_status_command_multiple_usernames_success():
                 "status",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "--username",
                 "gkapfham",
@@ -472,7 +472,7 @@ def test_cli_status_command_multiple_usernames_success():
         assert mock_get_status.call_count >= 1
 
 
-def test_cli_status_command_mixed_success_failure():
+def test_cli_status_command_mixed_success_failure(temp_usernames_file):
     """Test the status command with mixed success and failure results."""
     # mock the functions called by the CLI
     with (
@@ -491,7 +491,7 @@ def test_cli_status_command_mixed_success_failure():
                 "status",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "--username",
                 "gkapfham",
@@ -504,7 +504,7 @@ def test_cli_status_command_mixed_success_failure():
         # verify the mocked function was called multiple times
 
 
-def test_cli_commit_command_with_all_parameters_success():
+def test_cli_commit_command_with_all_parameters_success(temp_usernames_file):
     """Test the commit command with all parameters provided for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.commit_files_to_repo") as mock_commit_files:
@@ -517,7 +517,7 @@ def test_cli_commit_command_with_all_parameters_success():
                 "commit",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/source",
                 "test.py",
