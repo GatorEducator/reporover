@@ -173,7 +173,9 @@ def test_cli_access_command_with_all_parameters_success_read(
         mock_leave_pr.assert_called()
 
 
-def test_cli_access_command_with_all_parameters_success_write():
+def test_cli_access_command_with_all_parameters_success_write(
+    temp_usernames_file,
+):
     """Test the access command with all parameters provided for success case."""
     # mock the functions called by the CLI
     with (
@@ -189,7 +191,7 @@ def test_cli_access_command_with_all_parameters_success_write():
                 "access",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "--username",
                 "gkapfham",
@@ -208,7 +210,7 @@ def test_cli_access_command_with_all_parameters_success_write():
         mock_leave_pr.assert_called()
 
 
-def test_cli_access_command_with_all_parameters_failure():
+def test_cli_access_command_with_all_parameters_failure(temp_usernames_file):
     """Test the access command with all parameters provided for failure case."""
     # mock the functions called by the CLI
     with (
@@ -224,7 +226,7 @@ def test_cli_access_command_with_all_parameters_failure():
                 "access",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "--username",
                 "gkapfham",
@@ -244,7 +246,7 @@ def test_cli_access_command_with_all_parameters_failure():
         mock_leave_pr.assert_called()
 
 
-def test_cli_comment_command_with_all_parameters_success():
+def test_cli_comment_command_with_all_parameters_success(temp_usernames_file):
     """Test the comment command with all parameters provided for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.leave_pr_comment") as mock_leave_pr:
@@ -257,7 +259,7 @@ def test_cli_comment_command_with_all_parameters_success():
                 "comment",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "Questions? Please check the course web site at: https://www.algorithmology.org for more details or visit https://www.gregorykapfhammer.com/schedule/ to schedule an office hours appointment with the course instructor.",
                 "github_access_token_fake_1234",
                 "--username",
