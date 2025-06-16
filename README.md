@@ -1,5 +1,6 @@
 <p align="center">
-    <img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="RepoRover Logo" title="RepoRover Logo" />
+  <img src="https://github.com/GatorEducator/reporover/blob/main/.github/images/reporover-logo.svg" alt="RepoRover Logo"
+    title="RepoRover Logo" />
 </p>
 
 # RepoRover
@@ -13,17 +14,17 @@
 
 <!---toc start-->
 
-* [:robot: Introduction](#robot-introduction)
-* [:smile: Perspectives](#smile-perspectives)
-* [:rocket: Motivation](#rocket-motivation)
-* [:package: Installation and Configuration](#package-installation-and-configuration)
-  * [:wrench: Prerequisites](#wrench-prerequisites)
-  * [:inbox_tray: Installation](#inbox_tray-installation)
-* [:dog: Running RepoRover](#dog-running-reporover)
-  * [:key: Access Command](#key-access-command)
-  * [:bulb: Comment Command](#speech_balloon-comment-command)
-  * [:bar_chart: Status Command](#bar_chart-status-command)
-* [:handshake: Contributing](#handshake-contributing)
+- [:robot: Introduction](#robot-introduction)
+- [:smile: Perspectives](#smile-perspectives)
+- [:rocket: Motivation](#rocket-motivation)
+- [:package: Installation and Configuration](#package-installation-and-configuration)
+- [:wrench: Prerequisites](#wrench-prerequisites)
+- [:inbox_tray: Installation](#inbox_tray-installation)
+- [:dog: Running RepoRover](#dog-running-reporover)
+- [:key: Access Command](#key-access-command)
+- [:bulb: Comment Command](#speech_balloon-comment-command)
+- [:bar_chart: Status Command](#bar_chart-status-command)
+- [:handshake: Contributing](#handshake-contributing)
 
 <!---toc end-->
 
@@ -32,21 +33,19 @@
 RepoRover is your command-line companion for managing and analyzing multiple
 GitHub repositories at once! Whether you're an instructor managing student
 repositories on GitHub Classroom or a developer handling multiple project
-repositories, RepoRover is here to make your life easier and more fun! 
+repositories, RepoRover is here to make your life easier and more fun!
 
 ## :smile: Perspectives
 
 - RepoRover is a tool that automatically manages and analyzes multiple GitHub
 repositories within a GitHub organization. Here are three different perspectives
-that people may have about the tool!
-    - **Student perspective**: "I'm glad RepoRover made it easy for me to
-    quickly receive feedback on my project repositories from GitHub Classroom."
-    - **Instructor perspective**: "RepoRover makes it much easier for me to
-    oversee my students' repositories, manage access levels, and leave feedback
-    on their pull requests."
-    - **Developer perspective**: "Since RepoRover uses `uv` to manage its
-    development, I found that it is very easy to add features, saving me a lot
-    of time and effort."
+that people may have about the tool! - **Student perspective**: "I'm glad RepoRover made it easy for me to
+quickly receive feedback on my project repositories from GitHub Classroom." - **Instructor perspective**: "RepoRover
+makes it much easier for me to
+oversee my students' repositories, manage access levels, and leave feedback
+on their pull requests." - **Developer perspective**: "Since RepoRover uses `uv` to manage its
+development, I found that it is very easy to add features, saving me a lot
+of time and effort."
 
 ## :rocket: Motivation
 
@@ -114,17 +113,17 @@ users, providing the following arguments and options:
 Usage: reporover access [OPTIONS] github_org_url repo_prefix usernames_file token
 
 Arguments:
-*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
-*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
-*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
-*    token               TEXT  GitHub token for authentication [default: None] [required]
+* github_org_url TEXT URL of GitHub organization [default: None] [required]
+* repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+* usernames_file PATH Path to JSON file with usernames [default: None] [required]
+* token TEXT GitHub token for authentication [default: None] [required]
 
 Options:
---username            TEXT                                One or more usernames' accounts to modify [default: None]
---pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
---pr-message          TEXT                                Pull request number in GitHub repository
---access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
---help                                                    Show this message and exit.
+--username TEXT One or more usernames' accounts to modify [default: None]
+--pr-number INTEGER Pull request number in GitHub repository [default: 1]
+--pr-message TEXT Pull request number in GitHub repository
+--access-level [read|triage|write|maintain|admin] The access level for user [default: read]
+--help Show this message and exit.
 ```
 
 Here is a concrete example that shows how to use the `reporover access` command.
@@ -147,11 +146,7 @@ instructor:
 
 ```json
 {
-  "usernames": [
-    "gkapfham",
-    "student1",
-    "student2",
-  ]
+"usernames": ["gkapfham", "student1", "student2"]
 }
 ```
 
@@ -166,16 +161,16 @@ you need to provide the following arguments and options:
 Usage: reporover comment [OPTIONS] github_org_url repo_prefix usernames_file pr_message token
 
 Arguments:
-*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
-*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
-*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
-*    pr_message          TEXT  Pull request message for GitHub repository [default: None] [required]
-*    token               TEXT  GitHub token for authentication [default: None] [required]
+* github_org_url TEXT URL of GitHub organization [default: None] [required]
+* repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+* usernames_file PATH Path to JSON file with usernames [default: None] [required]
+* pr_message TEXT Pull request message for GitHub repository [default: None] [required]
+* token TEXT GitHub token for authentication [default: None] [required]
 
 Options:
---username            TEXT                                One or more usernames' accounts to modify [default: None]
---pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
---help                                                    Show this message and exit.
+--username TEXT One or more usernames' accounts to modify [default: None]
+--pr-number INTEGER Pull request number in GitHub repository [default: 1]
+--help Show this message and exit.
 ```
 
 Here is a concrete example that shows how to use the `reporover comment`
@@ -203,15 +198,15 @@ provide the following arguments and options:
 Usage: reporover clone [OPTIONS] github_org_url repo_prefix usernames_file token destination_directory
 
 Arguments:
-*    github_org_url         TEXT  URL of GitHub organization [default: None] [required]
-*    repo_prefix            TEXT  Prefix for GitHub repository [default: None] [required]
-*    usernames_file         PATH  Path to JSON file with usernames [default: None] [required]
-*    token                  TEXT  GitHub token for authentication [default: None] [required]
-*    destination_directory  PATH  Local directory to clone repositories into [default: None] [required]
+* github_org_url TEXT URL of GitHub organization [default: None] [required]
+* repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+* usernames_file PATH Path to JSON file with usernames [default: None] [required]
+* token TEXT GitHub token for authentication [default: None] [required]
+* destination_directory PATH Local directory to clone repositories into [default: None] [required]
 
 Options:
---username            TEXT  One or more usernames' accounts to clone [default: None]
---help                      Show this message and exit.
+--username TEXT One or more usernames' accounts to clone [default: None]
+--help Show this message and exit.
 ```
 
 Here is a concrete example that shows how to use the `reporover clone` command:
@@ -228,6 +223,46 @@ download all student repositories for local review, grading, or analysis. The
 command respects the username filtering, so you can clone repositories for
 specific students or all students at once.
 
+### :hammer: Commit Command
+
+Need to commit one or more files to multiple GitHub repositories? The commit
+command allows you to add and commit files to repositories across your
+organization. You can type the command `reporover commit --help` to learn how to
+commit files to repositories. To run this command you need to provide the
+following arguments and options:
+
+```bash
+Usage: reporover commit [OPTIONS] github_org_url repo_prefix usernames_file token directory files commit_message
+destination_directory
+
+Arguments:
+* github_org_url TEXT URL of GitHub organization [default: None] [required]
+* repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+* usernames_file PATH Path to JSON file with usernames [default: None] [required]
+* token TEXT GitHub token for authentication [default: None] [required]
+* directory PATH Directory containing the file(s) to commit [default: None] [required]
+* files PATH File(s) to commit [default: None] [required]
+* commit_message TEXT Commit message for the files [default: None] [required]
+* destination_directory PATH Destination directory inside the GitHub repository [default: None] [required]
+
+Options:
+--username TEXT One or more usernames' accounts to modify [default: None]
+--help Show this message and exit.
+```
+
+Here is a concrete example that shows how to use the `reporover commit` command:
+
+```bash
+$ reporover commit https://github.com/my-org repo-prefix usernames.json \
+ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ /local/files test.py main.py \
+"Add new test files" src --username student1
+```
+
+This command will commit the specified files from your local directory to the
+destination directory in each matching repository. This sub-command of
+`reporover` is perfect using the command-line to distribute starter files,
+tests, or updates to all student repositories at once.
+
 ### :bar_chart: Status Command
 
 Curious about the GitHub Actions status for multiple repositories? RepoRover has
@@ -242,23 +277,23 @@ Usage: reporover status [OPTIONS] github_org_url repo_prefix usernames_file toke
 Get the GitHub Actions status for repositories.
 
 Arguments:
-*    github_org_url      TEXT  URL of GitHub organization [default: None] [required]
-*    repo_prefix         TEXT  Prefix for GitHub repository [default: None] [required]
-*    usernames_file      PATH  Path to JSON file with usernames [default: None] [required]
-*    token               TEXT  GitHub token for authentication [default: None] [required]
+* github_org_url TEXT URL of GitHub organization [default: None] [required]
+* repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+* usernames_file PATH Path to JSON file with usernames [default: None] [required]
+* token TEXT GitHub token for authentication [default: None] [required]
 
 Options:
---username            TEXT                                One or more usernames' accounts to modify [default: None]
---pr-number           INTEGER                             Pull request number in GitHub repository [default: 1]
---pr-message          TEXT                                Pull request number in GitHub repository
---access-level        [read|triage|write|maintain|admin]  The access level for user [default: read]
---help                                                    Show this message and exit.
+--username TEXT One or more usernames' accounts to modify [default: None]
+--pr-number INTEGER Pull request number in GitHub repository [default: 1]
+--pr-message TEXT Pull request number in GitHub repository
+--access-level [read|triage|write|maintain|admin] The access level for user [default: read]
+--help Show this message and exit.
 ```
 
 Here is a concrete example that shows how to use the `reporover status` command:
 
 ```bash
-reporover status https://github.com/my-org repo-prefix usernames.json ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ 
+reporover status https://github.com/my-org repo-prefix usernames.json ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ
 ```
 
 This command will fetch and display the latest GitHub Actions status for each
