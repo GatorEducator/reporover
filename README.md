@@ -6,6 +6,7 @@
 # RepoRover
 
 [![build](https://github.com/GatorEducator/reporover/actions/workflows/build.yml/badge.svg)](https://github.com/GatorEducator/reporover/actions/workflows/build.yml)
+[![coverage](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.totals.percent_covered_display&suffix=%25&url=https%3A//raw.githubusercontent.com/wiki/GatorEducator/reporover/coverage.json)](https://github.com/GatorEducator/reporover)
 [![Code Style: ruff](https://img.shields.io/badge/Code%20Style-Ruff-blue.svg)](https://docs.astral.sh/ruff/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-Yes-blue.svg)](https://github.com/gkapfham/chasten/graphs/commit-activity)
 [![License LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
