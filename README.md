@@ -189,7 +189,44 @@ $ reporover comment https://github.com/my-org repo-prefix usernames.json \
 This command will leave a comment on the specified pull request for each
 matching repository. When using this command, it is important to note that, if
 configured correctly, GitHub Classroom will automatically create pull request
-number 1 that can be used for sending the comment.
+number `1` that can be used for sending the comment.
+
+### :cyclone: Clone Command
+
+Need to clone multiple GitHub repositories to your local machine? The clone
+command makes it easy to download all repositories matching a prefix to a local
+directory. You can type the command `reporover clone --help` to learn how to
+clone repositories from a GitHub organization. To run this command you need to
+provide the following arguments and options:
+
+```bash
+Usage: reporover clone [OPTIONS] github_org_url repo_prefix usernames_file token destination_directory
+
+Arguments:
+*    github_org_url         TEXT  URL of GitHub organization [default: None] [required]
+*    repo_prefix            TEXT  Prefix for GitHub repository [default: None] [required]
+*    usernames_file         PATH  Path to JSON file with usernames [default: None] [required]
+*    token                  TEXT  GitHub token for authentication [default: None] [required]
+*    destination_directory  PATH  Local directory to clone repositories into [default: None] [required]
+
+Options:
+--username            TEXT  One or more usernames' accounts to clone [default: None]
+--help                      Show this message and exit.
+```
+
+Here is a concrete example that shows how to use the `reporover clone` command:
+
+```bash
+$ reporover clone https://github.com/my-org repo-prefix usernames.json \
+ghp_12345ABCDEfghijKLMNOP67890qrstuvWXYZ /tmp/cloned-repos --username student1
+```
+
+This command will clone the specified repositories to the chosen local
+directory. Each repository will be cloned into a subdirectory named after the
+full repository name. This is particularly useful for instructors who want to
+download all student repositories for local review, grading, or analysis. The
+command respects the username filtering, so you can clone repositories for
+specific students or all students at once.
 
 ### :bar_chart: Status Command
 
