@@ -84,7 +84,7 @@ jobs:
         - name: Run Tests
           if: always()
           run: |
-            uv run task test-not-random
+            uv run task test
         # Run and collect the test coverage
         # Important: only run and collect test coverage monitoring on Linux
         - name: Run and Collect Test Coverage - Linux Only
