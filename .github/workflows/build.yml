@@ -101,18 +101,16 @@ jobs:
             echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
             CURRENT_GITHUB_STEP_SUMMARY="\`\`\`\n$(cat coverage.txt)\n\`\`\`"
             echo "$CURRENT_GITHUB_STEP_SUMMARY" >> $GITHUB_STEP_SUMMARY
-        # Generate the coverage badge
-        # Important: only report the monitored test coverage on Linux
-        - name: Display Collected Test Coverage - Linux Only
-          if: always() && matrix.os == 'ubuntu-latest'
-          uses: tj-actions/coverage-badge-py@v2
-          with:
-            output: coverage.svg
         # Upload the coverage badge
         # Important: only report the monitored test coverage on Linux
-        - name: Upload badge
-          if: always() && matrix.os == 'ubuntu-latest'
-          uses: actions/upload-artifact@v4
-          with:
-            name: coverage-badge
-            path: coverage.svg
+        - name: Upload Test Coverage Report in JSON Format
+          if: always() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' && github.ref == 'refs/heads/main'
+          run: |
+            git clone https://github.com/GatorEducator/reporover.wiki.git wiki
+            cp coverage.json wiki/
+            cd wiki
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add coverage.json
+            git diff --staged --quiet || git commit -m "Update coverage report"
+            git push
