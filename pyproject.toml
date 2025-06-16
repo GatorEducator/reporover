@@ -1,12 +1,26 @@
 [project]
 name = "reporover"
-version = "0.1.1"
+version = "0.1.2"
 description = "RepoRover manages and analyzes remote GitHub repositories! Arf!"
 readme = "README_PYPI.md"
 authors = [
     { name = "Gregory M. Kapfhammer", email = "gkapfham@allegheny.edu" }
 ]
 requires-python = ">=3.11"
+keywords = [
+  "github", "git"
+]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+]
 dependencies = [
     "gitpython>=3.1.44",
     "requests>=2.32.3",
