@@ -534,7 +534,7 @@ def test_cli_commit_command_with_all_parameters_success(temp_usernames_file):
         mock_commit_files.assert_called()
 
 
-def test_cli_commit_command_with_all_parameters_failure():
+def test_cli_commit_command_with_all_parameters_failure(temp_usernames_file):
     """Test the commit command with all parameters provided for failure case."""
     # mock the functions called by the CLI
     with patch("reporover.main.commit_files_to_repo") as mock_commit_files:
@@ -547,7 +547,7 @@ def test_cli_commit_command_with_all_parameters_failure():
                 "commit",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/source",
                 "test.py",
@@ -564,7 +564,7 @@ def test_cli_commit_command_with_all_parameters_failure():
         mock_commit_files.assert_called()
 
 
-def test_cli_commit_command_multiple_usernames_success():
+def test_cli_commit_command_multiple_usernames_success(temp_usernames_file):
     """Test the commit command with multiple usernames for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.commit_files_to_repo") as mock_commit_files:
@@ -577,7 +577,7 @@ def test_cli_commit_command_multiple_usernames_success():
                 "commit",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/source",
                 "test.py",
@@ -595,7 +595,7 @@ def test_cli_commit_command_multiple_usernames_success():
         assert mock_commit_files.call_count >= 1
 
 
-def test_cli_commit_command_mixed_success_failure():
+def test_cli_commit_command_mixed_success_failure(temp_usernames_file):
     """Test the commit command with mixed success and failure results."""
     # mock the functions called by the CLI
     with (
@@ -617,7 +617,7 @@ def test_cli_commit_command_mixed_success_failure():
                 "commit",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/source",
                 "test.py",
@@ -635,7 +635,7 @@ def test_cli_commit_command_mixed_success_failure():
         assert mock_commit_files.call_count == 2
 
 
-def test_cli_commit_command_multiple_files():
+def test_cli_commit_command_multiple_files(temp_usernames_file):
     """Test the commit command with multiple files for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.commit_files_to_repo") as mock_commit_files:
@@ -648,7 +648,7 @@ def test_cli_commit_command_multiple_files():
                 "commit",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/source",
                 "test.py",
@@ -666,7 +666,7 @@ def test_cli_commit_command_multiple_files():
         mock_commit_files.assert_called()
 
 
-def test_cli_clone_command_with_all_parameters_success():
+def test_cli_clone_command_with_all_parameters_success(temp_usernames_file):
     """Test the clone command with all parameters provided for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
@@ -679,7 +679,7 @@ def test_cli_clone_command_with_all_parameters_success():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
                 "--username",
@@ -692,7 +692,7 @@ def test_cli_clone_command_with_all_parameters_success():
         mock_clone_repo.assert_called()
 
 
-def test_cli_clone_command_with_all_parameters_failure():
+def test_cli_clone_command_with_all_parameters_failure(temp_usernames_file):
     """Test the clone command with all parameters provided for failure case."""
     # mock the functions called by the CLI
     with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
@@ -705,7 +705,7 @@ def test_cli_clone_command_with_all_parameters_failure():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
                 "--username",
@@ -718,7 +718,7 @@ def test_cli_clone_command_with_all_parameters_failure():
         mock_clone_repo.assert_called()
 
 
-def test_cli_clone_command_multiple_usernames_success():
+def test_cli_clone_command_multiple_usernames_success(temp_usernames_file):
     """Test the clone command with multiple usernames for success case."""
     # mock the functions called by the CLI
     with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
@@ -731,7 +731,7 @@ def test_cli_clone_command_multiple_usernames_success():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
                 "--username",
@@ -746,7 +746,7 @@ def test_cli_clone_command_multiple_usernames_success():
         assert mock_clone_repo.call_count >= 1
 
 
-def test_cli_clone_command_mixed_success_failure():
+def test_cli_clone_command_mixed_success_failure(temp_usernames_file):
     """Test the clone command with mixed success and failure results."""
     # mock the functions called by the CLI
     with (
@@ -765,7 +765,7 @@ def test_cli_clone_command_mixed_success_failure():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
                 "--username",
@@ -780,7 +780,7 @@ def test_cli_clone_command_mixed_success_failure():
         assert mock_clone_repo.call_count == 2
 
 
-def test_cli_clone_command_no_username_filter():
+def test_cli_clone_command_no_username_filter(temp_usernames_file):
     """Test the clone command without username filter uses all usernames."""
     # mock the functions called by the CLI
     with (
@@ -799,7 +799,7 @@ def test_cli_clone_command_no_username_filter():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
             ],
@@ -810,7 +810,7 @@ def test_cli_clone_command_no_username_filter():
         assert mock_clone_repo.call_count == 3
 
 
-def test_cli_clone_command_username_intersection():
+def test_cli_clone_command_username_intersection(temp_usernames_file):
     """Test the clone command filters usernames correctly."""
     # mock the functions called by the CLI
     with (
@@ -829,7 +829,7 @@ def test_cli_clone_command_username_intersection():
                 "clone",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
-                "/home/gkapfham/working/teaching/github-classroom/algorithmology/github-usernames/github_usernames_spring2025.json",
+                str(temp_usernames_file),
                 "github_access_token_fake_1234",
                 "/tmp/cloned-repos",
                 "--username",
