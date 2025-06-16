@@ -106,7 +106,7 @@ jobs:
         - name: Upload Test Coverage Report in JSON Format
           if: always() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' && github.ref == 'refs/heads/main'
           run: |
-            git clone https://github.com/GatorEducator/reporover.wiki.git wiki
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/GatorEducator/reporover.wiki.git wiki
             cp coverage.json wiki/
             cd wiki
             git config --local user.email "action@github.com"
