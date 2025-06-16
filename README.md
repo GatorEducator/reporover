@@ -94,7 +94,7 @@ uv tool install reporover
 
 If you do not want to install `reporover` directly but you have `uv` installed,
 then you can also replace the `reporover` command in the following instructions
-with `uvx reporover`. This will run the `reporover` command with the `uv`
+with `uvx reporover`. This will run the `reporover` tool with the `uvx` command
 without requiring you to install it globally on your system.
 
 ## :dog: Running RepoRover
