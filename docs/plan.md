@@ -1,5 +1,12 @@
 # RepoRover Plan
 
+## Infrastructure Requirements
+
+- Use `uv` for managing the dependencies, virtual environments, and task running
+- System should be written so that they work on MacOS, Linux, and Windows
+- System should support Python 3.11, 3.12, and 3.13.
+- The `pyproject.toml` file should be used to manage dependencies and project metadata.
+
 ## Code Requirements
 
 All the Python code should follow these standards:
@@ -8,8 +15,6 @@ All the Python code should follow these standards:
 - Every function should have a docstring that starts with a capital letter and
 ends with a period.
 - All comments should start with a lowercase letter.
-- Functions should be written so that they work on MacOS, Linux, and Windows
-- Functions should support Python 3.11, 3.12, and 3.13.
 - All command-line interfaces should be created with Typer.
 
 ## Test Requirements
