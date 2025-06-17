@@ -52,10 +52,12 @@ requirements above in the subsection called "Code Requirements".
 - Test cases should have a descriptive name that starts with `test_`.
 - Test cases should be grouped by the function they are testing.
 - Test cases should be ordered in a way that makes sense to the reader.
-- Test cases should be independent of each other so that they can be
-run in a random order without affecting the results or each other.
-- Test cases must work both on a local machine and in a CI environment,
-meaning that they should work on a laptop and in GitHub Actions.
+- Test cases should be independent of each other so that they can be run in a
+random order without affecting the results or each other.
+- Test cases must work both on a local machine and in a CI environment, meaning
+that they should work on a laptop and in GitHub Actions.
+- Test cases should aim to achieve full function, statement, and branch coverage
+so as to ensure that the function in the program is thoroughly tested.
 
 ## Code Generation Guidelines
 
