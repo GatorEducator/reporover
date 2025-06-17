@@ -189,13 +189,7 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         - `forks`: The minimum number of forks the repository should have.
         - `created_after`: The date after which the repository was created.
         - `updated_after`: The date after which the repository was last updated.
-    - The advanced features of the search criteria are the following:
-        - `topics`: A list of topics that the repository should have.
-        - `license`: The license of the repository.
-        - `size`: The minimum size of the repository in kilobytes.
-        - `has_issues`: Whether the repository should have issues enabled.
-        - `has_wiki`: Whether the repository should have a wiki enabled.
-    - A critical advanced feature in the following:
+    - The critical advanced feature in the following:
         - `files`: A list of exact file names that the repository should contain.
         - `max_depth`: The maximum depth of the repository's directory structure
         to search for the files. For this critical advanced feature, the value
@@ -207,3 +201,9 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         - An example of this critical advanced feature would allow this
         subcommand to discover repositories that only contain a `uv.lock` file
         and a `pyproject.toml` file in the root of the repository.
+    - The additional advanced features of the search criteria are the following:
+        - `topics`: A list of topics that the repository should have.
+        - `license`: The license of the repository.
+        - `size`: The minimum size of the repository in kilobytes.
+        - `has_issues`: Whether the repository should have issues enabled.
+        - `has_wiki`: Whether the repository should have a wiki enabled.
