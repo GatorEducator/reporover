@@ -185,7 +185,7 @@ def test_numbers_is_enum():
 def test_numbers_values():
     """Test that Numbers has the correct values."""
     assert Numbers.MAX_DISPLAY.value == 10
-    assert Numbers.MAX_RETRIEVE.value == 100
+    assert Numbers.MAX_FILTER.value == 100
     assert Numbers.MAX_DESCRIPTION_LENGTH.value == 50
 
 
@@ -267,14 +267,14 @@ def test_numbers_constant_access():
 def test_numbers_constant_types():
     """Test that Numbers constants have the correct types."""
     assert isinstance(Numbers.MAX_DISPLAY.value, int)
-    assert isinstance(Numbers.MAX_RETRIEVE.value, int)
+    assert isinstance(Numbers.MAX_FILTER.value, int)
     assert isinstance(Numbers.MAX_DESCRIPTION_LENGTH.value, int)
 
 
 def test_numbers_constant_values_are_positive():
     """Test that Numbers constants have positive values."""
     assert Numbers.MAX_DISPLAY.value > 0
-    assert Numbers.MAX_RETRIEVE.value > 0
+    assert Numbers.MAX_FILTER.value > 0
     assert Numbers.MAX_DESCRIPTION_LENGTH.value > 0
 
 
