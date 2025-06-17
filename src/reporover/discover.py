@@ -5,6 +5,7 @@ from typing import List, Optional
 import github
 import requests
 from rich.console import Console
+from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
 from reporover.constants import Numbers, StatusCode, Symbols
@@ -129,17 +130,33 @@ def _filter_repositories_by_files(
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    for repository in repositories:
-        if repo_count >= MAX_FILTER:
-            break
-        if _repository_contains_files(
-            repository, required_files, max_depth, headers
-        ):
-            filtered_repos.append(repository)
-            console.print(
-                f"{Symbols.CHECK.value} Found files in {repository.name}"
-            )
-        repo_count += 1
+    _ = console
+    # compute the maximum number of repositories that will
+    # ultimately be subject to the filtering process
+    max_filter_runs = min(repositories.totalCount, MAX_FILTER)
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Filtering Repositories", total=max_filter_runs
+        )
+        for repository in repositories:
+            if repo_count >= MAX_FILTER:
+                break
+            if _repository_contains_files(
+                repository, required_files, max_depth, headers
+            ):
+                filtered_repos.append(repository)
+                progress.console.print(
+                    f"{Symbols.CHECK.value} Found files in {repository.name}"
+                )
+            repo_count += 1
+            progress.update(task, advance=1)
+    # return the filtered repositories
+    # as a list of GitHub repositories
     return filtered_repos
 
 
@@ -286,11 +303,12 @@ def _display_search_results_with_files(
             files_display,
         )
         repository_count += 1
+    console.print()
     console.print(table)
     console.print()
     total_count = len(repositories)
     console.print(
-        f":information: Found {total_count} repositories with required files"
+        f":information: Found {total_count} repositories after filtering for the required files"
     )
     if total_count > max_results:
         console.print(f":information: Showing first {max_results} results")
