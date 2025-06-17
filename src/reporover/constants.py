@@ -62,7 +62,7 @@ class Numbers(Enum):
     """Define the numbers used in the RepoRover application."""
 
     MAX_DISPLAY = 10
-    MAX_RETRIEVE = 100
+    MAX_FILTER = 100
     MAX_DESCRIPTION_LENGTH = 50
 
 
