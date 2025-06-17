@@ -194,7 +194,8 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         - `created_after`: The date after which the repository was created.
         - `updated_after`: The date after which the repository was last updated.
     - The critical advanced feature in the following:
-        - `files`: A list of exact file names that the repository should contain.
+        - `files`: A list of exact file names that the repository should
+        contain.
         - `max_depth`: The maximum depth of the repository's directory structure
         to search for the files. For this critical advanced feature, the value
         of `max_depth` should be an integer greater than or equal to 0. The
@@ -205,6 +206,12 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         - An example of this critical advanced feature would allow this
         subcommand to discover repositories that only contain a `uv.lock` file
         and a `pyproject.toml` file in the root of the repository.
+        - Please note that for this critical advanced feature, the word "files"
+        designates either a file or a "directory". This means that the feature
+        should work correctly whether it is searching for a directory called
+        `tests` or a file called `uv.lock`.
+        - Please note that this critical advanced feature requires the existence
+        of all the files specified in the `files` argument of the command-line.
     - The additional advanced features of the search criteria are the following:
         - `topics`: A list of topics that the repository should have.
         - `license`: The license of the repository.
