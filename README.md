@@ -10,7 +10,6 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/reporover)
 ![PyPI - Version](https://img.shields.io/pypi/v/reporover?logoColor=blue&color=blue)
 [![PyPI Downloads](https://static.pepy.tech/badge/reporover)](https://pepy.tech/projects/reporover)
-[![Code Style: ruff](https://img.shields.io/badge/style-Ruff-blue.svg)](https://docs.astral.sh/ruff/)
 [![Maintenance](https://img.shields.io/badge/maintained%3F-Yes-blue.svg)](https://github.com/gkapfham/chasten/graphs/commit-activity)
 [![License LGPL v3](https://img.shields.io/badge/license-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
