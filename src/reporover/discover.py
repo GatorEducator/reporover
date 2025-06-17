@@ -45,15 +45,21 @@ def search_repositories(  # noqa: PLR0913
             filtered_repositories = _filter_repositories_by_files(
                 repositories, files, max_depth, token, console
             )
-            _display_search_results_with_files(filtered_repositories, console, files)
+            _display_search_results_with_files(
+                filtered_repositories, console, files
+            )
         else:
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
     except github.GithubException as github_error:
-        console.print(f"{Symbols.ERROR.value} GitHub API error: {github_error}")
+        console.print(
+            f"{Symbols.ERROR.value} GitHub API error: {github_error}"
+        )
         return StatusCode.FAILURE
     except Exception as general_error:
-        console.print(f"{Symbols.ERROR.value} Unexpected error: {general_error}")
+        console.print(
+            f"{Symbols.ERROR.value} Unexpected error: {general_error}"
+        )
         return StatusCode.FAILURE
 
 
@@ -98,9 +104,13 @@ def _filter_repositories_by_files(
     for repository in repositories:
         if repo_count >= MAX_RETRIEVE:
             break
-        if _repository_contains_files(repository, required_files, max_depth, headers):
+        if _repository_contains_files(
+            repository, required_files, max_depth, headers
+        ):
             filtered_repos.append(repository)
-            console.print(f"{Symbols.CHECK.value} Found files in {repository.name}")
+            console.print(
+                f"{Symbols.CHECK.value} Found files in {repository.name}"
+            )
         repo_count += 1
     return filtered_repos
 
@@ -124,8 +134,10 @@ def _repository_contains_files(
         return False
 
 
-def _get_repository_files(repository, max_depth: int, headers: dict) -> List[dict]:
-    """Get all files in repository up to specified depth."""
+def _get_repository_files(
+    repository, max_depth: int, headers: dict
+) -> List[dict]:
+    """Get all files in a GitHub repository up to specified depth."""
     all_files = []
     try:
         _collect_files_recursive(
@@ -136,7 +148,7 @@ def _get_repository_files(repository, max_depth: int, headers: dict) -> List[dic
     return all_files
 
 
-def _collect_files_recursive(
+def _collect_files_recursive(  # noqa: PLR0913
     repo_full_name: str,
     path: str,
     max_depth: int,
@@ -144,7 +156,7 @@ def _collect_files_recursive(
     headers: dict,
     all_files: List[dict],
 ) -> None:
-    """Recursively collect files from repository up to max_depth."""
+    """Recursively collect files from a GitHub repository up to a maximum depth."""
     if current_depth > max_depth:
         return
     api_url = f"https://api.github.com/repos/{repo_full_name}/contents/{path}"
@@ -249,6 +261,8 @@ def _display_search_results_with_files(
     console.print(table)
     console.print()
     total_count = len(repositories)
-    console.print(f":information: Found {total_count} repositories with required files")
+    console.print(
+        f":information: Found {total_count} repositories with required files"
+    )
     if total_count > max_results:
         console.print(f":information: Showing first {max_results} results")
