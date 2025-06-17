@@ -201,7 +201,7 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         of `max_depth` should be an integer greater than or equal to 0. The
         value of zero should indicate that the search should only recursively
         search into the root of the repository. A value of 1 would indicate that
-        the search should recursively go into all of the directories that are
+        the search should recursively go into all the directories that are
         contained in the root of the repository, and so on.
         - An example of this critical advanced feature would allow this
         subcommand to discover repositories that only contain a `uv.lock` file
