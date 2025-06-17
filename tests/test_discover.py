@@ -386,8 +386,8 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.SUCCESS
@@ -417,8 +417,8 @@ class TestSearchRepositories:
                 updated_after=None,
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.SUCCESS
@@ -445,8 +445,8 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.FAILURE
@@ -472,8 +472,8 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.FAILURE
@@ -502,8 +502,8 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.SUCCESS
@@ -531,8 +531,8 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=100,
-                max_matches_display=10,
+                max_filter=100,
+                max_display=10,
                 console=console,
             )
         assert result == StatusCode.SUCCESS
@@ -560,14 +560,14 @@ class TestSearchRepositories:
                 updated_after="2023-06-01",
                 files=None,
                 max_depth=0,
-                max_matches_retrieve=200,
-                max_matches_display=20,
+                max_filter=200,
+                max_display=20,
                 console=console,
             )
         assert result == StatusCode.SUCCESS
-        from reporover.discover import MAX_DISPLAY, MAX_RETRIEVE
+        from reporover.discover import MAX_DISPLAY, MAX_FILTER
 
-        assert MAX_RETRIEVE == 200
+        assert MAX_FILTER == 200
         assert MAX_DISPLAY == 20
 
     @patch("reporover.discover.github.Github")
@@ -597,8 +597,8 @@ class TestSearchRepositories:
                     updated_after=None,
                     files=None,
                     max_depth=0,
-                    max_matches_retrieve=100,
-                    max_matches_display=10,
+                    max_filter=100,
+                    max_display=10,
                     console=console,
                 )
         assert result == StatusCode.SUCCESS
@@ -632,8 +632,8 @@ class TestSearchRepositories:
                     updated_after="2023-06-01",
                     files=None,
                     max_depth=0,
-                    max_matches_retrieve=100,
-                    max_matches_display=10,
+                    max_filter=100,
+                    max_display=10,
                     console=console,
                 )
         assert result == StatusCode.SUCCESS
