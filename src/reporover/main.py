@@ -500,6 +500,12 @@ def discover(  # noqa: PLR0913
         None,
         help="Date after which the repository was last updated (YYYY-MM-DD)",
     ),
+    max_matches_retrieve: int = typer.Option(
+        100, help="Maximum number of matches to retrieve during discovery"
+    ),
+    max_matches_display: int = typer.Option(
+        10, help="Maximum number of matches to display during discovery"
+    ),
 ):
     """Discover public GitHub repositories matching search criteria."""
     # display the welcome message
@@ -509,6 +515,8 @@ def discover(  # noqa: PLR0913
     )
     console.print()
     # search for repositories using the provided criteria
+    # and the parameters that control matching for both
+    # (a) retrieval and (b) display of the results
     search_status_code = search_repositories(
         token,
         language,
@@ -516,9 +524,12 @@ def discover(  # noqa: PLR0913
         forks,
         created_after,
         updated_after,
+        max_matches_retrieve,
+        max_matches_display,
         console,
     )
-    # check if the search was successful
+    # check if the search was successful and if it was
+    # not then display an error message and exit the sub-command
     if search_status_code != StatusCode.SUCCESS:
         console.print(
             "\n{Symbols.ERROR} Failed to discover public GitHub repositories"
