@@ -507,7 +507,7 @@ def discover(  # noqa: PLR0913
     ),
     max_depth: int = typer.Option(
         0,
-        help="Maximum depth to search for files (0 = root only, 1 = root + subdirectories, etc.)",
+        help="Maximum depth to search for files (0 = repository root)",
     ),
     max_matches_retrieve: int = typer.Option(
         Numbers.MAX_RETRIEVE.value,
