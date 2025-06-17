@@ -42,20 +42,32 @@ def search_repositories(  # noqa: PLR0913
         # display the search query being used
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
+        # if there are files specified as a way to narrow the discovery
+        # of the public GitHub repositories, then filter the results
         if files:
+            # display the files being filtered and the maximum search depth
             console.print(f":mag: Filtering repositories for files: {files}")
             console.print(f":mag: Maximum search depth: {max_depth}")
             console.print()
+            # perform the filtering of the repositories
             filtered_repositories = _filter_repositories_by_files(
                 repositories, files, max_depth, token, console
             )
+            # display those repositories that contain all of the
+            # files that were specified in the discover command
             _display_search_results_with_files(
                 filtered_repositories, console, files
             )
+        # there are no files specified, so display the results,
+        # noting that an extra newline is needed to separate the
+        # output of the search results from the search query itself
         else:
             console.print()
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
+    # discovering public GitHub repositories did not work correctly and
+    # thus the status code should be set to failure after displaying
+    # a suitable error message about the problem
     except github.GithubException as github_error:
         console.print(
             f"{Symbols.ERROR.value} GitHub API error: {github_error}"
