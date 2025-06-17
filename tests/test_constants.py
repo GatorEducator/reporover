@@ -193,7 +193,7 @@ def test_numbers_members():
     """Test that Numbers enum has exactly the expected members."""
     expected_members = {
         "MAX_DISPLAY",
-        "MAX_RETRIEVE",
+        "MAX_FILTER",
         "MAX_DESCRIPTION_LENGTH",
     }
     actual_members = {member.name for member in Numbers}
@@ -248,7 +248,7 @@ def test_all_enums_accessible():
     assert hasattr(StatusCode, "INTERNAL_SERVER_ERROR")
     # Numbers
     assert hasattr(Numbers, "MAX_DISPLAY")
-    assert hasattr(Numbers, "MAX_RETRIEVE")
+    assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
     # Symbols
     assert hasattr(Symbols, "ELLIPSIS")
@@ -260,7 +260,7 @@ def test_all_enums_accessible():
 def test_numbers_constant_access():
     """Test that Numbers constants can be accessed as attributes."""
     assert hasattr(Numbers, "MAX_DISPLAY")
-    assert hasattr(Numbers, "MAX_RETRIEVE")
+    assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
 
 
