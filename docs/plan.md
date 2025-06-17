@@ -9,6 +9,12 @@ All documentation should follow these standards:
 - All command-line examples should include the `$` prompt prefix to indicate terminal commands.
 - Documentation should specify exact file paths when referencing project files.
 - All URLs in documentation should be complete and functional.
+- Source code examples should be as realistic as possible, reflecting actual usage patterns.
+- All documentation should be written in Markdown format and visible on GitHub.
+- A special version of the documentation in the README.md file is always
+maintained in the file called `README_PYTHON.md`. The purpose of this file is to
+contain all the same content in the `README.md` file, excepting the fact that it
+should not contain emojis or graphics or other elements that do not appear on PyPI.
 
 ## Project Structure Requirements
 
@@ -22,10 +28,10 @@ The project should maintain this structure:
 
 ## Infrastructure Requirements
 
-- Use `uv` for managing the dependencies, virtual environments, and task running
-- System should be written so that they work on MacOS, Linux, and Windows
+- Use `uv` for managing the dependencies, virtual environments, and task running.
+- System should be written so that they work on MacOS, Linux, and Windows.
 - System should support Python 3.11, 3.12, and 3.13.
-- The `pyproject.toml` file should be used to manage dependencies and project metadata.
+- The `pyproject.toml` file should be used to manage dependencies and encoded project metadata.
 
 ## Code Requirements
 
@@ -42,7 +48,7 @@ ends with a period.
 All test cases should follow these standards:
 
 - Since a test case is a Python function, it should always follow the code
-requirements above.
+requirements above in the subsection called "Code Requirements".
 - Test cases should have a descriptive name that starts with `test_`.
 - Test cases should be grouped by the function they are testing.
 - Test cases should be ordered in a way that makes sense to the reader.
@@ -121,7 +127,7 @@ and `repo_prefix`).
 
 ### File Operations
 
-- Use pathlib.Path for all file operations.
+- Use `pathlib.Path` for all file operations.
 - Handle file permissions and access errors gracefully.
 - Use context managers for file operations.
 - Validate file paths and existence before operations.
