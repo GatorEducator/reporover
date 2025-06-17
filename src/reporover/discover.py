@@ -230,7 +230,10 @@ def _collect_files_recursive(  # noqa: PLR0913
 
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table."""
-    table = Table(title="Repository Search Results", box=box.SIMPLE_HEAVY)
+    table = Table(
+        title="Repository Search Results (No Filtering by Files)",
+        box=box.SIMPLE_HEAVY,
+    )
     table.add_column("Name", style="cyan", no_wrap=False)
     table.add_column("Description", style="magenta")
     table.add_column("Stars", justify="right", style="green")
@@ -274,9 +277,7 @@ def _display_search_results(repositories, console: Console) -> None:
     # display the table of repositories
     console.print(table)
     # display final diagnostic information
-    console.print(
-        f":information: Discovered {total_count} repositories"
-    )
+    console.print(f":information: Discovered {total_count} repositories")
     if total_count > max_results:
         console.print(
             f":information: Showing first {max_results} repositories"
@@ -287,7 +288,10 @@ def _display_search_results_with_files(
     repositories: List, console: Console, required_files: List[str]
 ) -> None:
     """Display the search results for repositories filtered by files."""
-    table = Table(title="Repository Search Results (Filtered by Files)")
+    table = Table(
+        title="Repository Search Results (Filtered by Files)",
+        box=box.SIMPLE_HEAVY,
+    )
     table.add_column("Name", style="cyan", no_wrap=True)
     table.add_column("Description", style="magenta")
     table.add_column("Stars", justify="right", style="green")
