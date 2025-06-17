@@ -69,7 +69,7 @@ class Numbers(Enum):
 class Symbols(Enum):
     """Define the symbols used in the RepoRover application."""
 
-    ELLIPSIS = "…"
+    ELLIPSIS = "..."
     ERROR = ""
     CHECK = "󰄬"
     UNKNOWN = "Unknown"
