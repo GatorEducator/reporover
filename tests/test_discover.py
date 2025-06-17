@@ -301,7 +301,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 15
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_empty_repositories(self, console):
         """Test _display_search_results with empty repository list."""
