@@ -187,6 +187,7 @@ def test_numbers_values():
     assert Numbers.MAX_DISPLAY.value == 10
     assert Numbers.MAX_FILTER.value == 100
     assert Numbers.MAX_DESCRIPTION_LENGTH.value == 50
+    assert Numbers.MAX_NAME_LENGTH.value == 40
 
 
 def test_numbers_members():
@@ -195,6 +196,7 @@ def test_numbers_members():
         "MAX_DISPLAY",
         "MAX_FILTER",
         "MAX_DESCRIPTION_LENGTH",
+        "MAX_NAME_LENGTH",
     }
     actual_members = {member.name for member in Numbers}
     assert actual_members == expected_members
@@ -250,6 +252,7 @@ def test_all_enums_accessible():
     assert hasattr(Numbers, "MAX_DISPLAY")
     assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
+    assert hasattr(Numbers, "MAX_NAME_LENGTH")
     # Symbols
     assert hasattr(Symbols, "ELLIPSIS")
     assert hasattr(Symbols, "ERROR")
@@ -262,6 +265,7 @@ def test_numbers_constant_access():
     assert hasattr(Numbers, "MAX_DISPLAY")
     assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
+    assert hasattr(Numbers, "MAX_NAME_LENGTH")
 
 
 def test_numbers_constant_types():
@@ -269,6 +273,7 @@ def test_numbers_constant_types():
     assert isinstance(Numbers.MAX_DISPLAY.value, int)
     assert isinstance(Numbers.MAX_FILTER.value, int)
     assert isinstance(Numbers.MAX_DESCRIPTION_LENGTH.value, int)
+    assert isinstance(Numbers.MAX_NAME_LENGTH.value, int)
 
 
 def test_numbers_constant_values_are_positive():
@@ -276,6 +281,7 @@ def test_numbers_constant_values_are_positive():
     assert Numbers.MAX_DISPLAY.value > 0
     assert Numbers.MAX_FILTER.value > 0
     assert Numbers.MAX_DESCRIPTION_LENGTH.value > 0
+    assert Numbers.MAX_NAME_LENGTH.value > 0
 
 
 def test_symbols_constant_access():
