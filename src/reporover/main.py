@@ -14,7 +14,9 @@ from reporover.constants import (
     GitHubAccessLevel,
     GitHubPullRequestNumber,
     StatusCode,
+    Symbols,
 )
+from reporover.discover import search_repositories
 from reporover.pullrequest import leave_pr_comment
 from reporover.repository import clone_repo_gitpython, commit_files_to_repo
 from reporover.status import get_status_from_codes
@@ -473,7 +475,50 @@ def clone(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to clone at least one repository in"
+            f"\n{Symbols.ERROR} Failed to clone at least one repository in"
             + f" {github_org_url}"
         )
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def discover(  # noqa: PLR0913
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    language: Optional[str] = typer.Option(
+        None, help="Programming language found in the repository"
+    ),
+    stars: Optional[int] = typer.Option(
+        None, help="Minimum number of stars the repository should have"
+    ),
+    forks: Optional[int] = typer.Option(
+        None, help="Minimum number of forks the repository should have"
+    ),
+    created_after: Optional[str] = typer.Option(
+        None, help="Date after which the repository was created (YYYY-MM-DD)"
+    ),
+    updated_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was last updated (YYYY-MM-DD)",
+    ),
+):
+    """Discover public GitHub repositories matching search criteria."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        ":sparkles: Searching for public GitHub repositories matching your criteria"
+    )
+    console.print()
+    # search for repositories using the provided criteria
+    search_status_code = search_repositories(
+        token,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+        console,
+    )
+    # check if the search was successful
+    if search_status_code != StatusCode.SUCCESS:
+        console.print("\n{Symbols.ERROR} Failed to discover public GitHub repositories")
         raise typer.Exit(code=1)
