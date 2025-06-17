@@ -6,7 +6,10 @@ import github
 from rich.console import Console
 from rich.table import Table
 
-from reporover.constants import StatusCode
+from reporover.constants import Numbers, StatusCode, Symbols
+
+MAX_DISPLAY = Numbers.MAX_DISPLAY.value
+MAX_RETRIEVE = Numbers.MAX_RETRIEVE.value
 
 
 def search_repositories(  # noqa: PLR0913
@@ -16,9 +19,15 @@ def search_repositories(  # noqa: PLR0913
     forks: Optional[int],
     created_after: Optional[str],
     updated_after: Optional[str],
+    max_matches_retrieve: int,
+    max_matches_display: int,
     console: Console,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
+    # update the global variables for retrieval and display
+    global MAX_DISPLAY, MAX_RETRIEVE  # noqa: PLW0603
+    MAX_DISPLAY = max_matches_display
+    MAX_RETRIEVE = max_matches_retrieve
     try:
         # create a GitHub instance with the provided token
         github_instance = github.Github(token)
@@ -29,16 +38,18 @@ def search_repositories(  # noqa: PLR0913
         # display the search query being used
         console.print(f":mag: Search query: {search_query}")
         console.print()
-        # perform the search
+        # perform the search using the created search query
         repositories = github_instance.search_repositories(search_query)
         # display the results
         _display_search_results(repositories, console)
         return StatusCode.SUCCESS
+    # handle all of the error conditions by displaying a basic
+    # message about the problem that this function encountered
     except github.GithubException as github_error:
-        console.print(f":x: GitHub API error: {github_error}")
+        console.print(f"{Symbols.ERROR} GitHub API error: {github_error}")
         return StatusCode.FAILURE
     except Exception as general_error:
-        console.print(f":x: Unexpected error: {general_error}")
+        console.print(f"{Symbols.ERROR} Unexpected error: {general_error}")
         return StatusCode.FAILURE
 
 
@@ -75,12 +86,15 @@ def _build_search_query(
     # already limited to public repositories by default
     if not query_parts:
         query_parts.append("is:public")
+    # return the search query string, joining the
+    # components of the list with spaces, ensuring the
+    # format that is expected by PyGitHub
     return " ".join(query_parts)
 
 
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table."""
-    # create a table to display the results
+    # create a Rich-based table to display the results
     table = Table(title="Repository Search Results")
     table.add_column("Name", style="cyan", no_wrap=True)
     table.add_column("Description", style="magenta")
@@ -91,16 +105,19 @@ def _display_search_results(repositories, console: Console) -> None:
     # add repository information to the table
     # limit to first 10 results to avoid overwhelming output
     repository_count = 0
-    max_results = 10
+    max_results = MAX_DISPLAY
     for repository in repositories:
         if repository_count >= max_results:
             break
         # format the description to handle None values
         description = repository.description or "No description"
-        if len(description) > 50:
-            description = description[:47] + "..."
+        if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
+            description = (
+                str(description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3])
+                + Symbols.ELLIPSIS.value
+            )
         # format the language to handle None values
-        language_display = repository.language or "Unknown"
+        language_display = repository.language or Symbols.UNKNOWN.value
         # format the updated date
         updated_date = repository.updated_at.strftime("%Y-%m-%d")
         # add the row to the table
