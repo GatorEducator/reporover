@@ -138,7 +138,7 @@ def _get_repository_files(
     repository, max_depth: int, headers: dict
 ) -> List[dict]:
     """Get all files in a GitHub repository up to specified depth."""
-    all_files = []
+    all_files: List[dict] = []
     try:
         _collect_files_recursive(
             repository.full_name, "", max_depth, 0, headers, all_files
