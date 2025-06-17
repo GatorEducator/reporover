@@ -10,7 +10,7 @@ All documentation should follow these standards:
 - Documentation should specify exact file paths when referencing project files.
 - All URLs in documentation should be complete and functional.
 
-## Structure Requirements
+## Project Structure Requirements
 
 The project should maintain this structure:
 
@@ -50,3 +50,103 @@ requirements above.
 run in a random order without affecting the results or each other.
 - Test cases must work both on a local machine and in a CI environment,
 meaning that they should work on a laptop and in GitHub Actions.
+
+## Code Generation Guidelines
+
+When generating new code or test cases, follow these specific patterns:
+
+### Function and Class Patterns
+
+- All functions must have type hints for parameters and return values.
+- Use `Path` from `pathlib` for all file system operations, never string paths.
+- Rich console output should use the existing `rich` patterns in the codebase.
+- All CLI commands should use Typer with explicit type annotations.
+- Error handling should use specific exception types, not generic `Exception`.
+
+### Import Organization
+
+- Group imports in this order: standard library, third-party, local imports.
+- Use absolute imports for all local modules (`from reporover.module import ...`).
+- Import only what is needed, avoid wildcard imports.
+- Follow the existing import patterns seen in the codebase.
+
+### Naming Conventions
+
+- Use snake_case for all functions, variables, and module names.
+- Use PascalCase for class names.
+- Constants should be UPPER_SNAKE_CASE.
+- Private functions should start with underscore.
+- CLI argument should use hyphens (handled by Typer).
+- CLI sub-commands should be a single word like `clone` or `commit`.
+
+### Testing Patterns
+
+- Test files should mirror the source structure (e.g., `tests/test_main.py` for
+`src/reporover/main.py`).
+- Use descriptive test names that explain what is being tested.
+- Group related tests in the same file and use clear organization.
+- Mock external dependencies (GitHub API, file system) in tests.
+- Use pytest fixtures for common test setup.
+- Include both positive and negative test cases.
+- Test edge cases and error conditions.
+- Write property-based test cases using Hypothesis where applicable. Make sure
+that all the property-based are marked with the decorator called `@pytest.mark.property`
+so that they can be run separately from the other tests when needed.
+
+### CLI Command Patterns
+
+- All commands should provide helpful messages for use with the `--help`
+provided by Typer.
+- Use consistent parameter names across commands (e.g., `github_org_url`
+and `repo_prefix`).
+- Include progress indicators for long-running operations.
+- Validate inputs early and provide clear feedback.
+- Use the existing Rich console styling patterns.
+
+### Error Handling Patterns
+
+- Catch specific exceptions and provide meaningful error messages.
+- Use early returns to avoid deep nesting.
+- Log errors appropriately without exposing sensitive information.
+- Provide actionable error messages to users.
+
+### GitHub API Integration
+
+- When appropriate to do so and unless instructed otherwise,
+  use the PyGitHub approach unless it is not a good idea to do so.
+- Use the existing request patterns with proper authentication.
+- Handle rate limiting and network errors gracefully.
+- Cache responses when appropriate to avoid redundant API calls.
+- Follow the existing patterns for API endpoint construction.
+
+### File Operations
+
+- Use pathlib.Path for all file operations.
+- Handle file permissions and access errors gracefully.
+- Use context managers for file operations.
+- Validate file paths and existence before operations.
+
+## Context Requirements for LLM Assistance
+
+To generate the most accurate code, always provide:
+
+### Essential Context
+
+- The specific module or function being modified or extended.
+- Related functions or classes that might be affected.
+- Existing error handling patterns in similar functions.
+- The expected input/output format for the new functionality.
+
+### Testing Context
+
+- Existing test patterns for similar functionality.
+- Mock objects and fixtures already in use.
+- Test data structures and formats.
+- Integration test requirements vs unit test requirements.
+
+### Integration Context
+
+- How the new code fits into existing CLI commands.
+- Dependencies on other modules or external services.
+- Configuration requirements or environment variables.
+- Backward compatibility requirements.
