@@ -303,7 +303,6 @@ def _display_search_results_with_files(
         repository_count += 1
     console.print()
     console.print(table)
-    # console.print()
     total_count = len(repositories)
     console.print(
         f":information: Found {total_count} repositories after filtering"
