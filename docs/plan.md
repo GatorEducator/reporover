@@ -183,7 +183,7 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
 - The search criteria:
     - Could all be `None` if they are not provided.
     - Must be specified as command-line arguments.
-    - As a start, can focus on the following:
+    - As a start, they should focus on the following:
         - `language`: The programming language of the repository.
         - `stars`: The minimum number of stars the repository should have.
         - `forks`: The minimum number of forks the repository should have.
