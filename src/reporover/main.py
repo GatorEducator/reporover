@@ -520,5 +520,7 @@ def discover(  # noqa: PLR0913
     )
     # check if the search was successful
     if search_status_code != StatusCode.SUCCESS:
-        console.print("\n{Symbols.ERROR} Failed to discover public GitHub repositories")
+        console.print(
+            "\n{Symbols.ERROR} Failed to discover public GitHub repositories"
+        )
         raise typer.Exit(code=1)
