@@ -39,11 +39,6 @@ def search_repositories(  # noqa: PLR0913
         )
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
-        console.print()
-        console.print(
-            f":information: Initially processing {repositories.totalCount} repositories"
-        )
-        console.print()
         if files:
             console.print(
                 f":mag: Performing filtering for first {max_filter} repositories"
@@ -62,6 +57,11 @@ def search_repositories(  # noqa: PLR0913
                 filtered_repositories, console, files
             )
         else:
+            console.print()
+            console.print(
+                f":information: Initially discovered {repositories.totalCount} repositories"
+            )
+            console.print()
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
     except github.GithubException as github_error:
@@ -255,7 +255,7 @@ def _display_search_results(repositories, console: Console) -> None:
         repository_count += 1
     total_count = repositories.totalCount
     console.print(table)
-    console.print(f":information: Discovered {total_count} repositories")
+    console.print(f":information: Discovered {total_count} total repositories")
     if total_count > max_results:
         console.print(
             f":information: Showing first {max_results} repositories"
