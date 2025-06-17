@@ -40,6 +40,7 @@ All the Python code should follow these standards:
 - Function bodies should not have any blank lines in them
 - Every function should have a docstring that starts with a capital letter and
 ends with a period.
+- Every function should have a docstring that is a single line.
 - All comments should start with a lowercase letter.
 - All command-line interfaces should be created with Typer.
 
