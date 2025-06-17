@@ -64,6 +64,7 @@ class Numbers(Enum):
     MAX_DISPLAY = 10
     MAX_FILTER = 100
     MAX_DESCRIPTION_LENGTH = 50
+    MAX_NAME_LENGTH = 40
 
 
 class Symbols(Enum):
