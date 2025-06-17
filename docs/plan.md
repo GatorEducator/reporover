@@ -70,6 +70,10 @@ When generating new code or test cases, follow these specific patterns:
 - Rich console output should use the existing `rich` patterns in the codebase.
 - All CLI commands should use Typer with explicit type annotations.
 - Error handling should use specific exception types, not generic `Exception`.
+- If a function contains comments inside of it and the function is going
+to be refactored, never remove those comments that are still relevant to
+the new implementation of the function. Only delete comments or remove all of
+the comments from a function subject to refactoring if it is absolutely needed.
 
 ### Import Organization
 
