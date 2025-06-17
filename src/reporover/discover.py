@@ -32,17 +32,11 @@ def search_repositories(  # noqa: PLR0913
     global MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
     MAX_DISPLAY = max_display
     MAX_FILTER = max_filter
-    # attempt to perform the discovery
     try:
-        # create a GitHub instance with the provided token,
-        # using the PyGithub framework to access the GitHub API
         github_instance = github.Github(token)
-        # create the search query based on the provided criteria
         search_query = _build_search_query(
             language, stars, forks, created_after, updated_after
         )
-        # display the search query being used and additional information
-        # about the way in which the search will be performed
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
         console.print()
@@ -50,36 +44,26 @@ def search_repositories(  # noqa: PLR0913
             f":information: Initially processing {repositories.totalCount} repositories"
         )
         console.print()
-        # if there are files specified as a way to narrow the discovery
-        # of the public GitHub repositories, then filter the results
         if files:
-            # display the files being filtered and the maximum search depth
             console.print(
                 f":mag: Performing filtering for first {max_filter} repositories"
             )
-            console.print(f":mag: Filtering repositories for files: {files}")
+            console.print(
+                f":mag: Filtering repositories for files and directories: {files}"
+            )
             console.print(
                 f":mag: Maximum search depth during file filtering: {max_depth}"
             )
             console.print()
-            # perform the filtering of the repositories
             filtered_repositories = _filter_repositories_by_files(
                 repositories, files, max_depth, token, console
             )
-            # display those repositories that contain all of the
-            # files that were specified in the discover command
             _display_search_results_with_files(
                 filtered_repositories, console, files
             )
-        # there are no files specified, so display the results,
-        # noting that an extra newline is needed to separate the
-        # output of the search results from the search query itself
         else:
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
-    # discovering public GitHub repositories did not work correctly and
-    # thus the status code should be set to failure after displaying
-    # a suitable error message about the problem
     except github.GithubException as github_error:
         console.print(
             f"{Symbols.ERROR.value} GitHub API error: {github_error}"
@@ -123,7 +107,7 @@ def _filter_repositories_by_files(
     token: str,
     console: Console,
 ) -> List:
-    """Filter repositories that contain the specified files within max_depth."""
+    """Filter repositories that contain the specified files and directories within max_depth."""
     filtered_repos = []
     repo_count = 0
     headers = {
@@ -131,8 +115,6 @@ def _filter_repositories_by_files(
         "Accept": "application/vnd.github.v3+json",
     }
     _ = console
-    # compute the maximum number of repositories that will
-    # ultimately be subject to the filtering process
     max_filter_runs = min(repositories.totalCount, MAX_FILTER)
     with Progress(
         "[progress.description]{task.description}",
@@ -151,12 +133,10 @@ def _filter_repositories_by_files(
             ):
                 filtered_repos.append(repository)
                 progress.console.print(
-                    f"{Symbols.CHECK.value} Found files in {repository.name}"
+                    f"{Symbols.CHECK.value} Found all designated files in {repository.name}"
                 )
             repo_count += 1
             progress.update(task, advance=1)
-    # return the filtered repositories
-    # as a list of GitHub repositories
     return filtered_repos
 
 
@@ -166,7 +146,7 @@ def _repository_contains_files(
     max_depth: int,
     headers: dict,
 ) -> bool:
-    """Check if repository contains all required files within the specified depth."""
+    """Check if repository contains all required files and directories within the specified depth."""
     try:
         found_files = set()
         repo_files = _get_repository_files(repository, max_depth, headers)
@@ -182,7 +162,7 @@ def _repository_contains_files(
 def _get_repository_files(
     repository, max_depth: int, headers: dict
 ) -> List[dict]:
-    """Get all files in a GitHub repository up to specified depth."""
+    """Get all files and directories in a GitHub repository up to specified depth."""
     all_files: List[dict] = []
     try:
         _collect_files_recursive(
@@ -201,7 +181,7 @@ def _collect_files_recursive(  # noqa: PLR0913
     headers: dict,
     all_files: List[dict],
 ) -> None:
-    """Recursively collect files from a GitHub repository up to a maximum depth."""
+    """Recursively collect files and directories from a GitHub repository up to a maximum depth."""
     if current_depth > max_depth:
         return
     api_url = f"https://api.github.com/repos/{repo_full_name}/contents/{path}"
@@ -215,15 +195,17 @@ def _collect_files_recursive(  # noqa: PLR0913
         for item in contents:
             if item.get("type") == "file":
                 all_files.append(item)
-            elif item.get("type") == "dir" and current_depth < max_depth:
-                _collect_files_recursive(
-                    repo_full_name,
-                    item.get("path", ""),
-                    max_depth,
-                    current_depth + 1,
-                    headers,
-                    all_files,
-                )
+            elif item.get("type") == "dir":
+                all_files.append(item)
+                if current_depth < max_depth:
+                    _collect_files_recursive(
+                        repo_full_name,
+                        item.get("path", ""),
+                        max_depth,
+                        current_depth + 1,
+                        headers,
+                        all_files,
+                    )
     except Exception:
         pass
 
@@ -245,8 +227,6 @@ def _display_search_results(repositories, console: Console) -> None:
     for repository in repositories:
         if repository_count >= max_results:
             break
-        # format the name of the repository like the
-        # description, so that it does not exceed the maximum length
         if len(repository.name) > Numbers.MAX_NAME_LENGTH.value:
             repository_name = (
                 repository.name[: Numbers.MAX_NAME_LENGTH.value - 10]
@@ -274,9 +254,7 @@ def _display_search_results(repositories, console: Console) -> None:
         )
         repository_count += 1
     total_count = repositories.totalCount
-    # display the table of repositories
     console.print(table)
-    # display final diagnostic information
     console.print(f":information: Discovered {total_count} repositories")
     if total_count > max_results:
         console.print(
@@ -287,7 +265,7 @@ def _display_search_results(repositories, console: Console) -> None:
 def _display_search_results_with_files(
     repositories: List, console: Console, required_files: List[str]
 ) -> None:
-    """Display the search results for repositories filtered by files."""
+    """Display the search results for repositories filtered by files and directories."""
     table = Table(
         title="Repository Search Results (Filtered by Files)",
         box=box.SIMPLE_HEAVY,
@@ -331,4 +309,4 @@ def _display_search_results_with_files(
         f":information: Found {total_count} repositories after filtering for the required files"
     )
     if total_count > max_results:
-        console.print(f":information: Showing first {max_results} results")
+        console.print(f":information: Showing first {max_results} repositories")
