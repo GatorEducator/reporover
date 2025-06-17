@@ -10,7 +10,7 @@ from rich.table import Table
 from reporover.constants import Numbers, StatusCode, Symbols
 
 MAX_DISPLAY = Numbers.MAX_DISPLAY.value
-MAX_RETRIEVE = Numbers.MAX_RETRIEVE.value
+MAX_FILTER = Numbers.MAX_FILTER.value
 
 
 def search_repositories(  # noqa: PLR0913
@@ -22,14 +22,14 @@ def search_repositories(  # noqa: PLR0913
     updated_after: Optional[str],
     files: Optional[List[str]],
     max_depth: int,
-    max_matches_retrieve: int,
-    max_matches_display: int,
+    max_filter: int,
+    max_display: int,
     console: Console,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
-    global MAX_DISPLAY, MAX_RETRIEVE  # noqa: PLW0603
-    MAX_DISPLAY = max_matches_display
-    MAX_RETRIEVE = max_matches_retrieve
+    global MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
+    MAX_DISPLAY = max_display
+    MAX_FILTER = max_filter
     # attempt to perform the discovery
     try:
         # create a GitHub instance with the provided token,
@@ -39,15 +39,26 @@ def search_repositories(  # noqa: PLR0913
         search_query = _build_search_query(
             language, stars, forks, created_after, updated_after
         )
-        # display the search query being used
+        # display the search query being used and additional information
+        # about the way in which the search will be performed
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
+        console.print()
+        console.print(
+            f":tada: Found a total of {repositories.totalCount} repositories"
+        )
+        console.print()
         # if there are files specified as a way to narrow the discovery
         # of the public GitHub repositories, then filter the results
         if files:
             # display the files being filtered and the maximum search depth
+            console.print(
+                f":mag: Performing filtering for first {max_filter} repositories"
+            )
             console.print(f":mag: Filtering repositories for files: {files}")
-            console.print(f":mag: Maximum search depth: {max_depth}")
+            console.print(
+                f":mag: Maximum search depth during file filtering: {max_depth}"
+            )
             console.print()
             # perform the filtering of the repositories
             filtered_repositories = _filter_repositories_by_files(
@@ -119,7 +130,7 @@ def _filter_repositories_by_files(
         "Accept": "application/vnd.github.v3+json",
     }
     for repository in repositories:
-        if repo_count >= MAX_RETRIEVE:
+        if repo_count >= MAX_FILTER:
             break
         if _repository_contains_files(
             repository, required_files, max_depth, headers
@@ -217,7 +228,7 @@ def _display_search_results(repositories, console: Console) -> None:
         description = repository.description or "No description"
         if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
             description = (
-                str(description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3])
+                description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
                 + Symbols.ELLIPSIS.value
             )
         language_display = repository.language or Symbols.UNKNOWN.value
@@ -259,7 +270,7 @@ def _display_search_results_with_files(
         description = repository.description or "No description"
         if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
             description = (
-                str(description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3])
+                description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
                 + Symbols.ELLIPSIS.value
             )
         language_display = repository.language or Symbols.UNKNOWN.value
