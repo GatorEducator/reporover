@@ -50,6 +50,9 @@ def _build_search_query(
     updated_after: Optional[str],
 ) -> str:
     """Build a GitHub search query string from the provided criteria."""
+    # start with an empty list to hold query parts;
+    # note that each index inside of this list is
+    # one part of the search criteria passed to PyGitHub
     query_parts = []
     # add language filter if provided
     if language:
@@ -67,7 +70,9 @@ def _build_search_query(
     if updated_after:
         query_parts.append(f"pushed:>={updated_after}")
     # if no criteria provided, search for all public repositories
-    # but limit to a reasonable scope
+    # but limit to a reasonable scope where only public repositories
+    # are subject to the search; note that this use of PyGitHub is
+    # already limited to public repositories by default
     if not query_parts:
         query_parts.append("is:public")
     return " ".join(query_parts)
