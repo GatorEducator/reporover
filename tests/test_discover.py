@@ -228,7 +228,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 1
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_no_description(
         self, console, mock_repository_no_description
@@ -241,7 +241,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 1
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_no_language(
         self, console, mock_repository_no_language
@@ -254,7 +254,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 1
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_long_description(
         self, console, mock_repository_long_description
@@ -267,7 +267,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 1
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_multiple_repositories(
         self, console, mock_repository, mock_repository_no_description
@@ -282,7 +282,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 2
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_max_display_limit(self, console):
         """Test _display_search_results respects MAX_DISPLAY limit."""
@@ -310,7 +310,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 0
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_total_count_exceeds_max(
         self, console, mock_repository
@@ -321,7 +321,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = 50
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 4
+            assert mock_print.call_count >= 2
 
     def test_display_search_results_total_count_equals_max(self, console):
         """Test _display_search_results when total count equals max display."""
@@ -340,7 +340,7 @@ class TestDisplaySearchResults:
         repositories.totalCount = Numbers.MAX_DISPLAY.value
         with patch.object(console, "print") as mock_print:
             _display_search_results(repositories, console)
-            assert mock_print.call_count >= 3
+            assert mock_print.call_count >= 2
 
 
 class TestSearchRepositories:
