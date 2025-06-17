@@ -207,7 +207,7 @@ def test_symbols_is_enum():
 
 def test_symbols_values():
     """Test that Symbols has the correct values."""
-    assert Symbols.ELLIPSIS.value == "…"
+    assert Symbols.ELLIPSIS.value == "..."
     assert Symbols.ERROR.value == ""
     assert Symbols.CHECK.value == "󰄬"
     assert Symbols.UNKNOWN.value == "Unknown"
@@ -296,8 +296,8 @@ def test_symbols_constant_types():
 
 def test_symbols_ellipsis_is_unicode():
     """Test that ELLIPSIS is the correct Unicode character."""
-    assert Symbols.ELLIPSIS.value == "…"
-    assert len(Symbols.ELLIPSIS.value) == 1
+    assert Symbols.ELLIPSIS.value == "..."
+    assert len(Symbols.ELLIPSIS.value) == 3
 
 
 def test_symbols_check_is_icon():
