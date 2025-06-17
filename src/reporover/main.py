@@ -476,7 +476,7 @@ def clone(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            f"\n{Symbols.ERROR} Failed to clone at least one repository in"
+            f"\n{Symbols.ERROR.value} Failed to clone at least one repository in"
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
@@ -509,11 +509,11 @@ def discover(  # noqa: PLR0913
         0,
         help="Maximum depth to search for files (0 = repository root)",
     ),
-    max_matches_retrieve: int = typer.Option(
-        Numbers.MAX_RETRIEVE.value,
-        help="Maximum number of repositories to retrieve from search",
+    max_filter: int = typer.Option(
+        Numbers.MAX_FILTER.value,
+        help="Maximum number of discovered repositories filter for files",
     ),
-    max_matches_display: int = typer.Option(
+    max_display: int = typer.Option(
         Numbers.MAX_DISPLAY.value,
         help="Maximum number of repositories to display in results",
     ),
@@ -521,9 +521,12 @@ def discover(  # noqa: PLR0913
     """Discover public GitHub repositories matching search criteria."""
     display_welcome_message()
     console.print(
-        ":sparkles: Searching for public GitHub repositories matching your criteria"
+        ":sparkles: Discovering public GitHub repositories matching the search criteria"
     )
     console.print()
+    # perform the discovery by searching the
+    # public GitHub repositories according to
+    # the provided search and filtering criteria
     search_status_code = search_repositories(
         token,
         language,
@@ -533,17 +536,14 @@ def discover(  # noqa: PLR0913
         updated_after,
         files,
         max_depth,
-        max_matches_retrieve,
-        max_matches_display,
+        max_filter,
+        max_display,
         console,
     )
-    if search_status_code != StatusCode.SUCCESS:
-        console.print(f"\n {Symbols.ERROR} Failed to search for repositories")
-        raise typer.Exit(code=1)
     # check if the search was successful and if it was
     # not then display an error message and exit the sub-command
     if search_status_code != StatusCode.SUCCESS:
         console.print(
-            f"\n{Symbols.ERROR} Failed to discover public GitHub repositories"
+            f"\n{Symbols.ERROR.value} Failed to discover public GitHub repositories"
         )
         raise typer.Exit(code=1)
