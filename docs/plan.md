@@ -156,3 +156,34 @@ To generate the most accurate code, always provide:
 - Dependencies on other modules or external services.
 - Configuration requirements or environment variables.
 - Backward compatibility requirements.
+
+## New Features
+
+### `discover` Command
+
+#### Task Guidelines
+
+- The implementation of this command should adhere to all the rules described in
+all the previous sections.
+- The implementation should proceed on a small-scale basis. It must implement a
+part of a feature before checking back to confirm that the systems is as desired
+and whether or not it is in accordance with the rules described in this
+document.
+
+#### Task Description
+
+- A command-line interface implemented in Typer that is similar to the ones
+provided previously in that it should accept a GitHub access token.
+- The overall purpose of the `discover` command is to query the GitHub REST API
+through the use of PyGitHub to search for public GitHub repositories that match
+the provided search criteria. If it is not possible to implement a feature using
+the PyGitHub library, then it is acceptable to use the `requests` library.
+- The search criteria:
+    - Could all be `None` if they are not provided.
+    - Must be specified as command-line arguments.
+    - As a start, can focus on the following:
+        - `language`: The programming language of the repository.
+        - `stars`: The minimum number of stars the repository should have.
+        - `forks`: The minimum number of forks the repository should have.
+        - `created_after`: The date after which the repository was created.
+        - `updated_after`: The date after which the repository was last updated.
