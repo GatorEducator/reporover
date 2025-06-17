@@ -13,6 +13,7 @@ from reporover.actions import get_github_actions_status
 from reporover.constants import (
     GitHubAccessLevel,
     GitHubPullRequestNumber,
+    Numbers,
     StatusCode,
     Symbols,
 )
@@ -485,7 +486,7 @@ def clone(  # noqa: PLR0913
 def discover(  # noqa: PLR0913
     token: str = typer.Argument(..., help="GitHub token for authentication"),
     language: Optional[str] = typer.Option(
-        None, help="Programming language found in the repository"
+        None, help="Programming language of the repository"
     ),
     stars: Optional[int] = typer.Option(
         None, help="Minimum number of stars the repository should have"
@@ -500,23 +501,29 @@ def discover(  # noqa: PLR0913
         None,
         help="Date after which the repository was last updated (YYYY-MM-DD)",
     ),
+    files: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact file names that the repository should contain",
+    ),
+    max_depth: int = typer.Option(
+        0,
+        help="Maximum depth to search for files (0 = root only, 1 = root + subdirectories, etc.)",
+    ),
     max_matches_retrieve: int = typer.Option(
-        100, help="Maximum number of matches to retrieve during discovery"
+        Numbers.MAX_RETRIEVE.value,
+        help="Maximum number of repositories to retrieve from search",
     ),
     max_matches_display: int = typer.Option(
-        10, help="Maximum number of matches to display during discovery"
+        Numbers.MAX_DISPLAY.value,
+        help="Maximum number of repositories to display in results",
     ),
 ):
     """Discover public GitHub repositories matching search criteria."""
-    # display the welcome message
     display_welcome_message()
     console.print(
         ":sparkles: Searching for public GitHub repositories matching your criteria"
     )
     console.print()
-    # search for repositories using the provided criteria
-    # and the parameters that control matching for both
-    # (a) retrieval and (b) display of the results
     search_status_code = search_repositories(
         token,
         language,
@@ -524,14 +531,19 @@ def discover(  # noqa: PLR0913
         forks,
         created_after,
         updated_after,
+        files,
+        max_depth,
         max_matches_retrieve,
         max_matches_display,
         console,
     )
+    if search_status_code != StatusCode.SUCCESS:
+        console.print(f"\n {Symbols.ERROR} Failed to search for repositories")
+        raise typer.Exit(code=1)
     # check if the search was successful and if it was
     # not then display an error message and exit the sub-command
     if search_status_code != StatusCode.SUCCESS:
         console.print(
-            "\n{Symbols.ERROR} Failed to discover public GitHub repositories"
+            f"\n{Symbols.ERROR} Failed to discover public GitHub repositories"
         )
         raise typer.Exit(code=1)
