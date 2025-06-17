@@ -49,7 +49,7 @@ def search_repositories(  # noqa: PLR0913
                 f":mag: Performing filtering for first {max_filter} repositories"
             )
             console.print(
-                f":mag: Filtering repositories for files and directories: {files}"
+                f":mag: Filtering repositories for files and/or directories: {files}"
             )
             console.print(
                 f":mag: Maximum search depth during file filtering: {max_depth}"
@@ -213,7 +213,7 @@ def _collect_files_recursive(  # noqa: PLR0913
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table."""
     table = Table(
-        title="Repository Search Results (No Filtering by Files)",
+        title="Repository Search Results (No Filtering by Files and/or Directories)",
         box=box.SIMPLE_HEAVY,
     )
     table.add_column("Name", style="cyan", no_wrap=False)
@@ -265,9 +265,9 @@ def _display_search_results(repositories, console: Console) -> None:
 def _display_search_results_with_files(
     repositories: List, console: Console, required_files: List[str]
 ) -> None:
-    """Display the search results for repositories filtered by files and directories."""
+    """Display the search results for repositories filtered by files and/or directories."""
     table = Table(
-        title="Repository Search Results (Filtered by Files)",
+        title="Repository Search Results (Filtered by Files and/or Directories)",
         box=box.SIMPLE_HEAVY,
     )
     table.add_column("Name", style="cyan", no_wrap=True)
@@ -303,10 +303,12 @@ def _display_search_results_with_files(
         repository_count += 1
     console.print()
     console.print(table)
-    console.print()
+    # console.print()
     total_count = len(repositories)
     console.print(
-        f":information: Found {total_count} repositories after filtering for the required files"
+        f":information: Found {total_count} repositories after filtering"
     )
     if total_count > max_results:
-        console.print(f":information: Showing first {max_results} repositories")
+        console.print(
+            f":information: Showing first {max_results} repositories"
+        )
