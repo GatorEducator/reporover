@@ -30,13 +30,17 @@ def search_repositories(  # noqa: PLR0913
     global MAX_DISPLAY, MAX_RETRIEVE  # noqa: PLW0603
     MAX_DISPLAY = max_matches_display
     MAX_RETRIEVE = max_matches_retrieve
+    # attempt to perform the discovery
     try:
+        # create a GitHub instance with the provided token,
+        # using the PyGithub framework to access the GitHub API
         github_instance = github.Github(token)
+        # create the search query based on the provided criteria
         search_query = _build_search_query(
             language, stars, forks, created_after, updated_after
         )
+        # display the search query being used
         console.print(f":mag: Search query: {search_query}")
-        console.print()
         repositories = github_instance.search_repositories(search_query)
         if files:
             console.print(f":mag: Filtering repositories for files: {files}")
@@ -49,6 +53,7 @@ def search_repositories(  # noqa: PLR0913
                 filtered_repositories, console, files
             )
         else:
+            console.print()
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
     except github.GithubException as github_error:
