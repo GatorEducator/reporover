@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import github
 import requests
+from rich import box
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
@@ -46,7 +47,7 @@ def search_repositories(  # noqa: PLR0913
         repositories = github_instance.search_repositories(search_query)
         console.print()
         console.print(
-            f":tada: Found a total of {repositories.totalCount} repositories"
+            f":information: Initially processing {repositories.totalCount} repositories"
         )
         console.print()
         # if there are files specified as a way to narrow the discovery
@@ -74,7 +75,6 @@ def search_repositories(  # noqa: PLR0913
         # noting that an extra newline is needed to separate the
         # output of the search results from the search query itself
         else:
-            console.print()
             _display_search_results(repositories, console)
         return StatusCode.SUCCESS
     # discovering public GitHub repositories did not work correctly and
@@ -230,8 +230,8 @@ def _collect_files_recursive(  # noqa: PLR0913
 
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table."""
-    table = Table(title="Repository Search Results")
-    table.add_column("Name", style="cyan", no_wrap=True)
+    table = Table(title="Repository Search Results", box=box.SIMPLE_HEAVY)
+    table.add_column("Name", style="cyan", no_wrap=False)
     table.add_column("Description", style="magenta")
     table.add_column("Stars", justify="right", style="green")
     table.add_column("Forks", justify="right", style="yellow")
@@ -242,6 +242,17 @@ def _display_search_results(repositories, console: Console) -> None:
     for repository in repositories:
         if repository_count >= max_results:
             break
+        # format the name of the repository like the
+        # description, so that it does not exceed the maximum length
+        if len(repository.name) > Numbers.MAX_NAME_LENGTH.value:
+            repository_name = (
+                repository.name[: Numbers.MAX_NAME_LENGTH.value - 10]
+                + Symbols.ELLIPSIS.value
+                + "   "
+            )
+            repository_name = repository_name.strip()
+        else:
+            repository_name = repository.name
         description = repository.description or "No description"
         if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
             description = (
@@ -251,7 +262,7 @@ def _display_search_results(repositories, console: Console) -> None:
         language_display = repository.language or Symbols.UNKNOWN.value
         updated_date = repository.updated_at.strftime("%Y-%m-%d")
         table.add_row(
-            repository.name,
+            repository_name,
             description,
             str(repository.stargazers_count),
             str(repository.forks_count),
@@ -259,12 +270,17 @@ def _display_search_results(repositories, console: Console) -> None:
             updated_date,
         )
         repository_count += 1
-    console.print(table)
-    console.print()
     total_count = repositories.totalCount
-    console.print(f":information: Found {total_count} repositories total")
+    # display the table of repositories
+    console.print(table)
+    # display final diagnostic information
+    console.print(
+        f":information: Discovered {total_count} repositories"
+    )
     if total_count > max_results:
-        console.print(f":information: Showing first {max_results} results")
+        console.print(
+            f":information: Showing first {max_results} repositories"
+        )
 
 
 def _display_search_results_with_files(
