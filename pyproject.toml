@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "gitpython>=3.1.44",
+    "pydantic>=2.11.7",
     "pygithub>=2.6.1",
     "requests>=2.32.3",
     "rich>=13.9.4",
