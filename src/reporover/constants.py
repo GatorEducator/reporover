@@ -61,6 +61,7 @@ class StatusCode(Enum):
 class Numbers(Enum):
     """Define the numbers used in the RepoRover application."""
 
+    MAX_DEPTH = 0
     MAX_DISPLAY = 10
     MAX_FILTER = 100
     MAX_DESCRIPTION_LENGTH = 50
