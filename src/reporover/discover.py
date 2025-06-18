@@ -16,7 +16,7 @@ MAX_DISPLAY = Numbers.MAX_DISPLAY.value
 MAX_FILTER = Numbers.MAX_FILTER.value
 
 
-def search_repositories(  # noqa: PLR0913
+def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     console: Console,
     token: str,
     language: Optional[str],
@@ -29,6 +29,7 @@ def search_repositories(  # noqa: PLR0913
     max_depth: Optional[int] = Numbers.MAX_DEPTH.value,
     max_filter: Optional[int] = Numbers.MAX_FILTER.value,
     max_display: Optional[int] = Numbers.MAX_DISPLAY.value,
+    save_file: Optional[str] = None,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
     global MAX_DEPTH, MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
@@ -51,6 +52,21 @@ def search_repositories(  # noqa: PLR0913
         )
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
+
+        # prepare configuration data for saving
+        configuration_data = {
+            "language": language,
+            "stars": stars,
+            "forks": forks,
+            "created_after": created_after,
+            "updated_after": updated_after,
+            "files": files,
+            "topics": topics,
+            "max_depth": max_depth,
+            "max_filter": max_filter,
+            "max_display": max_display,
+        }
+
         if files:
             console.print(
                 f":mag: Processing the {repositories.totalCount} accessible repositories"
@@ -71,6 +87,23 @@ def search_repositories(  # noqa: PLR0913
             _display_search_results_with_files(
                 filtered_repositories, console, files
             )
+            # save results if requested
+            if save_file:
+                success = _save_results_to_json(
+                    filtered_repositories,
+                    save_file,
+                    configuration_data,
+                    search_query,
+                    files,
+                )
+                if success:
+                    console.print(
+                        f":floppy_disk: Results saved to {save_file}"
+                    )
+                else:
+                    console.print(
+                        f"{Symbols.ERROR.value} Failed to save results to {save_file}"
+                    )
         else:
             console.print()
             console.print(
@@ -78,6 +111,21 @@ def search_repositories(  # noqa: PLR0913
             )
             console.print()
             _display_search_results(repositories, console)
+            # save results if requested
+            if save_file:
+                # convert generator to list for saving
+                repos_list = list(repositories[:max_display])
+                success = _save_results_to_json(
+                    repos_list, save_file, configuration_data, search_query
+                )
+                if success:
+                    console.print(
+                        f":floppy_disk: Results saved to {save_file}"
+                    )
+                else:
+                    console.print(
+                        f"{Symbols.ERROR.value} Failed to save results to {save_file}"
+                    )
         return StatusCode.SUCCESS
     except github.GithubException as github_error:
         console.print(
@@ -227,6 +275,58 @@ def _collect_files_recursive(  # noqa: PLR0913
                     )
     except Exception:
         pass
+
+
+def _save_results_to_json(
+    repositories: List,
+    save_file: str,
+    configuration_data: dict,
+    search_query: str,
+    required_files: Optional[List[str]] = None,
+) -> bool:
+    """Save the repository search results to a JSON file using Pydantic models."""
+    try:
+        from reporover.models import (
+            DiscoverConfiguration,
+            RepoRoverData,
+            RepositoryInfo,
+        )
+
+        # create the configuration model
+        config_dict = configuration_data.copy()
+        config_dict["search_query"] = search_query
+        configuration = DiscoverConfiguration(**config_dict)
+
+        # create repository models
+        repo_models = []
+        for repo in repositories:
+            repo_info = RepositoryInfo(
+                name=repo.name,
+                url=repo.html_url,
+                description=repo.description,
+                language=repo.language,
+                stars=repo.stargazers_count,
+                forks=repo.forks_count,
+                created_at=repo.created_at,
+                updated_at=repo.updated_at,
+                files=required_files if required_files else None,
+            )
+            repo_models.append(repo_info)
+
+        # create the complete data structure
+        reporover_data = RepoRoverData.create_discover_data(
+            configuration, repo_models
+        )
+
+        # write to JSON file
+        import json
+
+        with open(save_file, "w", encoding="utf-8") as file:
+            json.dump(reporover_data.model_dump(), file, indent=2, default=str)
+
+        return True
+    except Exception:
+        return False
 
 
 def _display_search_results(repositories, console: Console) -> None:
