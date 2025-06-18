@@ -510,12 +510,12 @@ def discover(  # noqa: PLR0913
         help="List of topics that the repository should have",
     ),
     max_depth: int = typer.Option(
-        0,
+        None,
         help="Maximum depth to search for files (0 = repository root)",
     ),
     max_filter: int = typer.Option(
-        Numbers.MAX_FILTER.value,
-        help="Maximum number of discovered repositories filter for files",
+        None,
+        help="Maximum number of discovered repositories to filter for files",
     ),
     max_display: int = typer.Option(
         Numbers.MAX_DISPLAY.value,
@@ -528,6 +528,14 @@ def discover(  # noqa: PLR0913
         ":sparkles: Discovering public GitHub repositories matching the search criteria"
     )
     console.print()
+    # validate that max_filter and max_depth is only used when files are specified;
+    # the basic idea is that there is no value in parameterizing the filtering
+    # process if there are no files that are going to be used to filter repositories
+    if (max_filter is not None or max_depth is not None) and files is None:
+        console.print(
+            f"{Symbols.ERROR.value} The --max-filter and --max-depth options can only be used when --files is specified"
+        )
+        raise typer.Exit(code=1)
     # perform the discovery by searching the
     # public GitHub repositories according to
     # the provided search and filtering criteria
