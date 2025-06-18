@@ -627,8 +627,9 @@ class TestSearchRepositories:
         )
 
     @patch("reporover.discover.github.Github")
+    @patch("reporover.discover.Progress")
     def test_search_repositories_display_results_called(
-        self, mock_github_class, console, mock_repository
+        self, mock_progress_class, mock_github_class, console, mock_repository
     ):
         """Test search_repositories calls display results function."""
         mock_github_instance = Mock()
@@ -639,6 +640,14 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
+        # mock the Progress context manager
+        mock_progress_instance = Mock()
+        mock_progress_class.return_value.__enter__ = Mock(
+            return_value=mock_progress_instance
+        )
+        mock_progress_class.return_value.__exit__ = Mock(return_value=None)
+        mock_progress_instance.add_task.return_value = "task_id"
+        mock_progress_instance.update = Mock()
         with patch(
             "reporover.discover._display_search_results"
         ) as mock_display:
