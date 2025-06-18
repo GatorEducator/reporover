@@ -42,7 +42,7 @@ def search_repositories(  # noqa: PLR0913
         repositories = github_instance.search_repositories(search_query)
         if files:
             console.print(
-                f":mag: Performing filtering for first {max_filter} repositories"
+                f":mag: Performing filtering for at most {max_filter} first repositories"
             )
             console.print(
                 f":mag: Filtering repositories for files and/or directories: {files}"
@@ -60,7 +60,7 @@ def search_repositories(  # noqa: PLR0913
         else:
             console.print()
             console.print(
-                f":information: Initially discovered {repositories.totalCount} repositories"
+                f":information: Processing the {repositories.totalCount} accessible repositories"
             )
             console.print()
             _display_search_results(repositories, console)
@@ -77,7 +77,7 @@ def search_repositories(  # noqa: PLR0913
         return StatusCode.FAILURE
 
 
-def _build_search_query(
+def _build_search_query(  # noqa: PLR0913
     language: Optional[str],
     stars: Optional[int],
     forks: Optional[int],
