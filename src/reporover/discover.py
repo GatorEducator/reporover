@@ -23,6 +23,7 @@ def search_repositories(  # noqa: PLR0913
     created_after: Optional[str],
     updated_after: Optional[str],
     files: Optional[List[str]],
+    topics: Optional[List[str]],
     max_depth: int,
     max_filter: int,
     max_display: int,
@@ -35,7 +36,7 @@ def search_repositories(  # noqa: PLR0913
     try:
         github_instance = github.Github(token)
         search_query = _build_search_query(
-            language, stars, forks, created_after, updated_after
+            language, stars, forks, created_after, updated_after, topics
         )
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
@@ -82,6 +83,7 @@ def _build_search_query(
     forks: Optional[int],
     created_after: Optional[str],
     updated_after: Optional[str],
+    topics: Optional[List[str]],
 ) -> str:
     """Build a GitHub search query string from the provided criteria."""
     query_parts = []
@@ -95,6 +97,9 @@ def _build_search_query(
         query_parts.append(f"created:>={created_after}")
     if updated_after:
         query_parts.append(f"pushed:>={updated_after}")
+    if topics:
+        for topic in topics:
+            query_parts.append(f"topic:{topic}")
     if not query_parts:
         query_parts.append("is:public")
     return " ".join(query_parts)
