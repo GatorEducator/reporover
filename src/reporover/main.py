@@ -495,11 +495,12 @@ def discover(  # noqa: PLR0913
         None, help="Minimum number of forks the repository should have"
     ),
     created_after: Optional[str] = typer.Option(
-        None, help="Date after which the repository was created (YYYY-MM-DD)"
+        None,
+        help="Date after which the repository was created (format: YYYY-MM-DD)",
     ),
     updated_after: Optional[str] = typer.Option(
         None,
-        help="Date after which the repository was last updated (YYYY-MM-DD)",
+        help="Date after which the repository was last updated (format: YYYY-MM-DD)",
     ),
     files: Optional[List[str]] = typer.Option(
         None,
@@ -507,15 +508,15 @@ def discover(  # noqa: PLR0913
     ),
     topics: Optional[List[str]] = typer.Option(
         None,
-        help="List of topics that the repository should have",
+        help="List of exact topics that the repository should have",
     ),
     max_depth: int = typer.Option(
         None,
-        help="Maximum depth to search for files (0 = repository root)",
+        help="Maximum depth to search for files in repository (default: 0 = repository root)",
     ),
     max_filter: int = typer.Option(
         None,
-        help="Maximum number of discovered repositories to filter for files",
+        help="Maximum number of discovered repositories to filter for files (default: 100)",
     ),
     max_display: int = typer.Option(
         Numbers.MAX_DISPLAY.value,
@@ -540,6 +541,7 @@ def discover(  # noqa: PLR0913
     # public GitHub repositories according to
     # the provided search and filtering criteria
     search_status_code = search_repositories(
+        console,
         token,
         language,
         stars,
@@ -551,7 +553,6 @@ def discover(  # noqa: PLR0913
         max_depth,
         max_filter,
         max_display,
-        console,
     )
     # check if the search was successful and if it was
     # not then display an error message and exit the sub-command
