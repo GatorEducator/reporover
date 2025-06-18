@@ -238,7 +238,10 @@ class TestDisplaySearchResults:
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter([mock_repository]))
         repositories.totalCount = 1
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -251,7 +254,10 @@ class TestDisplaySearchResults:
             return_value=iter([mock_repository_no_description])
         )
         repositories.totalCount = 1
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -264,7 +270,10 @@ class TestDisplaySearchResults:
             return_value=iter([mock_repository_no_language])
         )
         repositories.totalCount = 1
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -277,7 +286,10 @@ class TestDisplaySearchResults:
             return_value=iter([mock_repository_long_description])
         )
         repositories.totalCount = 1
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -292,7 +304,10 @@ class TestDisplaySearchResults:
             )
         )
         repositories.totalCount = 2
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -311,7 +326,10 @@ class TestDisplaySearchResults:
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter(mock_repos))
         repositories.totalCount = 15
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -320,7 +338,10 @@ class TestDisplaySearchResults:
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter([]))
         repositories.totalCount = 0
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -331,7 +352,10 @@ class TestDisplaySearchResults:
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter([mock_repository]))
         repositories.totalCount = 50
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -350,7 +374,10 @@ class TestDisplaySearchResults:
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter(mock_repos))
         repositories.totalCount = Numbers.MAX_DISPLAY.value
-        with patch.object(console, "print") as mock_print:
+        with (
+            patch.object(console, "print") as mock_print,
+            patch("reporover.discover.Progress"),
+        ):
             _display_search_results(repositories, console)
             assert mock_print.call_count >= 2
 
@@ -388,7 +415,10 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
-        with patch.object(console, "print"):
+        with (
+            patch.object(console, "print"),
+            patch("reporover.discover.Progress"),
+        ):
             result = search_repositories(
                 token="fake_token",
                 language="python",
@@ -420,7 +450,10 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
-        with patch.object(console, "print"):
+        with (
+            patch.object(console, "print"),
+            patch("reporover.discover.Progress"),
+        ):
             result = search_repositories(
                 token="fake_token",
                 language=None,
