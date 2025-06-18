@@ -26,6 +26,7 @@ class TestBuildSearchQuery:
             forks=50,
             created_after="2023-01-01",
             updated_after="2023-06-01",
+            topics=None,
         )
         expected = "language:python stars:>=100 forks:>=50 created:>=2023-01-01 pushed:>=2023-06-01"
         assert result == expected
@@ -38,6 +39,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after=None,
+            topics=None,
         )
         expected = "language:javascript"
         assert result == expected
@@ -50,6 +52,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after=None,
+            topics=[],
         )
         expected = "stars:>=200"
         assert result == expected
@@ -62,6 +65,7 @@ class TestBuildSearchQuery:
             forks=75,
             created_after=None,
             updated_after=None,
+            topics=None,
         )
         expected = "forks:>=75"
         assert result == expected
@@ -74,6 +78,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after="2022-12-01",
             updated_after=None,
+            topics=None,
         )
         expected = "created:>=2022-12-01"
         assert result == expected
@@ -86,6 +91,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after="2023-03-15",
+            topics=None,
         )
         expected = "pushed:>=2023-03-15"
         assert result == expected
@@ -98,6 +104,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after=None,
+            topics=None,
         )
         expected = "stars:>=0"
         assert result == expected
@@ -110,6 +117,7 @@ class TestBuildSearchQuery:
             forks=0,
             created_after=None,
             updated_after=None,
+            topics=[],
         )
         expected = "forks:>=0"
         assert result == expected
@@ -122,6 +130,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after=None,
+            topics=None,
         )
         expected = "is:public"
         assert result == expected
@@ -134,6 +143,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after=None,
             updated_after=None,
+            topics=None,
         )
         expected = "is:public"
         assert result == expected
@@ -146,6 +156,7 @@ class TestBuildSearchQuery:
             forks=None,
             created_after="",
             updated_after="",
+            topics=None,
         )
         expected = "is:public"
         assert result == expected
@@ -158,6 +169,7 @@ class TestBuildSearchQuery:
             forks=25,
             created_after=None,
             updated_after="2023-01-01",
+            topics=[],
         )
         expected = "language:go forks:>=25 pushed:>=2023-01-01"
         assert result == expected
@@ -389,6 +401,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.SUCCESS
         mock_github_class.assert_called_once_with("fake_token")
@@ -420,6 +433,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.SUCCESS
 
@@ -448,6 +462,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.FAILURE
         mock_print.assert_called()
@@ -475,6 +490,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.FAILURE
         mock_print.assert_called()
@@ -505,6 +521,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.SUCCESS
 
@@ -534,6 +551,7 @@ class TestSearchRepositories:
                 max_filter=100,
                 max_display=10,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.SUCCESS
 
@@ -563,6 +581,7 @@ class TestSearchRepositories:
                 max_filter=200,
                 max_display=20,
                 console=console,
+                topics=[""],
             )
         assert result == StatusCode.SUCCESS
         from reporover.discover import MAX_DISPLAY, MAX_FILTER
@@ -600,10 +619,11 @@ class TestSearchRepositories:
                     max_filter=100,
                     max_display=10,
                     console=console,
+                    topics=[""],
                 )
         assert result == StatusCode.SUCCESS
         mock_build_query.assert_called_once_with(
-            "python", 100, None, None, None
+            "python", 100, None, None, None, [""]
         )
 
     @patch("reporover.discover.github.Github")
@@ -635,6 +655,7 @@ class TestSearchRepositories:
                     max_filter=100,
                     max_display=10,
                     console=console,
+                    topics=[""],
                 )
         assert result == StatusCode.SUCCESS
         mock_display.assert_called_once_with(mock_repositories, console)
