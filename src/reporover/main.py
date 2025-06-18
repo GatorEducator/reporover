@@ -522,6 +522,10 @@ def discover(  # noqa: PLR0913
         Numbers.MAX_DISPLAY.value,
         help="Maximum number of repositories to display in results",
     ),
+    save: Optional[str] = typer.Option(
+        None,
+        help="Save results to JSON file at specified path",
+    ),
 ):
     """Discover public GitHub repositories matching search criteria."""
     display_welcome_message()
@@ -553,6 +557,7 @@ def discover(  # noqa: PLR0913
         max_depth,
         max_filter,
         max_display,
+        save,
     )
     # check if the search was successful and if it was
     # not then display an error message and exit the sub-command
