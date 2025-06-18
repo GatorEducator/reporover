@@ -164,6 +164,26 @@ To generate the most accurate code, always provide:
 - Configuration requirements or environment variables.
 - Backward compatibility requirements.
 
+### Fenced Code Blocks
+
+- Always use fenced code blocks with the language specified for syntax highlighting.
+- Use triple backticks (```) for the fenced code blocks.
+- Whenever the generated code for a file is less than 100 lines, always generate
+a single code block for the entire file, making it easy to apply the code to a
+contiguous region of the file.
+- When the generated code for a file is more than 100 lines, always follow these rules:
+    - Provide the fenced code blocks so that the first one generated is for the last
+    block of code in the file being generated.
+    - After providing the last block of code, work your way "up" the file for which code
+    in being generated and provide each remaining fenced code block.
+    - Make sure that the provided blocks of code are for contiguous sections of the file
+    for which code is being generated.
+    - The overall goal is that I should be able to start from the first code block
+    that you generate and apply it to the bottom of the file and then continue to apply
+    code blocks until the entire file is updated with the new code.
+    - The reason for asking the code to be generated in this fashion is that it ensures
+    that the line numbers in the code blocks match the line numbers in the file.
+
 ## New Features
 
 ### `discover` Command
