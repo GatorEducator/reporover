@@ -527,7 +527,7 @@ def discover(  # noqa: PLR0913
         help="Save results to JSON file at specified path",
     ),
 ):
-    """Discover public GitHub repositories matching search criteria."""
+    """Discover public GitHub repositories matching criteria."""
     display_welcome_message()
     console.print(
         ":sparkles: Discovering public GitHub repositories matching the search criteria"
