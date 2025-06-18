@@ -239,3 +239,32 @@ the PyGitHub library, then it is acceptable to use the `requests` library.
         - `size`: The minimum size of the repository in kilobytes.
         - `has_issues`: Whether the repository should have issues enabled.
         - `has_wiki`: Whether the repository should have a wiki enabled.
+- The `discover` command should have the ability to display the results in a
+table and, importantly, to save the results to a file in JSON format. Here are
+more details about how the data should be saved to the JSON file:
+    - Use `pydantic` models to create the data in as a class instead of using
+    Python dictionaries directory.
+    - Use `pydantic` to confirm that the data is in the correct format before
+    saving it to the JSON file and after reading it from the JSON file.
+    - This is the information needed in the JSON file:
+      - A key called `reporover`. The values for this key are as follows:
+        - `configuration`: a dictionary that contains (key, value) pairs for all
+        the command-line arguments for that run of the command. For instance,
+        this would include the fact that it was the `discover` subcommand that
+        was run and the `search_query` that was used (this is constructed by the
+        functions inside of the `discover.py` file).
+        - `repos`: a list of dictionaries, where each dictionary contains all
+        the information about each GitHub repository that was found. This must
+        contain all the information that would be needed to access the
+        repository and be flexible enough to include new information later. For
+        instance, this would include additional (key, value) pairs for:
+            - `name`: The name of the repository.
+            - `url`: The URL of the repository.
+            - `description`: The description of the repository.
+            - `language`: The programming language of the repository.
+            - `stars`: The number of stars the repository has.
+            - `forks`: The number of forks the repository has.
+            - `created_at`: The date when the repository was created.
+            - `updated_at`: The date when the repository was last updated.
+            - `files`: A list of files that were found in the repository that
+            match the search criteria.
