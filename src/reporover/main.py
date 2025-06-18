@@ -505,6 +505,10 @@ def discover(  # noqa: PLR0913
         None,
         help="List of exact file names that the repository should contain",
     ),
+    topics: Optional[List[str]] = typer.Option(
+        None,
+        help="List of topics that the repository should have",
+    ),
     max_depth: int = typer.Option(
         0,
         help="Maximum depth to search for files (0 = repository root)",
@@ -535,6 +539,7 @@ def discover(  # noqa: PLR0913
         created_after,
         updated_after,
         files,
+        topics,
         max_depth,
         max_filter,
         max_display,
