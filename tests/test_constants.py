@@ -193,6 +193,7 @@ def test_numbers_values():
 def test_numbers_members():
     """Test that Numbers enum has exactly the expected members."""
     expected_members = {
+        "MAX_DEPTH",
         "MAX_DISPLAY",
         "MAX_FILTER",
         "MAX_DESCRIPTION_LENGTH",
