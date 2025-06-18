@@ -33,6 +33,7 @@ dependencies = [
 dev = [
     "hypothesis>=6.135.0",
     "mypy>=1.15.0",
+    "pymarkdownlnt>=0.9.30",
     "pytest>=8.3.4",
     "pytest-clarity>=1.0.1",
     "pytest-cov>=6.0.0",
@@ -75,6 +76,8 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
+readme = "README.md"
+plan = "docs/plan.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
@@ -91,6 +94,7 @@ symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recurs
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
 ty-command = {var = "ty check {project} {tests}", recursive = true}
+markdownlint-command = { var = "poetry run pymarkdown --config .pymarkdown.cfg scan {readme} {plan}", recursive = true }
 
 [tool.taskipy.tasks]
 all = "task lint && task test"
