@@ -508,7 +508,10 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
-        with patch.object(console, "print"):
+        with (
+            patch.object(console, "print"),
+            patch("reporover.discover.Progress"),
+        ):
             result = search_repositories(
                 token="fake_token",
                 language="obscure_language",
@@ -538,7 +541,10 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
-        with patch.object(console, "print"):
+        with (
+            patch.object(console, "print"),
+            patch("reporover.discover.Progress"),
+        ):
             result = search_repositories(
                 token="fake_token",
                 language="python",
@@ -568,7 +574,10 @@ class TestSearchRepositories:
         mock_github_instance.search_repositories.return_value = (
             mock_repositories
         )
-        with patch.object(console, "print"):
+        with (
+            patch.object(console, "print"),
+            patch("reporover.discover.Progress"),
+        ):
             result = search_repositories(
                 token="fake_token",
                 language="python",
