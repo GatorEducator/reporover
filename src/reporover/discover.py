@@ -11,11 +11,13 @@ from rich.table import Table
 
 from reporover.constants import Numbers, StatusCode, Symbols
 
+MAX_DEPTH = Numbers.MAX_DEPTH.value
 MAX_DISPLAY = Numbers.MAX_DISPLAY.value
 MAX_FILTER = Numbers.MAX_FILTER.value
 
 
 def search_repositories(  # noqa: PLR0913
+    console: Console,
     token: str,
     language: Optional[str],
     stars: Optional[int],
@@ -24,15 +26,24 @@ def search_repositories(  # noqa: PLR0913
     updated_after: Optional[str],
     files: Optional[List[str]],
     topics: Optional[List[str]],
-    max_depth: int,
-    max_filter: int,
-    max_display: int,
-    console: Console,
+    max_depth: Optional[int] = Numbers.MAX_DEPTH.value,
+    max_filter: Optional[int] = Numbers.MAX_FILTER.value,
+    max_display: Optional[int] = Numbers.MAX_DISPLAY.value,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
-    global MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
-    MAX_DISPLAY = max_display
-    MAX_FILTER = max_filter
+    global MAX_DEPTH, MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
+    if max_depth is None:
+        max_depth = MAX_DEPTH
+    else:
+        MAX_DEPTH = max_depth
+    if max_filter is None:
+        max_filter = MAX_FILTER
+    else:
+        MAX_FILTER = max_filter
+    if max_display is None:
+        max_display = MAX_DISPLAY
+    else:
+        MAX_DISPLAY = max_display
     try:
         github_instance = github.Github(token)
         search_query = _build_search_query(
@@ -41,6 +52,9 @@ def search_repositories(  # noqa: PLR0913
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
         if files:
+            console.print(
+                f":mag: Processing the {repositories.totalCount} accessible repositories"
+            )
             console.print(
                 f":mag: Performing filtering for at most {max_filter} first repositories"
             )
@@ -216,7 +230,7 @@ def _collect_files_recursive(  # noqa: PLR0913
 
 
 def _display_search_results(repositories, console: Console) -> None:
-    """Display the search results in a formatted table."""
+    """Display the search results in a formatted table when there is no file filtering."""
     table = Table(
         title="Repository Search Results (No Filtering by Files and/or Directories)",
         box=box.SIMPLE_HEAVY,
@@ -229,36 +243,48 @@ def _display_search_results(repositories, console: Console) -> None:
     table.add_column("Updated", style="white")
     repository_count = 0
     max_results = MAX_DISPLAY
-    for repository in repositories:
-        if repository_count >= max_results:
-            break
-        if len(repository.name) > Numbers.MAX_NAME_LENGTH.value:
-            repository_name = (
-                repository.name[: Numbers.MAX_NAME_LENGTH.value - 10]
-                + Symbols.ELLIPSIS.value
-                + "   "
-            )
-            repository_name = repository_name.strip()
-        else:
-            repository_name = repository.name
-        description = repository.description or "No description"
-        if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
-            description = (
-                description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
-                + Symbols.ELLIPSIS.value
-            )
-        language_display = repository.language or Symbols.UNKNOWN.value
-        updated_date = repository.updated_at.strftime("%Y-%m-%d")
-        table.add_row(
-            repository_name,
-            description,
-            str(repository.stargazers_count),
-            str(repository.forks_count),
-            language_display,
-            updated_date,
-        )
-        repository_count += 1
     total_count = repositories.totalCount
+    display_count = min(total_count, max_results)
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Processing Repositories", total=display_count
+        )
+        for repository in repositories:
+            if repository_count >= max_results:
+                break
+            if len(repository.name) > Numbers.MAX_NAME_LENGTH.value:
+                repository_name = (
+                    repository.name[: Numbers.MAX_NAME_LENGTH.value - 10]
+                    + Symbols.ELLIPSIS.value
+                    + "   "
+                )
+                repository_name = repository_name.strip()
+            else:
+                repository_name = repository.name
+            description = repository.description or "No description"
+            if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
+                description = (
+                    description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
+                    + Symbols.ELLIPSIS.value
+                )
+            language_display = repository.language or Symbols.UNKNOWN.value
+            updated_date = repository.updated_at.strftime("%Y-%m-%d")
+            table.add_row(
+                repository_name,
+                description,
+                str(repository.stargazers_count),
+                str(repository.forks_count),
+                language_display,
+                updated_date,
+            )
+            repository_count += 1
+            progress.update(task, advance=1)
+    console.print()
     console.print(table)
     console.print(f":information: Discovered {total_count} total repositories")
     if total_count > max_results:
@@ -284,31 +310,42 @@ def _display_search_results_with_files(
     table.add_column("Files Found", style="bright_green")
     repository_count = 0
     max_results = MAX_DISPLAY
-    for repository in repositories:
-        if repository_count >= max_results:
-            break
-        description = repository.description or "No description"
-        if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
-            description = (
-                description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
-                + Symbols.ELLIPSIS.value
-            )
-        language_display = repository.language or Symbols.UNKNOWN.value
-        updated_date = repository.updated_at.strftime("%Y-%m-%d")
-        files_display = ", ".join(required_files)
-        table.add_row(
-            repository.name,
-            description,
-            str(repository.stargazers_count),
-            str(repository.forks_count),
-            language_display,
-            updated_date,
-            files_display,
+    total_count = len(repositories)
+    display_count = min(total_count, max_results)
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Processing Repositories", total=display_count
         )
-        repository_count += 1
+        for repository in repositories:
+            if repository_count >= max_results:
+                break
+            description = repository.description or "No description"
+            if len(description) > Numbers.MAX_DESCRIPTION_LENGTH.value:
+                description = (
+                    description[: Numbers.MAX_DESCRIPTION_LENGTH.value - 3]
+                    + Symbols.ELLIPSIS.value
+                )
+            language_display = repository.language or Symbols.UNKNOWN.value
+            updated_date = repository.updated_at.strftime("%Y-%m-%d")
+            files_display = ", ".join(required_files)
+            table.add_row(
+                repository.name,
+                description,
+                str(repository.stargazers_count),
+                str(repository.forks_count),
+                language_display,
+                updated_date,
+                files_display,
+            )
+            repository_count += 1
+            progress.update(task, advance=1)
     console.print()
     console.print(table)
-    total_count = len(repositories)
     console.print(
         f":information: Found {total_count} repositories after filtering"
     )
