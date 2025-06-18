@@ -94,7 +94,7 @@ symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recurs
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
 ty-command = {var = "ty check {project} {tests}", recursive = true}
-markdownlint-command = { var = "poetry run pymarkdown --config .pymarkdown.cfg scan {readme} {plan}", recursive = true }
+markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {plan}", recursive = true }
 
 [tool.taskipy.tasks]
 all = "task lint && task test"
