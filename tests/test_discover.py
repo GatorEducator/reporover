@@ -362,7 +362,7 @@ class TestDisplaySearchResults:
     def test_display_search_results_total_count_equals_max(self, console):
         """Test _display_search_results when total count equals max display."""
         mock_repos = []
-        for i in range(Numbers.MAX_DISPLAY.value):
+        for i in range(Numbers.MAX_KEEP.value):
             repo = Mock()
             repo.name = f"repo-{i}"
             repo.description = f"Description {i}"
@@ -373,7 +373,7 @@ class TestDisplaySearchResults:
             mock_repos.append(repo)
         repositories = Mock()
         repositories.__iter__ = Mock(return_value=iter(mock_repos))
-        repositories.totalCount = Numbers.MAX_DISPLAY.value
+        repositories.totalCount = Numbers.MAX_KEEP.value
         with (
             patch.object(console, "print") as mock_print,
             patch("reporover.discover.Progress"),
