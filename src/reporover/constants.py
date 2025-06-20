@@ -58,8 +58,20 @@ class StatusCode(Enum):
     FAILURE = 600
 
 
+class Numbers(Enum):
+    """Define the numbers used in the RepoRover application."""
+
+    MAX_DEPTH = 0
+    MAX_KEEP = 75
+    MAX_FILTER = 100
+    MAX_DESCRIPTION_LENGTH = 50
+    MAX_NAME_LENGTH = 40
+
+
 class Symbols(Enum):
     """Define the symbols used in the RepoRover application."""
 
+    ELLIPSIS = "..."
     ERROR = ""
     CHECK = "󰄬"
+    UNKNOWN = "Unknown"

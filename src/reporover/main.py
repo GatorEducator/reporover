@@ -13,8 +13,11 @@ from reporover.actions import get_github_actions_status
 from reporover.constants import (
     GitHubAccessLevel,
     GitHubPullRequestNumber,
+    Numbers,
     StatusCode,
+    Symbols,
 )
+from reporover.discover import search_repositories
 from reporover.pullrequest import leave_pr_comment
 from reporover.repository import clone_repo_gitpython, commit_files_to_repo
 from reporover.status import get_status_from_codes
@@ -473,7 +476,93 @@ def clone(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to clone at least one repository in"
+            f"\n{Symbols.ERROR.value} Failed to clone at least one repository in"
             + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def discover(  # noqa: PLR0913
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    language: Optional[str] = typer.Option(
+        None, help="Programming language of the repository"
+    ),
+    stars: Optional[int] = typer.Option(
+        None, help="Minimum number of stars the repository should have"
+    ),
+    forks: Optional[int] = typer.Option(
+        None, help="Minimum number of forks the repository should have"
+    ),
+    created_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was created (format: YYYY-MM-DD)",
+    ),
+    updated_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was last updated (format: YYYY-MM-DD)",
+    ),
+    files: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact file names that the repository should contain",
+    ),
+    topics: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact topics that the repository should have",
+    ),
+    max_depth: int = typer.Option(
+        None,
+        help="Maximum depth to search for files in repository (default: 0 = repository root)",
+    ),
+    max_filter: int = typer.Option(
+        None,
+        help="Maximum number of discovered repositories to filter for files (default: 100)",
+    ),
+    max_keep: int = typer.Option(
+        Numbers.MAX_KEEP.value,
+        help="Maximum number of repositories to display and/or keep in results",
+    ),
+    save: Optional[str] = typer.Option(
+        None,
+        help="Save results to JSON file at specified path",
+    ),
+):
+    """Discover public GitHub repositories matching criteria."""
+    display_welcome_message()
+    console.print(
+        ":sparkles: Discovering public GitHub repositories matching the search criteria"
+    )
+    console.print()
+    # validate that max_filter and max_depth is only used when files are specified;
+    # the basic idea is that there is no value in parameterizing the filtering
+    # process if there are no files that are going to be used to filter repositories
+    if (max_filter is not None or max_depth is not None) and files is None:
+        console.print(
+            f"{Symbols.ERROR.value} The --max-filter and --max-depth options can only be used when --files is specified"
+        )
+        raise typer.Exit(code=1)
+    # perform the discovery by searching the
+    # public GitHub repositories according to
+    # the provided search and filtering criteria
+    search_status_code = search_repositories(
+        console,
+        token,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+        files,
+        topics,
+        max_depth,
+        max_filter,
+        max_keep,
+        save,
+    )
+    # check if the search was successful and if it was
+    # not then display an error message and exit the sub-command
+    if search_status_code != StatusCode.SUCCESS:
+        console.print(
+            f"\n{Symbols.ERROR.value} Failed to discover public GitHub repositories"
         )
         raise typer.Exit(code=1)

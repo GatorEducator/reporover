@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.totals.percent_covered_display&suffix=%25&url=https%3A//raw.githubusercontent.com/wiki/GatorEducator/reporover/coverage.json)](https://github.com/GatorEducator/reporover)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/reporover)
 ![PyPI - Version](https://img.shields.io/pypi/v/reporover?logoColor=blue&color=blue)
-[![Code Style: ruff](https://img.shields.io/badge/style-Ruff-blue.svg)](https://docs.astral.sh/ruff/)
+[![PyPI Downloads](https://static.pepy.tech/badge/reporover)](https://pepy.tech/projects/reporover)
 [![Maintenance](https://img.shields.io/badge/maintained%3F-Yes-blue.svg)](https://github.com/gkapfham/chasten/graphs/commit-activity)
 [![License LGPL v3](https://img.shields.io/badge/license-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 

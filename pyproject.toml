@@ -23,6 +23,8 @@ classifiers = [
 ]
 dependencies = [
     "gitpython>=3.1.44",
+    "pydantic>=2.11.7",
+    "pygithub>=2.6.1",
     "requests>=2.32.3",
     "rich>=13.9.4",
     "typer>=0.15.1",
@@ -32,6 +34,7 @@ dependencies = [
 dev = [
     "hypothesis>=6.135.0",
     "mypy>=1.15.0",
+    "pymarkdownlnt>=0.9.30",
     "pytest>=8.3.4",
     "pytest-clarity>=1.0.1",
     "pytest-cov>=6.0.0",
@@ -74,6 +77,8 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
+readme = "README.md"
+plan = "docs/plan.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
@@ -90,13 +95,15 @@ symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recurs
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
 ty-command = {var = "ty check {project} {tests}", recursive = true}
+markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {plan}", recursive = true }
 
 [tool.taskipy.tasks]
-all = "task lint && task test"
-lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented"
+all = "task lint && task test && task test-coverage"
+lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented && task markdownlint"
 check = { cmd = "{check-command}", help = "Run the ruff linting checks", use_vars = true }
 format = { cmd = "{format-command}", help = "Run the ruff formatter on source code", use_vars = true }
 format-fix = { cmd = "{fixformat-command}", help = "Run the ruff formatter to fix source code", use_vars = true }
+markdownlint = { cmd = "{markdownlint-command}", help = "Run the markdown linter on text files", use_vars = true }
 mypy = { cmd = "{mypy-command}", help = "Run the mypy type checker for potential type errors", use_vars = true }
 ty = { cmd = "{ty-command}", help = "Run the ty type checker for potential type errors", use_vars = true }
 symbex = "task symbex-typed && task symbex-documented"
