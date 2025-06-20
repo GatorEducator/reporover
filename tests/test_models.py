@@ -114,7 +114,7 @@ class TestRepositoryInfo:
                 created_at=created_at,
                 updated_at=updated_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_missing_required_field_forks(self):
         """Test RepositoryInfo validation fails when forks is missing."""
@@ -130,7 +130,7 @@ class TestRepositoryInfo:
                 created_at=created_at,
                 updated_at=updated_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_missing_required_field_created_at(self):
         """Test RepositoryInfo validation fails when created_at is missing."""
@@ -145,7 +145,7 @@ class TestRepositoryInfo:
                 forks=50,
                 updated_at=updated_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_missing_required_field_updated_at(self):
         """Test RepositoryInfo validation fails when updated_at is missing."""
@@ -160,7 +160,7 @@ class TestRepositoryInfo:
                 forks=50,
                 created_at=created_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_model_dump_excludes_none_values(self):
         """Test that model_dump excludes None values when exclude_none is True."""
@@ -263,7 +263,7 @@ class TestDiscoverConfiguration:
                 max_depth=None,
                 max_filter=None,
                 max_display=None,
-            )
+            )  # type: ignore
 
     def test_discover_configuration_model_dump_excludes_none_values(self):
         """Test that model_dump excludes None values when exclude_none is True."""
@@ -363,11 +363,11 @@ class TestRepoRoverData:
         assert "repos" in data.reporover
         config_dict = data.reporover["configuration"]
         repos_list = data.reporover["repos"]
-        assert config_dict["command"] == "discover"
-        assert config_dict["language"] == "Python"
-        assert config_dict["stars"] == 10
-        assert len(repos_list) == 1
-        assert repos_list[0]["name"] == "test-repo"
+        assert config_dict["command"] == "discover"  # type: ignore
+        assert config_dict["language"] == "Python"  # type: ignore
+        assert config_dict["stars"] == 10  # type: ignore
+        assert len(repos_list) == 1  # type: ignore
+        assert repos_list[0]["name"] == "test-repo"  # type: ignore
 
     def test_create_discover_data_with_empty_repositories(self):
         """Test create_discover_data works with empty repository list."""
@@ -390,7 +390,7 @@ class TestRepoRoverData:
         assert "configuration" in data.reporover
         assert "repos" in data.reporover
         repos_list = data.reporover["repos"]
-        assert len(repos_list) == 0
+        assert len(repos_list) == 0  # type: ignore
 
     def test_create_discover_data_json_serializable(self):
         """Test that create_discover_data produces JSON-serializable output."""
