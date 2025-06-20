@@ -518,9 +518,9 @@ def discover(  # noqa: PLR0913
         None,
         help="Maximum number of discovered repositories to filter for files (default: 100)",
     ),
-    max_display: int = typer.Option(
-        Numbers.MAX_DISPLAY.value,
-        help="Maximum number of repositories to display in results",
+    max_keep: int = typer.Option(
+        Numbers.MAX_KEEP.value,
+        help="Maximum number of repositories to display and/or keep in results",
     ),
     save: Optional[str] = typer.Option(
         None,
@@ -556,7 +556,7 @@ def discover(  # noqa: PLR0913
         topics,
         max_depth,
         max_filter,
-        max_display,
+        max_keep,
         save,
     )
     # check if the search was successful and if it was
