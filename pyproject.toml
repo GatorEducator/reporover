@@ -98,7 +98,7 @@ ty-command = {var = "ty check {project} {tests}", recursive = true}
 markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {plan}", recursive = true }
 
 [tool.taskipy.tasks]
-all = "task lint && task test"
+all = "task lint && task test && task test-coverage"
 lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented && task markdownlint"
 check = { cmd = "{check-command}", help = "Run the ruff linting checks", use_vars = true }
 format = { cmd = "{format-command}", help = "Run the ruff formatter on source code", use_vars = true }
