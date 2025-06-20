@@ -82,7 +82,7 @@ class TestRepositoryInfo:
                 created_at=created_at,
                 updated_at=updated_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_missing_required_field_url(self):
         """Test RepositoryInfo validation fails when url is missing."""
@@ -98,7 +98,7 @@ class TestRepositoryInfo:
                 created_at=created_at,
                 updated_at=updated_at,
                 files=None,
-            )
+            )  # type: ignore
 
     def test_repository_info_missing_required_field_stars(self):
         """Test RepositoryInfo validation fails when stars is missing."""
@@ -319,13 +319,13 @@ class TestRepoRoverData:
         assert "repos" in data.reporover
         config_dict = data.reporover["configuration"]
         repos_list = data.reporover["repos"]
-        assert config_dict["command"] == "discover"
-        assert len(repos_list) == 1
+        assert config_dict["command"] == "discover"  # type: ignore
+        assert len(repos_list) == 1  # type: ignore
 
     def test_repo_rover_data_missing_required_field(self):
         """Test RepoRoverData validation fails when reporover is missing."""
         with pytest.raises(ValidationError):
-            RepoRoverData()
+            RepoRoverData()  # type: ignore
 
     def test_create_discover_data_class_method(self):
         """Test the create_discover_data class method creates proper structure."""
