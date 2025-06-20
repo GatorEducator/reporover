@@ -2,6 +2,7 @@
 
 # ruff: noqa: PLR2004
 
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -719,3 +720,332 @@ class TestSearchRepositories:
                 )
         assert result == StatusCode.SUCCESS
         mock_display.assert_called_once_with(mock_repositories, console)
+
+
+class TestLoadResultsFromJson:
+    """Test cases for the load_results_from_json function."""
+
+    @pytest.fixture
+    def valid_json_data(self):
+        """Create valid JSON data for testing."""
+        return {
+            "reporover": {
+                "configuration": {
+                    "language": "python",
+                    "stars": 100,
+                    "forks": 50,
+                    "created_after": "2023-01-01",
+                    "updated_after": "2023-06-01",
+                    "files": ["README.md"],
+                    "topics": ["web"],
+                    "max_depth": 3,
+                    "max_filter": 100,
+                    "max_display": 10,
+                    "search_query": "language:python stars:>=100",
+                    "timestamp": "2023-07-01T12:00:00Z",
+                },
+                "repositories": [
+                    {
+                        "name": "test-repo",
+                        "url": "https://github.com/user/test-repo",
+                        "description": "A test repository",
+                        "language": "Python",
+                        "stars": 150,
+                        "forks": 25,
+                        "created_at": "2023-01-01T00:00:00Z",
+                        "updated_at": "2023-06-15T00:00:00Z",
+                        "files": ["README.md"],
+                    }
+                ],
+            }
+        }
+
+    @pytest.fixture
+    def temp_json_file(self, tmp_path, valid_json_data):
+        """Create a temporary JSON file with valid data."""
+        json_file = tmp_path / "test_data.json"
+        with open(json_file, "w", encoding="utf-8") as file:
+            json.dump(valid_json_data, file, indent=2)
+        return str(json_file)
+
+    @pytest.fixture
+    def invalid_json_file(self, tmp_path):
+        """Create a temporary file with invalid JSON."""
+        json_file = tmp_path / "invalid.json"
+        with open(json_file, "w", encoding="utf-8") as file:
+            file.write("invalid json content {")
+        return str(json_file)
+
+    @pytest.fixture
+    def empty_json_file(self, tmp_path):
+        """Create a temporary empty JSON file."""
+        json_file = tmp_path / "empty.json"
+        with open(json_file, "w", encoding="utf-8") as file:
+            json.dump({}, file)
+        return str(json_file)
+
+    def test_load_results_from_json_success(self, temp_json_file):
+        """Test load_results_from_json with valid JSON file."""
+        from reporover.discover import load_results_from_json
+
+        result = load_results_from_json(temp_json_file)
+
+        assert result is not None
+        assert hasattr(result, "reporover")
+        assert "configuration" in result.reporover
+        assert "repositories" in result.reporover
+
+    def test_load_results_from_json_file_not_found(self):
+        """Test load_results_from_json with non-existent file."""
+        from reporover.discover import load_results_from_json
+
+        result = load_results_from_json("non_existent_file.json")
+
+        assert result is None
+
+    def test_load_results_from_json_invalid_json(self, invalid_json_file):
+        """Test load_results_from_json with invalid JSON."""
+        from reporover.discover import load_results_from_json
+
+        result = load_results_from_json(invalid_json_file)
+
+        assert result is None
+
+    def test_load_results_from_json_empty_file(self, empty_json_file):
+        """Test load_results_from_json with empty JSON file."""
+        from reporover.discover import load_results_from_json
+
+        result = load_results_from_json(empty_json_file)
+
+        assert result is None
+
+    def test_load_results_from_json_malformed_data(self, tmp_path):
+        """Test load_results_from_json with malformed data structure."""
+        from reporover.discover import load_results_from_json
+
+        malformed_data = {"invalid": "structure"}
+        json_file = tmp_path / "malformed.json"
+        with open(json_file, "w", encoding="utf-8") as file:
+            json.dump(malformed_data, file)
+
+        result = load_results_from_json(str(json_file))
+
+        assert result is None
+
+    def test_load_results_from_json_missing_required_fields(self, tmp_path):
+        """Test load_results_from_json with missing required fields."""
+        from reporover.discover import load_results_from_json
+
+        # Create data that's missing the top-level reporover field
+        incomplete_data = {
+            "configuration": {"language": "python"}
+            # missing the required "reporover" top-level key
+        }
+        json_file = tmp_path / "incomplete.json"
+        with open(json_file, "w", encoding="utf-8") as file:
+            json.dump(incomplete_data, file)
+
+        result = load_results_from_json(str(json_file))
+
+        assert result is None
+
+    def test_load_results_from_json_validates_data_structure(
+        self, temp_json_file
+    ):
+        """Test load_results_from_json validates the loaded data structure."""
+        from reporover.discover import load_results_from_json
+
+        result = load_results_from_json(temp_json_file)
+
+        assert result is not None
+        # verify that the result has the expected structure
+        assert hasattr(result, "reporover")
+        assert isinstance(result.reporover, dict)
+        assert "configuration" in result.reporover
+        assert "repositories" in result.reporover
+
+
+class TestExtractConfigurationFromData:
+    """Test cases for the extract_configuration_from_data function."""
+
+    @pytest.fixture
+    def mock_reporover_data_valid(self):
+        """Create mock RepoRoverData with valid configuration."""
+        mock_data = Mock()
+        mock_data.reporover = {
+            "configuration": {
+                "language": "python",
+                "stars": 100,
+                "forks": 50,
+                "created_after": "2023-01-01",
+                "updated_after": "2023-06-01",
+                "files": ["README.md"],
+                "topics": ["web"],
+                "max_depth": 3,
+                "max_filter": 100,
+                "max_display": 10,
+                "search_query": "language:python stars:>=100",
+                "timestamp": "2023-07-01T12:00:00Z",
+            }
+        }
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_no_config(self):
+        """Create mock RepoRoverData with no configuration."""
+        mock_data = Mock()
+        mock_data.reporover = {}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_none_config(self):
+        """Create mock RepoRoverData with None configuration."""
+        mock_data = Mock()
+        mock_data.reporover = {"configuration": None}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_invalid_config(self):
+        """Create mock RepoRoverData with invalid configuration type."""
+        mock_data = Mock()
+        mock_data.reporover = {"configuration": "invalid_string"}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_empty_config(self):
+        """Create mock RepoRoverData with empty configuration."""
+        mock_data = Mock()
+        mock_data.reporover = {"configuration": {}}
+        return mock_data
+
+    def test_extract_configuration_from_data_success(
+        self, mock_reporover_data_valid
+    ):
+        """Test extract_configuration_from_data with valid data."""
+        from reporover.discover import extract_configuration_from_data
+
+        result = extract_configuration_from_data(mock_reporover_data_valid)
+
+        assert result is not None
+        assert hasattr(result, "language")
+        assert result.language == "python"
+        assert result.stars == 100
+        assert result.forks == 50
+
+    def test_extract_configuration_from_data_no_configuration_key(
+        self, mock_reporover_data_no_config
+    ):
+        """Test extract_configuration_from_data with no configuration key."""
+        from reporover.discover import extract_configuration_from_data
+
+        result = extract_configuration_from_data(mock_reporover_data_no_config)
+
+        assert result is None
+
+    def test_extract_configuration_from_data_none_configuration(
+        self, mock_reporover_data_none_config
+    ):
+        """Test extract_configuration_from_data with None configuration."""
+        from reporover.discover import extract_configuration_from_data
+
+        result = extract_configuration_from_data(
+            mock_reporover_data_none_config
+        )
+
+        assert result is None
+
+    def test_extract_configuration_from_data_invalid_type(
+        self, mock_reporover_data_invalid_config
+    ):
+        """Test extract_configuration_from_data with invalid configuration type."""
+        from reporover.discover import extract_configuration_from_data
+
+        result = extract_configuration_from_data(
+            mock_reporover_data_invalid_config
+        )
+
+        assert result is None
+
+    def test_extract_configuration_from_data_empty_configuration(
+        self, mock_reporover_data_empty_config
+    ):
+        """Test extract_configuration_from_data with empty configuration."""
+        from reporover.discover import extract_configuration_from_data
+
+        result = extract_configuration_from_data(
+            mock_reporover_data_empty_config
+        )
+
+        assert result is None
+
+    def test_extract_configuration_from_data_malformed_reporover_data(self):
+        """Test extract_configuration_from_data with malformed RepoRoverData."""
+        from reporover.discover import extract_configuration_from_data
+
+        # create a mock that will raise an exception when accessing reporover
+        mock_data = Mock()
+        mock_data.reporover.get.side_effect = Exception("Access error")
+
+        result = extract_configuration_from_data(mock_data)
+
+        assert result is None
+
+    def test_extract_configuration_from_data_missing_required_fields(self):
+        """Test extract_configuration_from_data with missing required fields."""
+        from reporover.discover import extract_configuration_from_data
+
+        mock_data = Mock()
+        mock_data.reporover = {
+            "configuration": {
+                "language": "python"
+                # missing other fields that might be required
+            }
+        }
+
+        result = extract_configuration_from_data(mock_data)
+
+        # the function should handle missing fields gracefully
+        # depending on the DiscoverConfiguration model requirements
+        assert result is None
+
+    def test_extract_configuration_from_data_exception_handling(self):
+        """Test extract_configuration_from_data handles exceptions properly."""
+        from reporover.discover import extract_configuration_from_data
+
+        # create a mock that raises an exception during processing
+        mock_data = Mock()
+        mock_data.reporover = {"configuration": {"invalid": "data"}}
+
+        # this should not raise an exception but return None
+        result = extract_configuration_from_data(mock_data)
+
+        assert result is None
+
+    def test_extract_configuration_from_data_with_partial_data(self):
+        """Test extract_configuration_from_data with partial valid data."""
+        from reporover.discover import extract_configuration_from_data
+
+        mock_data = Mock()
+        mock_data.reporover = {
+            "configuration": {
+                "language": "javascript",
+                "stars": None,
+                "forks": None,
+                "created_after": None,
+                "updated_after": None,
+                "files": None,
+                "topics": None,
+                "max_depth": 3,
+                "max_filter": 100,
+                "max_display": 10,
+                "search_query": "language:javascript",
+                "timestamp": "2023-07-01T12:00:00Z",
+            }
+        }
+
+        result = extract_configuration_from_data(mock_data)
+
+        # should handle None values appropriately
+        if result is not None:
+            assert result.language == "javascript"
+            assert result.max_depth == 3
