@@ -258,7 +258,8 @@ more details about how the data should be saved to the JSON file:
         the command-line arguments for that run of the command. For instance,
         this would include the fact that it was the `discover` subcommand that
         was run and the `search_query` that was used (this is constructed by the
-        functions inside of the `discover.py` file).
+        functions inside of the `discover.py` file). The configuration dictionary
+        should also save a timestamp to indicate when the command was run.
         - `repos`: a list of dictionaries, where each dictionary contains all
         the information about each GitHub repository that was found. This must
         contain all the information that would be needed to access the
