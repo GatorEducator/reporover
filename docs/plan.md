@@ -88,6 +88,8 @@ the comments from a function subject to refactoring if it is absolutely needed.
 - Use absolute imports for all local modules (`from reporover.module import ...`).
 - Import only what is needed, avoid wildcard imports.
 - Follow the existing import patterns seen in the codebase.
+- Unless there is a good reason not to do so, place all imports at the top
+of a file and thus, for instance, avoid imports inside of functions.
 
 ### Naming Conventions
 
