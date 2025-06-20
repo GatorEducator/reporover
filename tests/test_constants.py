@@ -184,17 +184,17 @@ def test_numbers_is_enum():
 
 def test_numbers_values():
     """Test that Numbers has the correct values."""
-    assert Numbers.MAX_DISPLAY.value == 10
+    assert Numbers.MAX_KEEP.value == 75
     assert Numbers.MAX_FILTER.value == 100
     assert Numbers.MAX_DESCRIPTION_LENGTH.value == 50
     assert Numbers.MAX_NAME_LENGTH.value == 40
 
 
 def test_numbers_members():
-    """Test that Numbers enum has exactly the expected members."""
+    """Test that Numbers enum has exactly the expected members with the expected names."""
     expected_members = {
         "MAX_DEPTH",
-        "MAX_DISPLAY",
+        "MAX_KEEP",
         "MAX_FILTER",
         "MAX_DESCRIPTION_LENGTH",
         "MAX_NAME_LENGTH",
@@ -250,7 +250,7 @@ def test_all_enums_accessible():
     assert hasattr(StatusCode, "UNPROCESSABLE_ENTITY")
     assert hasattr(StatusCode, "INTERNAL_SERVER_ERROR")
     # Numbers
-    assert hasattr(Numbers, "MAX_DISPLAY")
+    assert hasattr(Numbers, "MAX_KEEP")
     assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
     assert hasattr(Numbers, "MAX_NAME_LENGTH")
@@ -263,7 +263,7 @@ def test_all_enums_accessible():
 
 def test_numbers_constant_access():
     """Test that Numbers constants can be accessed as attributes."""
-    assert hasattr(Numbers, "MAX_DISPLAY")
+    assert hasattr(Numbers, "MAX_KEEP")
     assert hasattr(Numbers, "MAX_FILTER")
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
     assert hasattr(Numbers, "MAX_NAME_LENGTH")
@@ -271,7 +271,7 @@ def test_numbers_constant_access():
 
 def test_numbers_constant_types():
     """Test that Numbers constants have the correct types."""
-    assert isinstance(Numbers.MAX_DISPLAY.value, int)
+    assert isinstance(Numbers.MAX_KEEP.value, int)
     assert isinstance(Numbers.MAX_FILTER.value, int)
     assert isinstance(Numbers.MAX_DESCRIPTION_LENGTH.value, int)
     assert isinstance(Numbers.MAX_NAME_LENGTH.value, int)
@@ -279,7 +279,7 @@ def test_numbers_constant_types():
 
 def test_numbers_constant_values_are_positive():
     """Test that Numbers constants have positive values."""
-    assert Numbers.MAX_DISPLAY.value > 0
+    assert Numbers.MAX_KEEP.value > 0
     assert Numbers.MAX_FILTER.value > 0
     assert Numbers.MAX_DESCRIPTION_LENGTH.value > 0
     assert Numbers.MAX_NAME_LENGTH.value > 0
