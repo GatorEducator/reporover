@@ -116,6 +116,7 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
                     )
+                    return StatusCode.FAILURE
         # no additional filtering by files was requested, so these repositories
         # can be displayed (and, if requested, saved) without any more steps
         else:
@@ -142,6 +143,7 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
                     )
+                    return StatusCode.FAILURE
         return StatusCode.SUCCESS
     # handle any errors that may occur during the process of discovery,
     # making sure that the subcommand and then the reporover tool returns
@@ -207,13 +209,19 @@ def _filter_repositories_by_files(
     console: Console,
 ) -> List:
     """Filter repositories that contain the specified files and directories within max_depth."""
+    # initialize the list to hold filtered repositories
+    # and setup default values for the filtering
     filtered_repos = []
     repo_count = 0
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
+    # console is not used directly in this function,
+    # so we can just assign it to a not-used variable
     _ = console
+    # filter the repositories and display output in the
+    # context of a progress bar from rich
     max_filter_runs = min(repositories.totalCount, MAX_FILTER)
     with Progress(
         "[progress.description]{task.description}",
@@ -224,6 +232,9 @@ def _filter_repositories_by_files(
         task = progress.add_task(
             "[green]Filtering Repositories", total=max_filter_runs
         )
+        # iteratively filter through each of the repositories, only
+        # keeping a repository as a match if it contains all of the
+        # specified files at or before the specified depth
         for repository in repositories:
             if repo_count >= MAX_FILTER:
                 break
@@ -236,6 +247,7 @@ def _filter_repositories_by_files(
                 )
             repo_count += 1
             progress.update(task, advance=1)
+    # return the filtered repositories
     return filtered_repos
 
 
@@ -317,13 +329,14 @@ def _save_results_to_json(
     required_files: Optional[List[str]] = None,
 ) -> bool:
     """Save the repository search results to a JSON file using Pydantic models."""
+    # attempt to use Pydantic models to save the data to
+    # a JSON file that will have the required format
     try:
         from reporover.models import (
             DiscoverConfiguration,
             RepoRoverData,
             RepositoryInfo,
         )
-
         # create the configuration model
         config_dict = configuration_data.copy()
         config_dict["search_query"] = search_query
