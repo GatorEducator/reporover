@@ -10,6 +10,11 @@ from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
 from reporover.constants import Numbers, StatusCode, Symbols
+from reporover.models import (
+    DiscoverConfiguration,
+    RepoRoverData,
+    RepositoryInfo,
+)
 
 MAX_DEPTH = Numbers.MAX_DEPTH.value
 MAX_DISPLAY = Numbers.MAX_KEEP.value
@@ -332,11 +337,6 @@ def _save_results_to_json(
     # attempt to use Pydantic models to save the data to
     # a JSON file that will have the required format
     try:
-        from reporover.models import (
-            DiscoverConfiguration,
-            RepoRoverData,
-            RepositoryInfo,
-        )
         # create the configuration model
         config_dict = configuration_data.copy()
         config_dict["search_query"] = search_query
