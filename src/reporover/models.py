@@ -41,6 +41,10 @@ class DiscoverConfiguration(BaseModel):
     command: str = Field(
         default="discover", description="The subcommand that was run"
     )
+    timestamp: datetime = Field(
+        default_factory=datetime.now,
+        description="When the reporover tool was run",
+    )
     language: Optional[str] = Field(
         None, description="Programming language filter"
     )
