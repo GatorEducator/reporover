@@ -1,5 +1,6 @@
 """Module for discovering GitHub repositories using search criteria."""
 
+import json
 from typing import List, Optional
 
 import github
@@ -342,7 +343,6 @@ def _save_results_to_json(
         config_dict["search_query"] = search_query
         # timestamp will be automatically set by the model's default_factory
         configuration = DiscoverConfiguration(**config_dict)
-
         # create repository models
         repo_models = []
         for repo in repositories:
@@ -358,18 +358,13 @@ def _save_results_to_json(
                 files=required_files if required_files else None,
             )
             repo_models.append(repo_info)
-
         # create the complete data structure
         reporover_data = RepoRoverData.create_discover_data(
             configuration, repo_models
         )
-
         # write to JSON file
-        import json
-
         with open(save_file, "w", encoding="utf-8") as file:
             json.dump(reporover_data.model_dump(), file, indent=2, default=str)
-
         return True
     except Exception:
         return False
