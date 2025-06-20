@@ -37,11 +37,17 @@ The project should maintain this structure:
 
 All the Python code should follow these standards:
 
-- Function bodies should not have any blank lines in them
+- Function bodies should not have any blank lines in them. This means that
+function bodies should be contiguous blocks of code without any blank lines.
 - Every function should have a docstring that starts with a capital letter and
 ends with a period.
 - Every function should have a docstring that is a single line.
-- All comments should start with a lowercase letter.
+- All other comments should start with a lowercase letter.
+- If there are already comments in the source code and it must be revised,
+extended, or refactored in some way, do not delete the comments unless the code
+that is going along with the comments is deleted. If the original source code
+is refactored such that it no longer goes along with the comments, then it is
+permissible to delete and/or revise the comments in a suitable fashion.
 - All command-line interfaces should be created with Typer.
 
 ## Test Requirements
