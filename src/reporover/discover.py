@@ -370,6 +370,33 @@ def _save_results_to_json(
         return False
 
 
+def load_results_from_json(load_file: str) -> Optional[RepoRoverData]:
+    """Load the repository search results from a JSON file using Pydantic models."""
+    try:
+        with open(load_file, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        reporover_data = RepoRoverData(**data)
+        return reporover_data
+    except Exception:
+        return None
+
+
+def extract_configuration_from_data(
+    reporover_data: RepoRoverData,
+) -> Optional[DiscoverConfiguration]:
+    """Extract the configuration from loaded RepoRoverData."""
+    try:
+        config_dict = reporover_data.reporover.get("configuration")
+        if config_dict is None:
+            return None
+        if not isinstance(config_dict, dict):
+            return None
+        configuration = DiscoverConfiguration(**config_dict)
+        return configuration
+    except Exception:
+        return None
+
+
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table when there is no file filtering."""
     table = Table(
