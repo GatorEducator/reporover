@@ -1,7 +1,7 @@
 """Create Pydantic models for RepoRover data structures."""
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Self
 
 from pydantic import BaseModel, Field
 
@@ -84,7 +84,7 @@ class RepoRoverData(BaseModel):
         cls,
         configuration: DiscoverConfiguration,
         repositories: List[RepositoryInfo],
-    ) -> "RepoRoverData":
+    ) -> Self:
         """Create a RepoRoverData instance for discover command results."""
         return cls(
             reporover={
