@@ -32,6 +32,8 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     save_file: Optional[str] = None,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
+    # define the global variables based on the command-line arguments
+    # that were input by the caller of this function and passed here
     global MAX_DEPTH, MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
     if max_depth is None:
         max_depth = MAX_DEPTH
@@ -46,13 +48,14 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     else:
         MAX_DISPLAY = max_display
     try:
+        # create a GitHub API instance using PyGitHub
+        # and the provided GitHub access token
         github_instance = github.Github(token)
         search_query = _build_search_query(
             language, stars, forks, created_after, updated_after, topics
         )
         console.print(f":mag: Search query: {search_query}")
         repositories = github_instance.search_repositories(search_query)
-
         # prepare configuration data for saving
         configuration_data = {
             "language": language,
@@ -66,7 +69,6 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
             "max_filter": max_filter,
             "max_display": max_display,
         }
-
         if files:
             console.print(
                 f":mag: Processing the {repositories.totalCount} accessible repositories"
@@ -148,7 +150,10 @@ def _build_search_query(  # noqa: PLR0913
     topics: Optional[List[str]],
 ) -> str:
     """Build a GitHub search query string from the provided criteria."""
+    # create a list of search query parts
     query_parts = []
+    # add filters to the query based on the provided parameters;
+    # note that each of these filters is an index in the list
     if language:
         query_parts.append(f"language:{language}")
     if stars is not None:
@@ -159,11 +164,21 @@ def _build_search_query(  # noqa: PLR0913
         query_parts.append(f"created:>={created_after}")
     if updated_after:
         query_parts.append(f"pushed:>={updated_after}")
+    # since there can be more or more topics, make sure
+    # to add all of the provided topics to the query; note
+    # that each topic is prefixed with "topic:" and then
+    # added to the query_parts list as its own element
     if topics:
         for topic in topics:
             query_parts.append(f"topic:{topic}")
+    # the construction requires that there must be some query;
+    # as such, if no elements were specified for the parts of
+    # the query make the query a benign one that only looks
+    # for public repositories on GitHub
     if not query_parts:
         query_parts.append("is:public")
+    # return the constructed query by separating the elements
+    # with a space to form a valid GitHub search query
     return " ".join(query_parts)
 
 
