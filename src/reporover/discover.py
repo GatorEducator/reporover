@@ -60,7 +60,8 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
         console.print(f":mag: Search query: {search_query}")
         # use the GitHub API to search for repositories with PyGitHub
         repositories = github_instance.search_repositories(search_query)
-        # prepare configuration data for saving
+        # prepare configuration data for saving; note that this is
+        # only for placeholder purposes and will be populated later
         configuration_data = {
             "language": language,
             "stars": stars,
@@ -73,7 +74,11 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
             "max_filter": max_filter,
             "max_display": max_display,
         }
+        # if there are files to filter by, then filter the repositories
+        # so that only those are ultimately displayed/saved if they
+        # contain all of the specified files at the specified depth
         if files:
+            # display debugging information about the filtering
             console.print(
                 f":mag: Processing the {repositories.totalCount} accessible repositories"
             )
@@ -87,13 +92,14 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                 f":mag: Maximum search depth during file filtering: {max_depth}"
             )
             console.print()
+            # filter and then display the results of the discover process
             filtered_repositories = _filter_repositories_by_files(
                 repositories, files, max_depth, token, console
             )
             _display_search_results_with_files(
                 filtered_repositories, console, files
             )
-            # save results if requested
+            # save results to a JSON file if saving of data was requested
             if save_file:
                 success = _save_results_to_json(
                     filtered_repositories,
@@ -104,12 +110,14 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                 )
                 if success:
                     console.print(
-                        f":floppy_disk: Results saved to {save_file}"
+                        f":information: Discovery results saved to {save_file}"
                     )
                 else:
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
                     )
+        # no additional filtering by files was requested, so these repositories
+        # can be displayed (and, if requested, saved) without any more steps
         else:
             console.print()
             console.print(
@@ -119,20 +127,25 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
             _display_search_results(repositories, console)
             # save results if requested
             if save_file:
-                # convert generator to list for saving
+                # convert the repositories generator (i.e., you have to fetch
+                # all of the data incrementally) to list for saving
                 repos_list = list(repositories[:max_display])
+                # save results to a JSON file if saving of data was requested
                 success = _save_results_to_json(
                     repos_list, save_file, configuration_data, search_query
                 )
                 if success:
                     console.print(
-                        f":floppy_disk: Results saved to {save_file}"
+                        f":information: Discovery results saved to {save_file}"
                     )
                 else:
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
                     )
         return StatusCode.SUCCESS
+    # handle any errors that may occur during the process of discovery,
+    # making sure that the subcommand and then the reporover tool returns
+    # the current exit code to communicate with the operating system
     except github.GithubException as github_error:
         console.print(
             f"{Symbols.ERROR.value} GitHub API error: {github_error}"
@@ -314,6 +327,7 @@ def _save_results_to_json(
         # create the configuration model
         config_dict = configuration_data.copy()
         config_dict["search_query"] = search_query
+        # timestamp will be automatically set by the model's default_factory
         configuration = DiscoverConfiguration(**config_dict)
 
         # create repository models
