@@ -3,19 +3,25 @@
 # ruff: noqa: PLR2004
 
 import json
+import os
+import tempfile
 from unittest.mock import Mock, patch
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from rich.console import Console
 
 from reporover.constants import Numbers, StatusCode
 from reporover.discover import (
     _build_search_query,
     _display_search_results,
+    _save_results_to_json,
     extract_configuration_from_data,
     load_results_from_json,
     search_repositories,
 )
+from reporover.models import DiscoverConfiguration
 
 
 class TestBuildSearchQuery:
@@ -981,3 +987,97 @@ class TestExtractConfigurationFromData:
         if result is not None:
             assert result.language == "javascript"
             assert result.max_depth == 3
+
+
+class TestRoundTripSaveLoad:
+    """Property-based tests for round-trip save/load operations using Hypothesis."""
+
+    @given(
+        language=st.one_of(st.none(), st.text(min_size=1, max_size=20)),
+        stars=st.one_of(st.none(), st.integers(min_value=0, max_value=10000)),
+        forks=st.one_of(st.none(), st.integers(min_value=0, max_value=1000)),
+        created_after=st.one_of(st.none(), st.text(min_size=10, max_size=10)),
+        updated_after=st.one_of(st.none(), st.text(min_size=10, max_size=10)),
+        files=st.one_of(
+            st.none(),
+            st.lists(st.text(min_size=1, max_size=20), min_size=1, max_size=5),
+        ),
+        topics=st.one_of(
+            st.none(),
+            st.lists(st.text(min_size=1, max_size=15), min_size=1, max_size=3),
+        ),
+        max_depth=st.integers(min_value=1, max_value=10),
+        max_filter=st.integers(min_value=1, max_value=500),
+        max_display=st.integers(min_value=1, max_value=100),
+        search_query=st.text(min_size=1, max_size=100),
+    )
+    def test_configuration_round_trip_save_load(  # noqa: PLR0913
+        self,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+        files,
+        topics,
+        max_depth,
+        max_filter,
+        max_display,
+        search_query,
+    ):
+        """Test round-trip save and load of configuration data."""
+        configuration_data = {
+            "language": language,
+            "stars": stars,
+            "forks": forks,
+            "created_after": created_after,
+            "updated_after": updated_after,
+            "files": files,
+            "topics": topics,
+            "max_depth": max_depth,
+            "max_filter": max_filter,
+            "max_display": max_display,
+            "search_query": search_query,
+        }
+        try:
+            original_config = DiscoverConfiguration(**configuration_data)
+        except Exception:
+            return
+        repositories = []
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as temp_file:
+            temp_file_path = temp_file.name
+        try:
+            save_success = _save_results_to_json(
+                repositories,
+                temp_file_path,
+                configuration_data,
+                search_query,
+                files,
+            )
+            assert save_success is True
+            loaded_data = load_results_from_json(temp_file_path)
+            assert loaded_data is not None
+            extracted_config = extract_configuration_from_data(loaded_data)
+            assert extracted_config is not None
+            assert extracted_config.language == original_config.language
+            assert extracted_config.stars == original_config.stars
+            assert extracted_config.forks == original_config.forks
+            assert (
+                extracted_config.created_after == original_config.created_after
+            )
+            assert (
+                extracted_config.updated_after == original_config.updated_after
+            )
+            assert extracted_config.files == original_config.files
+            assert extracted_config.topics == original_config.topics
+            assert extracted_config.max_depth == original_config.max_depth
+            assert extracted_config.max_filter == original_config.max_filter
+            assert extracted_config.max_display == original_config.max_display
+            assert (
+                extracted_config.search_query == original_config.search_query
+            )
+        finally:
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
