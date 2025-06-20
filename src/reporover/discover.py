@@ -12,7 +12,7 @@ from rich.table import Table
 from reporover.constants import Numbers, StatusCode, Symbols
 
 MAX_DEPTH = Numbers.MAX_DEPTH.value
-MAX_DISPLAY = Numbers.MAX_DISPLAY.value
+MAX_DISPLAY = Numbers.MAX_KEEP.value
 MAX_FILTER = Numbers.MAX_FILTER.value
 
 
@@ -28,7 +28,7 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     topics: Optional[List[str]],
     max_depth: Optional[int] = Numbers.MAX_DEPTH.value,
     max_filter: Optional[int] = Numbers.MAX_FILTER.value,
-    max_display: Optional[int] = Numbers.MAX_DISPLAY.value,
+    max_display: Optional[int] = Numbers.MAX_KEEP.value,
     save_file: Optional[str] = None,
 ) -> StatusCode:
     """Search for public GitHub repositories matching the provided criteria."""
@@ -51,10 +51,14 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
         # create a GitHub API instance using PyGitHub
         # and the provided GitHub access token
         github_instance = github.Github(token)
+        # create the search query based on the provided parameters;
+        # note that if there are no provided parameters then this
+        # function will create a default, benign query that works
         search_query = _build_search_query(
             language, stars, forks, created_after, updated_after, topics
         )
         console.print(f":mag: Search query: {search_query}")
+        # use the GitHub API to search for repositories with PyGitHub
         repositories = github_instance.search_repositories(search_query)
         # prepare configuration data for saving
         configuration_data = {
