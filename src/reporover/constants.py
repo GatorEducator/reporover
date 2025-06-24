@@ -9,6 +9,15 @@ class Data(Enum):
     USERNAMES = "usernames"
 
 
+class FileSystem(Enum):
+    """Define the file system locations for the RepoRover application."""
+
+    FILE = "file"
+    DIRECTORY = "dir"
+    EMPTY = ""
+    PATH = "path"
+
+
 class GitHubAccessLevel(Enum):
     """Define the access levels for GitHub repositories."""
 
