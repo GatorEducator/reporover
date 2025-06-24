@@ -202,7 +202,7 @@ def _build_search_query(  # noqa: PLR0913
         query_parts.append(f"created:>={created_after}")
     if updated_after:
         query_parts.append(f"pushed:>={updated_after}")
-    # since there can be more or more topics, make sure
+    # since there can be one or more topics, make sure
     # to add all of the provided topics to the query; note
     # that each topic is prefixed with "topic:" and then
     # added to the query_parts list as its own element
