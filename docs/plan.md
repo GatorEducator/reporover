@@ -280,6 +280,9 @@ more details about how the data should be saved to the JSON file:
 
 ## Included Files
 
+Note that the purpose of this fenced code block is to provide an example
+template for providing files to a coding agent.
+
 ```text
 > #file:./docs/plan.md
 > #file:./README.md
