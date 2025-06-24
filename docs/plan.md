@@ -201,7 +201,7 @@ contiguous region of the file.
 - The implementation of this command should adhere to all the rules described in
 all the previous sections.
 - The implementation should proceed on a small-scale basis. It must implement a
-part of a feature before checking back to confirm that the systems is as desired
+part of a feature before checking back to confirm that the system is as desired
 and whether or not it is in accordance with the rules described in this
 document.
 
@@ -277,6 +277,25 @@ more details about how the data should be saved to the JSON file:
             - `updated_at`: The date when the repository was last updated.
             - `files`: A list of files that were found in the repository that
             match the search criteria.
+
+## New Refactorings
+
+### `clone` command
+
+#### Task Guidelines
+
+- The implementation of this command should adhere to all the rules described in
+all the previous sections.
+- The implementation should proceed on a small-scale basis. It must implement a
+part of a feature before checking back to confirm that the systems is as desired
+and whether or not it is in accordance with the rules described in this
+document.
+
+#### Task Description
+
+- A command-line interface implemented in Typer that is similar to the ones
+provided previously in that it should accept a GitHub access token.
+
 
 ## Included Files
 
