@@ -586,7 +586,9 @@ def file(
         raise typer.Exit(code=1)
 
 
-# add the clone subapp to the main app
+# add the clone subapp to the main app;
+# this ensure that the clone command has
+# two subcommands: organization and file
 app.add_typer(clone_app, name="clone")
 
 
