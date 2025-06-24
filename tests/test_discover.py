@@ -19,10 +19,11 @@ from reporover.discover import (
     _repository_contains_files,
     _save_results_to_json,
     extract_configuration_from_data,
+    extract_repos_from_data,
     load_results_from_json,
     search_repositories,
 )
-from reporover.models import DiscoverConfiguration
+from reporover.models import DiscoverConfiguration, RepositoryInfo
 
 
 class TestBuildSearchQuery:
@@ -991,6 +992,172 @@ class TestExtractConfigurationFromData:
         assert result is not None
         assert result.language == "javascript"
         assert result.max_depth == 3
+
+
+class TestExtractReposFromData:
+    """Test cases for the extract_repos_from_data function."""
+
+    @pytest.fixture
+    def mock_reporover_data_valid(self):
+        """Create mock RepoRoverData with valid repositories."""
+        mock_data = Mock()
+        mock_data.reporover = {
+            "repos": [
+                {
+                    "name": "test-repo",
+                    "url": "https://github.com/user/test-repo",
+                    "description": "A test repository",
+                    "language": "Python",
+                    "stars": 150,
+                    "forks": 25,
+                    "created_at": "2023-01-01T00:00:00Z",
+                    "updated_at": "2023-06-15T00:00:00Z",
+                    "files": ["README.md"],
+                }
+            ]
+        }
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_no_repos(self):
+        """Create mock RepoRoverData with no repositories."""
+        mock_data = Mock()
+        mock_data.reporover = {}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_none_repos(self):
+        """Create mock RepoRoverData with None repositories."""
+        mock_data = Mock()
+        mock_data.reporover = {"repos": None}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_invalid_repos(self):
+        """Create mock RepoRoverData with invalid repositories type."""
+        mock_data = Mock()
+        mock_data.reporover = {"repos": "invalid_string"}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_empty_repos(self):
+        """Create mock RepoRoverData with empty repositories list."""
+        mock_data = Mock()
+        mock_data.reporover = {"repos": []}
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_invalid_repo_item(self):
+        """Create mock RepoRoverData with invalid repository items."""
+        mock_data = Mock()
+        mock_data.reporover = {
+            "repos": [
+                "not_a_dict",
+                {"invalid_data": "missing_required_fields"},
+            ]
+        }
+        return mock_data
+
+    @pytest.fixture
+    def mock_reporover_data_multiple_repos(self):
+        """Create mock RepoRoverData with multiple repositories."""
+        mock_data = Mock()
+        mock_data.reporover = {
+            "repos": [
+                {
+                    "name": "repo-1",
+                    "url": "https://github.com/user/repo-1",
+                    "description": "First test repository",
+                    "language": "Python",
+                    "stars": 150,
+                    "forks": 25,
+                    "created_at": "2023-01-01T00:00:00Z",
+                    "updated_at": "2023-06-15T00:00:00Z",
+                },
+                {
+                    "name": "repo-2",
+                    "url": "https://github.com/user/repo-2",
+                    "description": "Second test repository",
+                    "language": "JavaScript",
+                    "stars": 75,
+                    "forks": 10,
+                    "created_at": "2023-02-01T00:00:00Z",
+                    "updated_at": "2023-05-15T00:00:00Z",
+                },
+            ]
+        }
+        return mock_data
+
+    def test_extract_repos_from_data_success(self, mock_reporover_data_valid):
+        """Test extract_repos_from_data with valid data."""
+        result = extract_repos_from_data(mock_reporover_data_valid)
+        assert result is not None
+        assert len(result) == 1
+        assert isinstance(result[0], RepositoryInfo)
+        assert result[0].name == "test-repo"
+        assert result[0].stars == 150
+        assert result[0].forks == 25
+
+    def test_extract_repos_from_data_multiple_repos(
+        self, mock_reporover_data_multiple_repos
+    ):
+        """Test extract_repos_from_data with multiple repositories."""
+        result = extract_repos_from_data(mock_reporover_data_multiple_repos)
+        assert result is not None
+        assert len(result) == 2
+        assert result[0].name == "repo-1"
+        assert result[0].language == "Python"
+        assert result[1].name == "repo-2"
+        assert result[1].language == "JavaScript"
+
+    def test_extract_repos_from_data_no_repositories_key(
+        self, mock_reporover_data_no_repos
+    ):
+        """Test extract_repos_from_data with no repositories key."""
+        result = extract_repos_from_data(mock_reporover_data_no_repos)
+        assert result is None
+
+    def test_extract_repos_from_data_none_repositories(
+        self, mock_reporover_data_none_repos
+    ):
+        """Test extract_repos_from_data with None repositories."""
+        result = extract_repos_from_data(mock_reporover_data_none_repos)
+        assert result is None
+
+    def test_extract_repos_from_data_invalid_type(
+        self, mock_reporover_data_invalid_repos
+    ):
+        """Test extract_repos_from_data with invalid repositories type."""
+        result = extract_repos_from_data(mock_reporover_data_invalid_repos)
+        assert result is None
+
+    def test_extract_repos_from_data_empty_repositories(
+        self, mock_reporover_data_empty_repos
+    ):
+        """Test extract_repos_from_data with empty repositories list."""
+        result = extract_repos_from_data(mock_reporover_data_empty_repos)
+        assert result is None
+
+    def test_extract_repos_from_data_invalid_repo_items(
+        self, mock_reporover_data_invalid_repo_item
+    ):
+        """Test extract_repos_from_data with invalid repository items."""
+        result = extract_repos_from_data(mock_reporover_data_invalid_repo_item)
+        assert result is None
+
+    def test_extract_repos_from_data_malformed_reporover_data(self):
+        """Test extract_repos_from_data with malformed RepoRoverData."""
+        mock_data = Mock()
+        mock_data.reporover.get.side_effect = Exception("Access error")
+        result = extract_repos_from_data(mock_data)
+        assert result is None
+
+    def test_extract_repos_from_data_exception_handling(self):
+        """Test extract_repos_from_data handles exceptions properly."""
+        mock_data = Mock()
+        mock_data.reporover = {"repos": [{"invalid": "data"}]}
+        result = extract_repos_from_data(mock_data)
+        assert result is None
 
 
 class TestRoundTripSaveLoad:
