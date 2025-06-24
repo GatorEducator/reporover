@@ -255,8 +255,12 @@ def _filter_repositories_by_files(
         # keeping a repository as a match if it contains all of the
         # specified files at or before the specified depth
         for repository in repositories:
+            # the maximum number of filters has been reached and
+            # thus the filtering can be stopped
             if repo_count >= MAX_FILTER:
                 break
+            # more filtering is needed because the maximum
+            # number of repositories has not yet been reached
             if _repository_contains_files(
                 repository, required_files, max_depth, headers
             ):
@@ -264,6 +268,8 @@ def _filter_repositories_by_files(
                 progress.console.print(
                     f"{Symbols.CHECK.value} Found all designated files in {repository.name}"
                 )
+            # indicate that another filter has been performed
+            # through both the counter and the progress bar
             repo_count += 1
             progress.update(task, advance=1)
     # return the filtered repositories
