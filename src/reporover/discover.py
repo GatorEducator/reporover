@@ -1,7 +1,7 @@
 """Module for discovering GitHub repositories using search criteria."""
 
 import json
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import github
 import requests
@@ -282,15 +282,32 @@ def _repository_contains_files(
     max_depth: int,
     headers: dict,
 ) -> bool:
-    """Check if repository contains all required files and directories within the specified depth."""
+    """Check if repository contains all required files and directories within specified depth."""
+    # convert the required files to a set to ensure
+    # that there is no duplicate looking; this guarantees
+    # that if there is a duplicate file in the required_files
+    # then the return statement will work correctly
+    required_files_set: Set[str] = set(required_files)
     try:
+        # create a set to hold the found files
         found_files = set()
+        # get all files in the repository up to the specified depth
         repo_files = _get_repository_files(repository, max_depth, headers)
+        # iterate through the files and directories in the repository
+        # that were found and check if the required files are present
         for file_info in repo_files:
             file_name = file_info.get("name", "")
+            # found one of the required files and thus
+            # it should be added to the set of those files found
             if file_name in required_files:
                 found_files.add(file_name)
-        return len(found_files) == len(required_files)
+        # check if all required files were found in the repository;
+        # this is done by confirming that the set of required files
+        # has the same length as the set of (recursively) found files
+        return len(found_files) == len(required_files_set)
+    # there was some problem with the repository or the API call,
+    # and thus the repository cannot be considered as containing
+    # the required files, so therefore return False
     except Exception:
         return False
 
