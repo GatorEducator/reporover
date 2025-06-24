@@ -1079,5 +1079,7 @@ class TestRoundTripSaveLoad:
                 extracted_config.search_query == original_config.search_query
             )
         finally:
-            if os.path.exists(temp_file_path):
-                os.unlink(temp_file_path)
+            # the file called temp_file_path should always exist at this
+            # point and thus it is a good idea for it to be unlinked so
+            # that there are no dependencies between this test and others
+            os.unlink(temp_file_path)
