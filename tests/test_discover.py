@@ -16,6 +16,7 @@ from reporover.constants import Numbers, StatusCode
 from reporover.discover import (
     _build_search_query,
     _display_search_results,
+    _repository_contains_files,
     _save_results_to_json,
     extract_configuration_from_data,
     load_results_from_json,
@@ -1083,3 +1084,235 @@ class TestRoundTripSaveLoad:
             # point and thus it is a good idea for it to be unlinked so
             # that there are no dependencies between this test and others
             os.unlink(temp_file_path)
+
+
+class TestRepositoryContainsFiles:
+    """Test cases for the _repository_contains_files function."""
+
+    @pytest.fixture
+    def mock_repository(self):
+        """Create a mock repository for testing."""
+        repo = Mock()
+        repo.full_name = "test-owner/test-repo"
+        return repo
+
+    @pytest.fixture
+    def headers(self):
+        """Create mock headers for testing."""
+        return {
+            "Authorization": "token fake_token",
+            "Accept": "application/vnd.github.v3+json",
+        }
+
+    @pytest.fixture
+    def mock_repo_files_basic(self):
+        """Create mock repository files for basic testing."""
+        return [
+            {"name": "README.md", "type": "file"},
+            {"name": "requirements.txt", "type": "file"},
+            {"name": "src", "type": "dir"},
+            {"name": "tests", "type": "dir"},
+        ]
+
+    def test_repository_contains_files_all_found(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files when all required files are found."""
+        required_files = ["README.md", "requirements.txt"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_partial_found(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files when only some required files are found."""
+        required_files = ["README.md", "missing_file.txt"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is False
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_none_found(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files when no required files are found."""
+        required_files = ["missing1.txt", "missing2.txt"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is False
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_empty_required_list(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files with empty required files list."""
+        required_files = []
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_empty_repo_files(
+        self, mock_repository, headers
+    ):
+        """Test _repository_contains_files with empty repository files."""
+        required_files = ["README.md"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = []
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is False
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_with_directories(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files when searching for directories."""
+        required_files = ["src", "tests"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_mixed_files_and_dirs(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files with mixed files and directories."""
+        required_files = ["README.md", "src"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_case_sensitive(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files is case sensitive."""
+        required_files = ["readme.md"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is False
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_exception_handling(
+        self, mock_repository, headers
+    ):
+        """Test _repository_contains_files handles exceptions gracefully."""
+        required_files = ["README.md"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.side_effect = Exception("API error")
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is False
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_malformed_file_info(
+        self, mock_repository, headers
+    ):
+        """Test _repository_contains_files with malformed file info."""
+        required_files = ["README.md"]
+        malformed_files = [
+            {"type": "file"},
+            {"name": "README.md"},
+            {"name": "test.py", "type": "file"},
+        ]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = malformed_files
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_max_depth_parameter(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files passes max_depth parameter correctly."""
+        required_files = ["README.md"]
+        max_depth = 5
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            _repository_contains_files(
+                mock_repository, required_files, max_depth, headers
+            )
+            mock_get_files.assert_called_once_with(
+                mock_repository, max_depth, headers
+            )
+
+    def test_repository_contains_files_duplicate_required_files(
+        self, mock_repository, headers, mock_repo_files_basic
+    ):
+        """Test _repository_contains_files with duplicate required files."""
+        required_files = ["README.md", "README.md", "requirements.txt"]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = mock_repo_files_basic
+            result = _repository_contains_files(
+                mock_repository, required_files, 2, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 2, headers)
+
+    def test_repository_contains_files_single_file_match(
+        self, mock_repository, headers
+    ):
+        """Test _repository_contains_files with single file requirement."""
+        required_files = ["pyproject.toml"]
+        single_file = [{"name": "pyproject.toml", "type": "file"}]
+        with patch(
+            "reporover.discover._get_repository_files"
+        ) as mock_get_files:
+            mock_get_files.return_value = single_file
+            result = _repository_contains_files(
+                mock_repository, required_files, 1, headers
+            )
+            assert result is True
+            mock_get_files.assert_called_once_with(mock_repository, 1, headers)
