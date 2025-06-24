@@ -277,6 +277,8 @@ more details about how the data should be saved to the JSON file:
             - `updated_at`: The date when the repository was last updated.
             - `files`: A list of files that were found in the repository that
             match the search criteria.
+    - The `discover` subcommand in the `main.py` file now provides a largely
+    complete implementation of the featured described in this document.
 
 ## New Refactorings
 
@@ -287,15 +289,34 @@ more details about how the data should be saved to the JSON file:
 - The implementation of this command should adhere to all the rules described in
 all the previous sections.
 - The implementation should proceed on a small-scale basis. It must implement a
-part of a feature before checking back to confirm that the systems is as desired
+part of a feature before checking back to confirm that the system is as desired
 and whether or not it is in accordance with the rules described in this
 document.
 
 #### Task Description
 
+- The `main.py` file already contains a basic implementation of the `clone`
+feature. It currently works with the following command-line arguments:
+    * github_org_url TEXT URL of GitHub organization [default: None] [required]
+    * repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+    * usernames_file PATH Path to JSON file with usernames [default: None] [required]
+    * token TEXT GitHub token for authentication [default: None] [required]
+    * destination_directory PATH Local directory to clone repositories into [default: None] [required]
+- Now that the `discover` command makes it possible to produce a `reporover.json` file
+that contains a list of GitHub repositories, the `clone` command should be refactored
+so that it can read the `reporover.json` file and clone the repositories listed in it.
+- This means that the `clone` command needs to have two subcommands:
+    - `organization`: This is the currently implementation of `clone`. It should have
+    the same command-line arguments as the current implementation of `clone`.
+    - `file`: This is the new version that will take:
+        - `reporover_json`: A `reporover.json` file that adheres to the
+        requirements of a JSON file described by the Pydantic models in `models.py`
+        - `destination_directory`: A local directory to clone the repositories into.
+        - `token`: A GitHub access token for authentication.
+        - Note that, importantly, this sub-command of `clone` will _not_ accept
+        `github_org_url`, `repo_prefix`, or `usernames_file` as command-line arguments.
 - A command-line interface implemented in Typer that is similar to the ones
 provided previously in that it should accept a GitHub access token.
-
 
 ## Included Files
 
