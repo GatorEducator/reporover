@@ -277,3 +277,14 @@ more details about how the data should be saved to the JSON file:
             - `updated_at`: The date when the repository was last updated.
             - `files`: A list of files that were found in the repository that
             match the search criteria.
+
+## Included Files
+
+```text
+> #file:./docs/plan.md
+> #file:./README.md
+> #file:./src/reporover/main.py
+> #file:./src/reporover/discover.py
+> #file:./tests/test_main.py
+> #file:./tests/test_discover.py
+```
