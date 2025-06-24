@@ -116,10 +116,15 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                     search_query,
                     files,
                 )
+                # saving the file worked correctly and thus this
+                # function only needs to display a diagnostic message
                 if success:
                     console.print(
                         f":information: Discovery results saved to {save_file}"
                     )
+                # saving the file did not work and thus this function
+                # must return a failure status code so that a calling
+                # function can ensure that this is communicated back
                 else:
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
@@ -133,6 +138,7 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                 f":information: Processing the {repositories.totalCount} accessible repositories"
             )
             console.print()
+            # display the search results with no additional filtering
             _display_search_results(repositories, console)
             # save results if requested
             if save_file:
@@ -143,10 +149,15 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
                 success = _save_results_to_json(
                     repos_list, save_file, configuration_data, search_query
                 )
+                # saving the file worked correctly and thus this
+                # function only needs to display a diagnostic message
                 if success:
                     console.print(
                         f":information: Discovery results saved to {save_file}"
                     )
+                # saving the file did not work and thus this function
+                # must return a failure status code so that a calling
+                # function can ensure that this is communicated back
                 else:
                     console.print(
                         f"{Symbols.ERROR.value} Failed to save results to {save_file}"
