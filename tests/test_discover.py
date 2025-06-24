@@ -1042,10 +1042,7 @@ class TestRoundTripSaveLoad:
             "max_display": max_display,
             "search_query": search_query,
         }
-        try:
-            original_config = DiscoverConfiguration(**configuration_data)
-        except Exception:
-            return
+        original_config = DiscoverConfiguration(**configuration_data)
         repositories = []
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".json", delete=False
