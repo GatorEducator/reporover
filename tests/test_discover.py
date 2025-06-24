@@ -984,9 +984,12 @@ class TestExtractConfigurationFromData:
             }
         }
         result = extract_configuration_from_data(mock_data)
-        if result is not None:
-            assert result.language == "javascript"
-            assert result.max_depth == 3
+        # this should have parsed in a valid fashion and
+        # thus the result should not be none and there should
+        # be data in the result, evident after some checks
+        assert result is not None
+        assert result.language == "javascript"
+        assert result.max_depth == 3
 
 
 class TestRoundTripSaveLoad:
