@@ -516,7 +516,6 @@ def file(
         raise typer.Exit(code=1)
     # read and parse the reporover.json file
     try:
-
         with reporover_json.open() as f:
             data = json.load(f)
         # validate the data structure using Pydantic models
@@ -555,9 +554,9 @@ def file(
         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         for repo in repositories:
             # clone the repository using the URL from the JSON data
-            from reporover.repository import clone_repo_from_url
+            from reporover.repository import clone_repo_from_url_gitpython
 
-            clone_repo_status_code = clone_repo_from_url(
+            clone_repo_status_code = clone_repo_from_url_gitpython(
                 repo["url"],
                 repo["name"],
                 token,
@@ -584,78 +583,6 @@ def file(
 
 # add the clone subapp to the main app
 app.add_typer(clone_app, name="clone")
-
-# @app.command()
-# def clone(  # noqa: PLR0913
-#     github_org_url: str = typer.Argument(
-#         ..., help="URL of GitHub organization"
-#     ),
-#     repo_prefix: str = typer.Argument(
-#         ..., help="Prefix for GitHub repository"
-#     ),
-#     usernames_file: Path = typer.Argument(
-#         ..., help="Path to JSON file with usernames"
-#     ),
-#     token: str = typer.Argument(..., help="GitHub token for authentication"),
-#     destination_directory: Path = typer.Argument(
-#         ..., help="Local directory to clone repositories into"
-#     ),
-#     username: Optional[List[str]] = typer.Option(
-#         default=None, help="One or more usernames' accounts to clone"
-#     ),
-# ):
-#     """Clone GitHub repositories to a local directory."""
-#     # display the welcome message
-#     display_welcome_message()
-#     console.print(
-#         f":sparkles: Cloning repositories from this GitHub organization: {github_org_url}"
-#     )
-#     console.print()
-#     # extract the usernames from the JSON file
-#     usernames_parsed = read_usernames_from_json(usernames_file)
-#     # if there exists a list of usernames only use those usernames as long
-#     # as they are inside of the parsed usernames, the complete list
-#     # (i.e., the username variable lets you select a subset of those
-#     # names that are specified in the JSON file of usernames)
-#     if username:
-#         usernames_parsed = list(set(username) & set(usernames_parsed))
-#     # create a progress bar
-#     with Progress(
-#         "[progress.description]{task.description}",
-#         BarColumn(),
-#         "[progress.percentage]{task.percentage:>3.0f}%",
-#         TextColumn("[progress.completed]{task.completed}/{task.total}"),
-#     ) as progress:
-#         task = progress.add_task(
-#             "[green]Cloning Repositories", total=len(usernames_parsed)
-#         )
-#         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
-#         for current_username in usernames_parsed:
-#             # clone the repository
-#             clone_repo_status_code = clone_repo_from_details_gitpython(
-#                 github_org_url,
-#                 repo_prefix,
-#                 current_username,
-#                 token,
-#                 destination_directory,
-#                 progress,
-#             )
-#             # store the status code for this iteration
-#             status_codes.append([clone_repo_status_code])
-#             # take the next step in the progress bar
-#             progress.advance(task)
-#     # determine if there was at least one error
-#     # in the status codes list, which would designate
-#     # that there was an overall failure in this command
-#     overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
-#     # if there was an overall failure then return a non-zero exit code
-#     # to indicate that the command did not complete successfully
-#     if overall_failure:
-#         progress.console.print(
-#             f"\n{Symbols.ERROR.value} Failed to clone at least one repository in"
-#             + f" {github_org_url}"
-#         )
-#         raise typer.Exit(code=1)
 
 
 @app.command()
