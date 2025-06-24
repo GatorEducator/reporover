@@ -18,10 +18,12 @@ from reporover.constants import (
     StatusCode,
     Symbols,
 )
-from reporover.discover import search_repositories
+from reporover.discover import extract_repos_from_data, search_repositories
+from reporover.models import RepoRoverData
 from reporover.pullrequest import leave_pr_comment
 from reporover.repository import (
     clone_repo_from_details_gitpython,
+    clone_repo_from_url_gitpython,
     commit_files_to_repo,
 )
 from reporover.status import get_status_from_codes
@@ -519,10 +521,10 @@ def file(
         with reporover_json.open() as f:
             data = json.load(f)
         # validate the data structure using Pydantic models
-        from reporover.models import RepoRoverData
-
+        # and then extract the GitHub repositories from the data
         reporover_data = RepoRoverData(**data)
-        repositories = reporover_data.reporover.get("repos", [])
+        repositories = extract_repos_from_data(reporover_data)
+    # since something went wrong, display a diagnostic message
     except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
         console.print(
             f"{Symbols.ERROR.value} Failed to read or parse reporover.json file\n"
@@ -541,7 +543,7 @@ def file(
             f"{Symbols.ERROR.value} No repositories found in reporover.json file"
         )
         raise typer.Exit(code=1)
-    # create a progress bar
+    # create a progress bar using rich
     with Progress(
         "[progress.description]{task.description}",
         BarColumn(),
@@ -552,13 +554,16 @@ def file(
             "[green]Cloning Repositories", total=len(repositories)
         )
         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+        # iterate through each of the repositories and attempt to
+        # clone it to the provided destination directory
         for repo in repositories:
-            # clone the repository using the URL from the JSON data
-            from reporover.repository import clone_repo_from_url_gitpython
-
+            # clone the repository using the URL from the JSON data;
+            # note that it is possible to access the URL and the name
+            # by using the "dot notation" since a Repo is an instance
+            # of the RepositoryInfo model defined in the models module
             clone_repo_status_code = clone_repo_from_url_gitpython(
-                repo["url"],
-                repo["name"],
+                repo.url,
+                repo.name,
                 token,
                 destination_directory,
                 progress,
