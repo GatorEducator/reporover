@@ -667,7 +667,7 @@ def test_clone_repo_from_url_gitpython_success(mock_progress):
         mock_progress.console.print.assert_called_once()
         success_message = mock_progress.console.print.call_args[0][0]
         assert "Cloned testrepo" in success_message
-        assert "/tmp/testrepo" in success_message
+        assert str(expected_destination) in success_message
 
 
 def test_clone_repo_from_url_gitpython_with_git_extension(mock_progress):
