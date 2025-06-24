@@ -196,7 +196,7 @@ contiguous region of the file.
 
 ### `discover` Command
 
-#### Task Guidelines
+#### Task Guidelines for `discover` Command
 
 - The implementation of this command should adhere to all the rules described in
 all the previous sections.
@@ -205,7 +205,7 @@ part of a feature before checking back to confirm that the system is as desired
 and whether or not it is in accordance with the rules described in this
 document.
 
-#### Task Description
+#### Task Description for `discover` Command
 
 - A command-line interface implemented in Typer that is similar to the ones
 provided previously in that it should accept a GitHub access token.
@@ -284,7 +284,7 @@ more details about how the data should be saved to the JSON file:
 
 ### `clone` command
 
-#### Task Guidelines
+#### Task Guidelines for `clone` Command
 
 - The implementation of this command should adhere to all the rules described in
 all the previous sections.
@@ -293,7 +293,7 @@ part of a feature before checking back to confirm that the system is as desired
 and whether or not it is in accordance with the rules described in this
 document.
 
-#### Task Description
+#### Task Description for `clone` Command
 
 - The `main.py` file already contains a basic implementation of the `clone`
 feature. It currently works with the following command-line arguments:
