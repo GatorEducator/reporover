@@ -1,5 +1,6 @@
 """Main module for the reporover command-line interface."""
 
+import json
 from pathlib import Path
 from typing import List, Optional
 
@@ -19,7 +20,10 @@ from reporover.constants import (
 )
 from reporover.discover import search_repositories
 from reporover.pullrequest import leave_pr_comment
-from reporover.repository import clone_repo_gitpython, commit_files_to_repo
+from reporover.repository import (
+    clone_repo_from_details_gitpython,
+    commit_files_to_repo,
+)
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import read_usernames_from_json
@@ -409,8 +413,12 @@ def commit(  # noqa: PLR0913
         raise typer.Exit(code=1)
 
 
-@app.command()
-def clone(  # noqa: PLR0913
+# create a subapp for clone commands
+clone_app = Typer(help="Clone GitHub repositories to a local directory.")
+
+
+@clone_app.command()
+def organization(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -428,7 +436,7 @@ def clone(  # noqa: PLR0913
         default=None, help="One or more usernames' accounts to clone"
     ),
 ):
-    """Clone GitHub repositories to a local directory."""
+    """Clone GitHub repositories from an organization using usernames."""
     # display the welcome message
     display_welcome_message()
     console.print(
@@ -456,7 +464,7 @@ def clone(  # noqa: PLR0913
         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         for current_username in usernames_parsed:
             # clone the repository
-            clone_repo_status_code = clone_repo_gitpython(
+            clone_repo_status_code = clone_repo_from_details_gitpython(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -480,6 +488,174 @@ def clone(  # noqa: PLR0913
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
+
+
+@clone_app.command()
+def file(
+    reporover_json: Path = typer.Argument(
+        ...,
+        help="Path to reporover.json file containing repository information",
+    ),
+    destination_directory: Path = typer.Argument(
+        ..., help="Local directory to clone repositories into"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+):
+    """Clone GitHub repositories from a reporover.json file."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Cloning repositories from reporover.json file: {reporover_json}"
+    )
+    console.print()
+    # validate that the reporover.json file exists
+    if not reporover_json.exists():
+        console.print(
+            f"{Symbols.ERROR.value} The reporover.json file does not exist: {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+    # read and parse the reporover.json file
+    try:
+
+        with reporover_json.open() as f:
+            data = json.load(f)
+        # validate the data structure using Pydantic models
+        from reporover.models import RepoRoverData
+
+        reporover_data = RepoRoverData(**data)
+        repositories = reporover_data.reporover.get("repos", [])
+    except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
+        console.print(
+            f"{Symbols.ERROR.value} Failed to read or parse reporover.json file\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(
+            f"{Symbols.ERROR.value} Invalid reporover.json file format\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    # check if there are repositories to clone
+    if not repositories:
+        console.print(
+            f"{Symbols.ERROR.value} No repositories found in reporover.json file"
+        )
+        raise typer.Exit(code=1)
+    # create a progress bar
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Cloning Repositories", total=len(repositories)
+        )
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+        for repo in repositories:
+            # clone the repository using the URL from the JSON data
+            from reporover.repository import clone_repo_from_url
+
+            clone_repo_status_code = clone_repo_from_url(
+                repo["url"],
+                repo["name"],
+                token,
+                destination_directory,
+                progress,
+            )
+            # store the status code for this iteration
+            status_codes.append([clone_repo_status_code])
+            # take the next step in the progress bar
+            progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            f"\n{Symbols.ERROR.value} Failed to clone at least one repository from"
+            + f" {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+
+
+# add the clone subapp to the main app
+app.add_typer(clone_app, name="clone")
+
+# @app.command()
+# def clone(  # noqa: PLR0913
+#     github_org_url: str = typer.Argument(
+#         ..., help="URL of GitHub organization"
+#     ),
+#     repo_prefix: str = typer.Argument(
+#         ..., help="Prefix for GitHub repository"
+#     ),
+#     usernames_file: Path = typer.Argument(
+#         ..., help="Path to JSON file with usernames"
+#     ),
+#     token: str = typer.Argument(..., help="GitHub token for authentication"),
+#     destination_directory: Path = typer.Argument(
+#         ..., help="Local directory to clone repositories into"
+#     ),
+#     username: Optional[List[str]] = typer.Option(
+#         default=None, help="One or more usernames' accounts to clone"
+#     ),
+# ):
+#     """Clone GitHub repositories to a local directory."""
+#     # display the welcome message
+#     display_welcome_message()
+#     console.print(
+#         f":sparkles: Cloning repositories from this GitHub organization: {github_org_url}"
+#     )
+#     console.print()
+#     # extract the usernames from the JSON file
+#     usernames_parsed = read_usernames_from_json(usernames_file)
+#     # if there exists a list of usernames only use those usernames as long
+#     # as they are inside of the parsed usernames, the complete list
+#     # (i.e., the username variable lets you select a subset of those
+#     # names that are specified in the JSON file of usernames)
+#     if username:
+#         usernames_parsed = list(set(username) & set(usernames_parsed))
+#     # create a progress bar
+#     with Progress(
+#         "[progress.description]{task.description}",
+#         BarColumn(),
+#         "[progress.percentage]{task.percentage:>3.0f}%",
+#         TextColumn("[progress.completed]{task.completed}/{task.total}"),
+#     ) as progress:
+#         task = progress.add_task(
+#             "[green]Cloning Repositories", total=len(usernames_parsed)
+#         )
+#         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+#         for current_username in usernames_parsed:
+#             # clone the repository
+#             clone_repo_status_code = clone_repo_from_details_gitpython(
+#                 github_org_url,
+#                 repo_prefix,
+#                 current_username,
+#                 token,
+#                 destination_directory,
+#                 progress,
+#             )
+#             # store the status code for this iteration
+#             status_codes.append([clone_repo_status_code])
+#             # take the next step in the progress bar
+#             progress.advance(task)
+#     # determine if there was at least one error
+#     # in the status codes list, which would designate
+#     # that there was an overall failure in this command
+#     overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+#     # if there was an overall failure then return a non-zero exit code
+#     # to indicate that the command did not complete successfully
+#     if overall_failure:
+#         progress.console.print(
+#             f"\n{Symbols.ERROR.value} Failed to clone at least one repository in"
+#             + f" {github_org_url}"
+#         )
+#         raise typer.Exit(code=1)
 
 
 @app.command()
