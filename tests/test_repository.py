@@ -15,6 +15,7 @@ from reporover.constants import (
 )
 from reporover.repository import (
     clone_repo_from_details_gitpython,
+    clone_repo_from_url_gitpython,
     commit_files_to_repo,
 )
 
@@ -636,3 +637,139 @@ def test_clone_repo_gitpython_directory_already_exists(mock_progress):
         error_message = mock_progress.console.print.call_args[0][0]
         assert "Failed to clone assignment-testuser to" in error_message
         assert "already exists" in error_message
+
+
+def test_clone_repo_from_url_gitpython_success(mock_progress):
+    """Test successful repository cloning from URL."""
+    # mock necessary functions
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure mock for successful cloning
+        mock_clone.return_value = Mock()
+        # call the function with valid parameters
+        result = clone_repo_from_url_gitpython(
+            repo_url="https://github.com/testorg/testrepo",
+            repo_name="testrepo",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify successful cloning
+        assert result == StatusCode.WORKING
+        # verify git clone was called with correct parameters
+        expected_clone_url = (
+            "https://test_token_123@github.com/testorg/testrepo.git"
+        )
+        expected_destination = Path("/tmp/testrepo")
+        mock_clone.assert_called_once_with(
+            expected_clone_url, expected_destination
+        )
+        # verify success message was printed
+        mock_progress.console.print.assert_called_once()
+        success_message = mock_progress.console.print.call_args[0][0]
+        assert "Cloned testrepo" in success_message
+        assert "/tmp/testrepo" in success_message
+
+
+def test_clone_repo_from_url_gitpython_with_git_extension(mock_progress):
+    """Test successful repository cloning from URL with .git extension."""
+    # mock necessary functions
+    with patch("reporover.repository.Repo.clone_from") as mock_clone:
+        # configure mock for successful cloning
+        mock_clone.return_value = Mock()
+        # call the function with URL already having .git extension
+        result = clone_repo_from_url_gitpython(
+            repo_url="https://github.com/testorg/testrepo.git",
+            repo_name="testrepo",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify successful cloning
+        assert result == StatusCode.WORKING
+        # verify git clone was called with correct parameters
+        expected_clone_url = (
+            "https://test_token_123@github.com/testorg/testrepo.git"
+        )
+        expected_destination = Path("/tmp/testrepo")
+        mock_clone.assert_called_once_with(
+            expected_clone_url, expected_destination
+        )
+
+
+def test_clone_repo_from_url_gitpython_directory_exists(mock_progress):
+    """Test cloning failure when destination directory already exists."""
+    # mock necessary functions
+    with patch("pathlib.Path.exists") as mock_exists:
+        # configure mock to simulate directory already exists
+        mock_exists.return_value = True
+        # call the function
+        result = clone_repo_from_url_gitpython(
+            repo_url="https://github.com/testorg/testrepo",
+            repo_name="testrepo",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify failure status is returned
+        assert result == StatusCode.FAILURE
+        # verify error message was printed
+        mock_progress.console.print.assert_called_once()
+        error_message = mock_progress.console.print.call_args[0][0]
+        assert "Failed to clone testrepo" in error_message
+        assert "already exists" in error_message
+
+
+def test_clone_repo_from_url_gitpython_git_error(mock_progress):
+    """Test cloning failure with git command error."""
+    # mock necessary functions
+    with (
+        patch("pathlib.Path.exists") as mock_exists,
+        patch("reporover.repository.Repo.clone_from") as mock_clone,
+    ):
+        # configure mocks to simulate git error
+        mock_exists.return_value = False
+        mock_clone.side_effect = GitCommandError(
+            "clone", "Authentication failed"
+        )
+        # call the function
+        result = clone_repo_from_url_gitpython(
+            repo_url="https://github.com/testorg/testrepo",
+            repo_name="testrepo",
+            token="invalid_token",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify failure status is returned
+        assert result == StatusCode.FAILURE
+        # verify error message was printed
+        mock_progress.console.print.assert_called_once()
+        error_message = mock_progress.console.print.call_args[0][0]
+        assert "Failed to clone testrepo" in error_message
+        assert "Authentication failed" in error_message
+
+
+def test_clone_repo_from_url_gitpython_special_chars_in_name(mock_progress):
+    """Test cloning repo with special characters in name."""
+    # mock necessary functions
+    with (
+        patch("pathlib.Path.exists") as mock_exists,
+        patch("reporover.repository.Repo.clone_from") as mock_clone,
+    ):
+        # configure mocks for successful cloning
+        mock_exists.return_value = False
+        mock_clone.return_value = Mock()
+        # call the function with special characters in repo name
+        result = clone_repo_from_url_gitpython(
+            repo_url="https://github.com/testorg/test-repo-with-hyphens",
+            repo_name="test-repo-with-hyphens",
+            token="test_token_123",
+            destination_directory=Path("/tmp"),
+            progress=mock_progress,
+        )
+        # verify successful cloning
+        assert result == StatusCode.WORKING
+        # verify path was correctly formed with special characters
+        expected_destination = Path("/tmp/test-repo-with-hyphens")
+        mock_clone.assert_called_once()
+        actual_destination = mock_clone.call_args[0][1]
+        assert actual_destination == expected_destination
