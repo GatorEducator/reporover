@@ -669,7 +669,7 @@ def test_cli_commit_command_multiple_files(temp_usernames_file):
 def test_cli_clone_command_with_all_parameters_success(temp_usernames_file):
     """Test the clone command with all parameters provided for success case."""
     # mock the functions called by the CLI
-    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+    with patch("reporover.main.clone_repo_from_details_gitpython") as mock_clone_repo:
         # configure the mocks to simulate success
         mock_clone_repo.return_value = StatusCode.SUCCESS
         # define the command arguments that match the real usage
@@ -677,6 +677,7 @@ def test_cli_clone_command_with_all_parameters_success(temp_usernames_file):
             app,
             [
                 "clone",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
@@ -695,7 +696,7 @@ def test_cli_clone_command_with_all_parameters_success(temp_usernames_file):
 def test_cli_clone_command_with_all_parameters_failure(temp_usernames_file):
     """Test the clone command with all parameters provided for failure case."""
     # mock the functions called by the CLI
-    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+    with patch("reporover.main.clone_repo_from_details_gitpython") as mock_clone_repo:
         # configure the mocks to simulate failure
         mock_clone_repo.return_value = StatusCode.FAILURE
         # define the command arguments that match the real usage
@@ -703,6 +704,7 @@ def test_cli_clone_command_with_all_parameters_failure(temp_usernames_file):
             app,
             [
                 "clone",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
@@ -721,7 +723,7 @@ def test_cli_clone_command_with_all_parameters_failure(temp_usernames_file):
 def test_cli_clone_command_multiple_usernames_success(temp_usernames_file):
     """Test the clone command with multiple usernames for success case."""
     # mock the functions called by the CLI
-    with patch("reporover.main.clone_repo_gitpython") as mock_clone_repo:
+    with patch("reporover.main.clone_repo_from_details_gitpython") as mock_clone_repo:
         # configure the mocks to simulate success
         mock_clone_repo.return_value = StatusCode.SUCCESS
         # define the command arguments with multiple usernames
@@ -729,6 +731,7 @@ def test_cli_clone_command_multiple_usernames_success(temp_usernames_file):
             app,
             [
                 "clone",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
