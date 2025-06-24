@@ -428,11 +428,16 @@ def _save_results_to_json(
 
 def load_results_from_json(load_file: str) -> Optional[RepoRoverData]:
     """Load the repository search results from a JSON file using Pydantic models."""
+    # load the data as a JSON file and then use pydantic to
+    # transform it into the RepoRoverData model; this will
+    # ensure that the data is correctly formatted as JSON
     try:
         with open(load_file, "r", encoding="utf-8") as file:
             data = json.load(file)
         reporover_data = RepoRoverData(**data)
         return reporover_data
+    # the data validation did not work correctly and thus
+    # this function must return None to show no data is available
     except Exception:
         return None
 
