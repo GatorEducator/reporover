@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
-from reporover.constants import Numbers, StatusCode, Symbols
+from reporover.constants import FileSystem, Numbers, StatusCode, Symbols
 from reporover.models import (
     DiscoverConfiguration,
     RepoRoverData,
@@ -316,13 +316,17 @@ def _get_repository_files(
     repository, max_depth: int, headers: dict
 ) -> List[dict]:
     """Get all files and directories in a GitHub repository up to specified depth."""
+    # initialize the list of files and directories that
+    # are found from the recursive search of the repository
     all_files: List[dict] = []
+    # recursively collect all files and directories
     try:
         _collect_files_recursive(
             repository.full_name, "", max_depth, 0, headers, all_files
         )
     except Exception:
         pass
+    # return the list of all files and directories found
     return all_files
 
 
@@ -335,25 +339,41 @@ def _collect_files_recursive(  # noqa: PLR0913
     all_files: List[dict],
 ) -> None:
     """Recursively collect files and directories from a GitHub repository up to a maximum depth."""
+    # stop the recursion if the current depth exceeds the maximum depth;
+    # the use of the maximum depth parameter is the means by which this
+    # function controls the computational cost of the recursive search
     if current_depth > max_depth:
         return
+    # create the API URL for the GitHub repository so that this
+    # function can query the contents of the repository
     api_url = f"https://api.github.com/repos/{repo_full_name}/contents/{path}"
     try:
+        # access the GitHub API to get the contents of the repository
+        # using the requests library; this is done to access the
+        # files and/or directories in the repository at the specified path
         response = requests.get(api_url, headers=headers, timeout=10)
+        # something did not work and thus the traversal has failed
         if response.status_code != StatusCode.WORKING.value:
             return
         contents = response.json()
         if not isinstance(contents, list):
             return
+        # iterate through all of the files and/or directories that
+        # were found at this specific level in the repository
         for item in contents:
-            if item.get("type") == "file":
+            if item.get("type") == FileSystem.FILE.value:
                 all_files.append(item)
-            elif item.get("type") == "dir":
+            elif item.get("type") == FileSystem.DIRECTORY.value:
                 all_files.append(item)
+                # keep recursively traversing the files and
+                # directories in this GitHub repository as long
+                # as the maximum depth is not exceeded
                 if current_depth < max_depth:
                     _collect_files_recursive(
                         repo_full_name,
-                        item.get("path", ""),
+                        item.get(
+                            FileSystem.PATH.value, FileSystem.EMPTY.value
+                        ),
                         max_depth,
                         current_depth + 1,
                         headers,
