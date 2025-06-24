@@ -53,6 +53,8 @@ def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
         max_display = MAX_DISPLAY
     else:
         MAX_DISPLAY = max_display
+    # perform the search of the public repositories that
+    # are on GitHub using the provided search parameters
     try:
         # create a GitHub API instance using PyGitHub
         # and the provided GitHub access token
