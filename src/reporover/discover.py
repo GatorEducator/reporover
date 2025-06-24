@@ -343,7 +343,7 @@ def _collect_files_recursive(  # noqa: PLR0913
     # the use of the maximum depth parameter is the means by which this
     # function controls the computational cost of the recursive search
     if current_depth > max_depth:
-        return
+        return None
     # create the API URL for the GitHub repository so that this
     # function can query the contents of the repository
     api_url = f"https://api.github.com/repos/{repo_full_name}/contents/{path}"
@@ -380,7 +380,7 @@ def _collect_files_recursive(  # noqa: PLR0913
                         all_files,
                     )
     except Exception:
-        pass
+        return None
 
 
 def _save_results_to_json(
