@@ -458,6 +458,30 @@ def extract_configuration_from_data(
         return None
 
 
+def extract_repos_from_data(
+    reporover_data: RepoRoverData,
+) -> Optional[List[RepositoryInfo]]:
+    """Extract repository information from loaded RepoRoverData."""
+    try:
+        repos_data = reporover_data.reporover.get("repos")
+        if repos_data is None:
+            return None
+        if not isinstance(repos_data, list):
+            return None
+        repositories = []
+        for repo_dict in repos_data:
+            if not isinstance(repo_dict, dict):
+                continue
+            try:
+                repo = RepositoryInfo(**repo_dict)
+                repositories.append(repo)
+            except Exception:
+                continue
+        return repositories if repositories else None
+    except Exception:
+        return None
+
+
 def _display_search_results(repositories, console: Console) -> None:
     """Display the search results in a formatted table when there is no file filtering."""
     table = Table(
