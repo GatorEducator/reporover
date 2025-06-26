@@ -18,7 +18,8 @@ from reporover.constants import (
     StatusCode,
     Symbols,
 )
-from reporover.discover import extract_repos_from_data, search_repositories
+from reporover.discover import discover_repositories, extract_repos_from_data
+from reporover.find import find_repositories
 from reporover.models import RepoRoverData
 from reporover.pullrequest import leave_pr_comment
 from reporover.repository import (
@@ -654,7 +655,7 @@ def discover(  # noqa: PLR0913
     # perform the discovery by searching the
     # public GitHub repositories according to
     # the provided search and filtering criteria
-    search_status_code = search_repositories(
+    search_status_code = discover_repositories(
         console,
         token,
         language,
@@ -674,5 +675,60 @@ def discover(  # noqa: PLR0913
     if search_status_code != StatusCode.SUCCESS:
         console.print(
             f"\n{Symbols.ERROR.value} Failed to discover public GitHub repositories"
+        )
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def find(  # noqa: PLR0913
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    organization: str = typer.Argument(
+        ..., help="GitHub organization name to search within"
+    ),
+    name: Optional[str] = typer.Option(
+        None, help="Repository name fragment to search for"
+    ),
+    language: Optional[str] = typer.Option(
+        None, help="Programming language of the repository"
+    ),
+    stars: Optional[int] = typer.Option(
+        None, help="Minimum number of stars the repository should have"
+    ),
+    forks: Optional[int] = typer.Option(
+        None, help="Minimum number of forks the repository should have"
+    ),
+    created_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was created (format: YYYY-MM-DD)",
+    ),
+    updated_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was last updated (format: YYYY-MM-DD)",
+    ),
+):
+    """Find private GitHub repositories in an organization matching criteria."""
+    display_welcome_message()
+    console.print(
+        ":sparkles: Finding private GitHub repositories in the specified organization"
+    )
+    console.print()
+    # perform the search by finding the private GitHub repositories
+    # within the specified organization according to the provided criteria
+    search_status_code = find_repositories(
+        console,
+        token,
+        organization,
+        name,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+    )
+    # check if the search was successful and if it was
+    # not then display an error message and exit the sub-command
+    if search_status_code != StatusCode.SUCCESS:
+        console.print(
+            f"\n{Symbols.ERROR.value} Failed to find private GitHub repositories"
         )
         raise typer.Exit(code=1)
