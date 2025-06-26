@@ -216,9 +216,12 @@ command using PyGitHub, then it is acceptable to use the `requests` library.
 - The overall purpose of the `find` command is to query the GitHub REST API
 through the use of PyGitHub to search for private repositories (accessible to
 the individual based on their provided GitHub access token) that are in the
-specified organization and contain at least a fragment of the specified name. If
+specified `organization` and contain a fragment of the specified `name`. If
 it is not possible to implement the `find` command using the PyGitHub library,
 then it is acceptable to use the `requests` library.
+- The distinction between the `discover` and `find` commands is that the
+`discover` command is used to discover public repositories that match the search
+criteria while the `find` command is used to find private repositories.
 - Both the `discover` and the `find` commands have the search criteria that:
     - Could all be `None` if they are not provided.
     - Must be specified as command-line arguments.
@@ -287,7 +290,7 @@ more details about how the data should be saved to the JSON file:
     - The `discover` subcommand in the `main.py` file now provides a largely
     complete implementation of the featured described in this document.
 
-## New Refactorings
+## Refactorings for RepoRover
 
 ### `clone` command
 
