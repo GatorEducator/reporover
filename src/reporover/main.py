@@ -256,8 +256,11 @@ def comment(  # noqa: PLR0913
         raise typer.Exit(code=1)
 
 
-@app.command()
-def status(
+status_app = Typer(help="Get GitHub Actions status for repositories.")
+
+
+@status_app.command()
+def organizations(
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -272,7 +275,7 @@ def status(
         default=None, help="One or more usernames' accounts to modify"
     ),
 ):
-    """Get the GitHub Actions status for repositories."""
+    """Get the GitHub Actions status for repositories in an organization using usernames."""
     # display the welcome message
     display_welcome_message()
     console.print(
@@ -324,10 +327,202 @@ def status(
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to access the status of GitHub Actions of at least one repository in"
+            "\n Failed to access the status of GitHub Actions of at least one repository in"
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
+
+
+@status_app.command()
+def files(
+    reporover_json: Path = typer.Argument(
+        ...,
+        help="Path to reporover.json file containing repository information",
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+):
+    """Get GitHub Actions status for repositories from a reporover.json file."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Retrieving GitHub Actions status for repositories from reporover.json file: {reporover_json}"
+    )
+    console.print()
+    # validate that the reporover.json file exists
+    if not reporover_json.exists():
+        console.print(
+            f"{Symbols.ERROR.value} The reporover.json file does not exist: {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+    # read and parse the reporover.json file
+    try:
+        with reporover_json.open() as f:
+            data = json.load(f)
+        # validate the data structure using Pydantic models
+        # and then extract the GitHub repositories from the data
+        reporover_data = RepoRoverData(**data)
+        repositories = extract_repos_from_data(reporover_data)
+    # since something went wrong, display a diagnostic message
+    except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
+        console.print(
+            f"{Symbols.ERROR.value} Failed to read or parse reporover.json file\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(
+            f"{Symbols.ERROR.value} Invalid reporover.json file format\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    # check if there are repositories to get status for
+    if not repositories:
+        console.print(
+            f"{Symbols.ERROR.value} No repositories found in reporover.json file"
+        )
+        raise typer.Exit(code=1)
+    # create a progress bar using rich
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Getting GitHub Actions Status", total=len(repositories)
+        )
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+        # iterate through each of the repositories and attempt to
+        # get the GitHub Actions status for it
+        for repo in repositories:
+            # get the GitHub Actions status using the URL from the JSON data;
+            # note that we need to extract the organization and repository name
+            # from the URL since the get_github_actions_status function expects
+            # these parameters separately
+            try:
+                # extract organization and repository name from URL
+                # URL format: https://github.com/org/repo
+                url_parts = repo.url.rstrip("/").split("/")
+                if len(url_parts) >= 2:
+                    github_org = url_parts[-2]
+                    repo_name = url_parts[-1]
+                    github_org_url = f"https://github.com/{github_org}"
+                    # get the GitHub Actions status for this repository
+                    access_github_actions_status = get_github_actions_status(
+                        github_org_url,
+                        repo_name,
+                        "",  # no username needed as we have the full repo name
+                        token,
+                        progress,
+                    )
+                else:
+                    # invalid URL format, mark as failure
+                    access_github_actions_status = StatusCode.FAILURE
+                    progress.console.print(
+                        f"{Symbols.ERROR.value} Invalid repository URL format: {repo.url}"
+                    )
+            except Exception as e:
+                # error processing this repository, mark as failure
+                access_github_actions_status = StatusCode.FAILURE
+                progress.console.print(
+                    f"{Symbols.ERROR.value} Error processing repository {repo.name}: {e!s}"
+                )
+            # store the status code for this iteration
+            status_codes.append([access_github_actions_status])
+            # take the next step in the progress bar
+            progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            f"\n{Symbols.ERROR.value} Failed to access the status of GitHub Actions of at least one repository from"
+            + f" {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+
+
+# add the status subapp to the main app;
+# this ensures that the status command has
+# two subcommands: organization and file
+app.add_typer(status_app, name="status")
+
+
+# @app.command()
+# def status(
+#     github_org_url: str = typer.Argument(
+#         ..., help="URL of GitHub organization"
+#     ),
+#     repo_prefix: str = typer.Argument(
+#         ..., help="Prefix for GitHub repository"
+#     ),
+#     usernames_file: Path = typer.Argument(
+#         ..., help="Path to JSON file with usernames"
+#     ),
+#     token: str = typer.Argument(..., help="GitHub token for authentication"),
+#     username: Optional[List[str]] = typer.Option(
+#         default=None, help="One or more usernames' accounts to modify"
+#     ),
+# ):
+#     """Get the GitHub Actions status for repositories."""
+#     # display the welcome message
+#     display_welcome_message()
+#     console.print(
+#         f":sparkles: Retrieving GitHub Actions status for repositories in this organization: {github_org_url}"
+#     )
+#     console.print()
+#     # extract the usernames from the JSON file
+#     usernames_parsed = read_usernames_from_json(usernames_file)
+#     # if there exists a list of usernames only use those usernames as long
+#     # as they are inside of the parsed usernames, the complete list
+#     # (i.e., the username variable lets you select a subset of those
+#     # names that are specified in the JSON file of usernames)
+#     if username:
+#         usernames_parsed = list(set(username) & set(usernames_parsed))
+#     # create a progress bar for the GitHub Actions status retrieval
+#     with Progress(
+#         "[progress.description]{task.description}",
+#         BarColumn(),
+#         "[progress.percentage]{task.percentage:>3.0f}%",
+#         TextColumn("[progress.completed]{task.completed}/{task.total}"),
+#     ) as progress:
+#         task = progress.add_task(
+#             "[green]Getting GitHub Actions Status", total=len(usernames_parsed)
+#         )
+#         # create a list to keep track of the status codes
+#         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+#         # for each username, determine the status of their GitHub Actions
+#         # build for the repository associated with the user in the
+#         # specified GitHub organization
+#         for current_username in usernames_parsed:
+#             # get the GitHub Actions status, making sure to store
+#             # the status of the attempt to access the GitHub Actions' status
+#             access_github_actions_status = get_github_actions_status(
+#                 github_org_url,
+#                 repo_prefix,
+#                 current_username,
+#                 token,
+#                 progress,
+#             )
+#             # store the status code for this iteration
+#             status_codes.append([access_github_actions_status])
+#             # take the next step in the progress bar
+#             progress.advance(task)
+#     # determine if there was at least one error
+#     # in the status codes list, which would designate
+#     # that there was an overall failure in this command
+#     overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+#     # if there was an overall failure then return a non-zero exit code
+#     # to indicate that the command did not complete successfully
+#     if overall_failure:
+#         progress.console.print(
+#             "\n Failed to access the status of GitHub Actions of at least one repository in"
+#             + f" {github_org_url}"
+#         )
+#         raise typer.Exit(code=1)
 
 
 @app.command()
