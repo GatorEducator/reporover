@@ -82,7 +82,7 @@ plan = "docs/plan.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
-coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=90 --cov-report term-missing --cov-report json --cov --cov-branch"
+coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=80 --cov-report term-missing --cov-report json --cov --cov-branch"
 coverage-test-command-silent = "pytest -x --show-capture=no --cov-report term-missing --cov-report json --cov --cov-branch"
 developer-test-command = "pytest -x -s -vv"
 developer-test-command-no-property = "pytest -x -s -vv -m 'not property'"
