@@ -196,7 +196,7 @@ contiguous region of the file.
 
 ### `discover` Command
 
-#### Task Guidelines for `discover` Command
+#### Task Guidelines for `discover` and `find` Commands
 
 - The implementation of this command should adhere to all the rules described in
 all the previous sections.
@@ -205,15 +205,21 @@ part of a feature before checking back to confirm that the system is as desired
 and whether or not it is in accordance with the rules described in this
 document.
 
-#### Task Description for `discover` Command
+#### Task Description for `discover` and `find` Commands
 
 - A command-line interface implemented in Typer that is similar to the ones
 provided previously in that it should accept a GitHub access token.
 - The overall purpose of the `discover` command is to query the GitHub REST API
 through the use of PyGitHub to search for public GitHub repositories that match
-the provided search criteria. If it is not possible to implement a feature using
-the PyGitHub library, then it is acceptable to use the `requests` library.
-- The search criteria:
+the provided search criteria. If it is not possible to implement the `discover`
+command using PyGitHub, then it is acceptable to use the `requests` library.
+- The overall purpose of the `find` command is to query the GitHub REST API
+through the use of PyGitHub to search for private repositories (accessible to
+the individual based on their provided GitHub access token) that are in the
+specified organization and contain at least a fragment of the specified name. If
+it is not possible to implement the `find` command using the PyGitHub library,
+then it is acceptable to use the `requests` library.
+- Both the `discover` and the `find` commands have the search criteria that:
     - Could all be `None` if they are not provided.
     - Must be specified as command-line arguments.
     - As a start, they should focus on the following:
@@ -260,8 +266,9 @@ more details about how the data should be saved to the JSON file:
         the command-line arguments for that run of the command. For instance,
         this would include the fact that it was the `discover` subcommand that
         was run and the `search_query` that was used (this is constructed by the
-        functions inside of the `discover.py` file). The configuration dictionary
-        should also save a timestamp to indicate when the command was run.
+        functions inside of the `discover.py` file). The configuration
+        dictionary should also save a timestamp to indicate when the command was
+        run.
         - `repos`: a list of dictionaries, where each dictionary contains all
         the information about each GitHub repository that was found. This must
         contain all the information that would be needed to access the
@@ -320,8 +327,8 @@ provided previously in that it should accept a GitHub access token.
 
 ## Included Files
 
-Note that the purpose of this fenced code block is to provide an example
-template for providing files to a coding agent.
+Note that the purpose of the following fenced code block is to provide an
+example template for providing files to a coding agent.
 
 ```text
 > #file:./docs/plan.md
