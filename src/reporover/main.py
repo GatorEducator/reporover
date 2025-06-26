@@ -273,8 +273,6 @@ def status(
     ),
 ):
     """Get the GitHub Actions status for repositories."""
-    # create a default console
-    # console = Console()
     # display the welcome message
     display_welcome_message()
     console.print(
