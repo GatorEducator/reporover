@@ -22,7 +22,7 @@ MAX_DISPLAY = Numbers.MAX_KEEP.value
 MAX_FILTER = Numbers.MAX_FILTER.value
 
 
-def search_repositories(  # noqa: PLR0912, PLR0913, PLR0915
+def discover_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     console: Console,
     token: str,
     language: Optional[str],
