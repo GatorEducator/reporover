@@ -705,6 +705,26 @@ def find(  # noqa: PLR0913
         None,
         help="Date after which the repository was last updated (format: YYYY-MM-DD)",
     ),
+    files: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact file names that the repository should contain",
+    ),
+    max_depth: int = typer.Option(
+        None,
+        help="Maximum depth to search for files in repository (default: 0 = repository root)",
+    ),
+    max_filter: int = typer.Option(
+        None,
+        help="Maximum number of discovered repositories to filter for files (default: 100)",
+    ),
+    max_keep: int = typer.Option(
+        Numbers.MAX_KEEP.value,
+        help="Maximum number of repositories to display and/or keep in results",
+    ),
+    save: Optional[str] = typer.Option(
+        None,
+        help="Save results to JSON file at specified path",
+    ),
 ):
     """Find private GitHub repositories in an organization matching criteria."""
     display_welcome_message()
@@ -712,6 +732,14 @@ def find(  # noqa: PLR0913
         ":sparkles: Finding private GitHub repositories in the specified organization"
     )
     console.print()
+    # validate that max_filter and max_depth is only used when files are specified;
+    # the basic idea is that there is no value in parameterizing the filtering
+    # process if there are no files that are going to be used to filter repositories
+    if (max_filter is not None or max_depth is not None) and files is None:
+        console.print(
+            f"{Symbols.ERROR.value} The --max-filter and --max-depth options can only be used when --files is specified"
+        )
+        raise typer.Exit(code=1)
     # perform the search by finding the private GitHub repositories
     # within the specified organization according to the provided criteria
     search_status_code = find_repositories(
@@ -724,6 +752,11 @@ def find(  # noqa: PLR0913
         forks,
         created_after,
         updated_after,
+        files,
+        max_depth,
+        max_filter,
+        max_keep,
+        save,
     )
     # check if the search was successful and if it was
     # not then display an error message and exit the sub-command
