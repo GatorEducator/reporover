@@ -18,10 +18,10 @@ from reporover.discover import (
     _display_search_results,
     _repository_contains_files,
     _save_results_to_json,
+    discover_repositories,
     extract_configuration_from_data,
     extract_repos_from_data,
     load_results_from_json,
-    search_repositories,
 )
 from reporover.models import DiscoverConfiguration, RepositoryInfo
 
@@ -430,7 +430,7 @@ class TestSearchRepositories:
             patch.object(console, "print"),
             patch("reporover.discover.Progress"),
         ):
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language="python",
                 stars=100,
@@ -465,7 +465,7 @@ class TestSearchRepositories:
             patch.object(console, "print"),
             patch("reporover.discover.Progress"),
         ):
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language=None,
                 stars=None,
@@ -494,7 +494,7 @@ class TestSearchRepositories:
             status=404, data="Not found"
         )
         with patch.object(console, "print") as mock_print:
-            result = search_repositories(
+            result = discover_repositories(
                 token="invalid_token",
                 language="python",
                 stars=100,
@@ -522,7 +522,7 @@ class TestSearchRepositories:
             "Network error"
         )
         with patch.object(console, "print") as mock_print:
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language="python",
                 stars=100,
@@ -556,7 +556,7 @@ class TestSearchRepositories:
             patch.object(console, "print"),
             patch("reporover.discover.Progress"),
         ):
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language="obscure_language",
                 stars=10000,
@@ -589,7 +589,7 @@ class TestSearchRepositories:
             patch.object(console, "print"),
             patch("reporover.discover.Progress"),
         ):
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language="python",
                 stars=0,
@@ -622,7 +622,7 @@ class TestSearchRepositories:
             patch.object(console, "print"),
             patch("reporover.discover.Progress"),
         ):
-            result = search_repositories(
+            result = discover_repositories(
                 token="fake_token",
                 language="python",
                 stars=100,
@@ -669,7 +669,7 @@ class TestSearchRepositories:
         ) as mock_build_query:
             mock_build_query.return_value = "language:python stars:>=100"
             with patch.object(console, "print"):
-                result = search_repositories(
+                result = discover_repositories(
                     token="fake_token",
                     language="python",
                     stars=100,
@@ -714,7 +714,7 @@ class TestSearchRepositories:
             "reporover.discover._display_search_results"
         ) as mock_display:
             with patch.object(console, "print"):
-                result = search_repositories(
+                result = discover_repositories(
                     token="fake_token",
                     language="python",
                     stars=100,
