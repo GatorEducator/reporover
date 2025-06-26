@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Optional
 
 import github
+from rich import box
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TextColumn
+from rich.table import Table
 
 from reporover.constants import StatusCode, Symbols
 
@@ -193,11 +195,6 @@ def _display_find_results(
     repositories: list, console: Console, organization: str
 ) -> None:
     """Display the find results in a formatted table."""
-    from rich import box
-    from rich.table import Table
-
-    from reporover.constants import Symbols
-
     table = Table(
         title=f"Repository Find Results for Organization: {organization}",
         box=box.SIMPLE_HEAVY,
