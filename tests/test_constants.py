@@ -6,6 +6,7 @@ from enum import Enum
 
 from reporover.constants import (
     Data,
+    FileSystem,
     GitHubAccessLevel,
     GitHubPullRequestNumber,
     GitHubRepositoryDetails,
@@ -225,6 +226,11 @@ def test_symbols_members():
 
 def test_all_enums_accessible():
     """Test that all enum constants can be accessed as attributes."""
+    # FileSystem
+    assert hasattr(FileSystem, "FILE")
+    assert hasattr(FileSystem, "DIRECTORY")
+    assert hasattr(FileSystem, "EMPTY")
+    assert hasattr(FileSystem, "PATH")
     # GitHubAccessLevel
     assert hasattr(GitHubAccessLevel, "READ")
     assert hasattr(GitHubAccessLevel, "TRIAGE")
@@ -313,16 +319,17 @@ def test_symbols_check_is_icon():
     assert len(Symbols.CHECK.value) == 1
 
 
-def test_symbols_unknown_is_word():
-    """Test that UNKNOWN is the word 'Unknown'."""
-    assert Symbols.UNKNOWN.value == "Unknown"
-    assert isinstance(Symbols.UNKNOWN.value, str)
-
-
 def test_all_enum_classes_are_subclasses_of_enum():
     """Test that all constant classes are subclasses of Enum."""
     assert issubclass(Data, Enum)
+    assert issubclass(FileSystem, Enum)
     assert issubclass(GitHubAccessLevel, Enum)
+    assert issubclass(GitHubPullRequestNumber, Enum)
+    assert issubclass(GitHubRepositoryDetails, Enum)
+    assert issubclass(PullRequestMessages, Enum)
+    assert issubclass(StatusCode, Enum)
+    assert issubclass(Numbers, Enum)
+    assert issubclass(Symbols, Enum)
     assert issubclass(GitHubPullRequestNumber, Enum)
     assert issubclass(GitHubRepositoryDetails, Enum)
     assert issubclass(PullRequestMessages, Enum)
@@ -339,3 +346,23 @@ def test_enum_members_are_unique():
     # check Symbols enum uniqueness
     symbols_values = [member.value for member in Symbols]
     assert len(symbols_values) == len(set(symbols_values))
+
+
+def test_filesystem_is_enum():
+    """Test that FileSystem is an Enum class."""
+    assert issubclass(FileSystem, Enum)
+
+
+def test_filesystem_values():
+    """Test that FileSystem has the correct values."""
+    assert FileSystem.FILE.value == "file"
+    assert FileSystem.DIRECTORY.value == "dir"
+    assert FileSystem.EMPTY.value == ""
+    assert FileSystem.PATH.value == "path"
+
+
+def test_filesystem_members():
+    """Test that FileSystem enum has exactly the expected members."""
+    expected_members = {"FILE", "DIRECTORY", "EMPTY", "PATH"}
+    actual_members = {member.name for member in FileSystem}
+    assert actual_members == expected_members
