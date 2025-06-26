@@ -50,6 +50,23 @@ def find_repositories(  # noqa: PLR0913
         console.print(
             f":mag: Searching repositories in organization: {organization}"
         )
+        # display all of the search criteria as long as they are not None
+        if name:
+            console.print(f":mag: Repository name fragment: {name}")
+        if language:
+            console.print(f":mag: Repository programming language: {language}")
+        if stars:
+            console.print(f":mag: Repository minimum stars: {stars}")
+        if forks:
+            console.print(f":mag: Repository minimum forks: {forks}")
+        if created_after:
+            console.print(
+                f":mag: Created after: {created_after} (YYYY-MM-DD)"
+            )
+        if updated_after:
+            console.print(
+                f":mag: Updated after: {updated_after} (YYYY-MM-DD)"
+            )
         # filter repositories based on the provided criteria
         filtered_repositories = _filter_repositories_by_criteria(
             repositories,
