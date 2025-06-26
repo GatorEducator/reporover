@@ -309,22 +309,62 @@ document.
 feature. It currently works with the following command-line arguments:
     * github_org_url TEXT URL of GitHub organization [default: None] [required]
     * repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
-    * usernames_file PATH Path to JSON file with usernames [default: None] [required]
+    * usernames_file PATH Path to JSON file with usernames [default: None]
+    [required]
     * token TEXT GitHub token for authentication [default: None] [required]
-    * destination_directory PATH Local directory to clone repositories into [default: None] [required]
-- Now that the `discover` command makes it possible to produce a `reporover.json` file
-that contains a list of GitHub repositories, the `clone` command should be refactored
-so that it can read the `reporover.json` file and clone the repositories listed in it.
+    * destination_directory PATH Local directory to clone repositories into
+    [default: None] [required]
+- Now that the `discover` and `find` commands make it possible to produce a
+`reporover.json` file that contains a list of GitHub repositories, the `clone`
+command should be refactored so that it can read the `reporover.json` file and
+clone the repositories listed in it.
 - This means that the `clone` command needs to have two subcommands:
-    - `organization`: This is the currently implementation of `clone`. It should have
-    the same command-line arguments as the current implementation of `clone`.
+    - `organization`: This is the currently implementation of `clone`. It should
+    have the same command-line arguments as the current implementation of
+    `clone`.
     - `file`: This is the new version that will take:
         - `reporover_json`: A `reporover.json` file that adheres to the
-        requirements of a JSON file described by the Pydantic models in `models.py`
-        - `destination_directory`: A local directory to clone the repositories into.
+        requirements of a JSON file described by the Pydantic models in
+        `models.py`
+        - `destination_directory`: A local directory to clone the repositories
+        into.
         - `token`: A GitHub access token for authentication.
         - Note that, importantly, this sub-command of `clone` will _not_ accept
-        `github_org_url`, `repo_prefix`, or `usernames_file` as command-line arguments.
+        `github_org_url`, `repo_prefix`, or `usernames_file` as command-line
+        arguments.
+- A command-line interface implemented in Typer that is similar to the ones
+provided previously in that it should accept a GitHub access token.
+
+#### Task Description for `status` Command
+
+- The `main.py` file already contains a basic implementation of the `status`
+feature. It currently works with the following command-line arguments:
+    * github_org_url TEXT URL of GitHub organization [default: None] [required]
+    * repo_prefix TEXT Prefix for GitHub repository [default: None] [required]
+    * usernames_file PATH Path to JSON file with usernames [default: None]
+    [required]
+    * token TEXT GitHub token for authentication [default: None] [required]
+- Now that the `discover` and `find` commands make it possible to produce a
+`reporover.json` file that contains a list of GitHub repositories, the `status`
+command should be refactored so that it can read the `reporover.json` file and
+clone the repositories listed in it.
+- This means that the `status` command needs to have two subcommands:
+    - `organization`: This is the currently implementation of `status`. It
+    should have the same command-line arguments as the current implementation of
+    `status`.
+    - `file`: This is the new version that will take:
+        - `reporover_json`: A `reporover.json` file that adheres to the
+        requirements of a JSON file described by the Pydantic models in
+        `models.py`
+        - `destination_directory`: A local directory to clone the repositories
+        into.
+        - `token`: A GitHub access token for authentication.
+        - Note that, importantly, this sub-command of `status` will _not_ accept
+        `github_org_url`, `repo_prefix`, or `usernames_file` as command-line
+        arguments.
+- Note that this implementation of `status` can be based on the existing
+implementation of the `clone` command available in the `main.py` and
+`repository.py` files.
 - A command-line interface implemented in Typer that is similar to the ones
 provided previously in that it should accept a GitHub access token.
 
@@ -334,10 +374,9 @@ Note that the purpose of the following fenced code block is to provide an
 example template for providing files to a coding agent.
 
 ```text
-> #file:./docs/plan.md
-> #file:./README.md
-> #file:./src/reporover/main.py
-> #file:./src/reporover/discover.py
-> #file:./tests/test_main.py
-> #file:./tests/test_discover.py
+> #file:`docs/plan.md`
+> #file:`src/reporover/main.py`
+> #file:`src/reporover/discover.py`
+> #file:`tests/test_main.py`
+> #file:`tests/test_discover.py`
 ```
