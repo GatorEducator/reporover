@@ -324,7 +324,7 @@ def _repository_matches_criteria(  # noqa: PLR0911, PLR0913
 def _repository_contains_files(
     repository,
     required_files: List[str],
-    max_depth: int,
+    max_depth: Optional[int],
     headers: dict,
 ) -> bool:
     """Check if repository contains all required files and directories within specified depth."""
@@ -358,7 +358,7 @@ def _repository_contains_files(
 
 
 def _get_repository_files(
-    repository, max_depth: int, headers: dict
+    repository, max_depth: Optional[int], headers: dict
 ) -> List[dict]:
     """Get all files and directories in a GitHub repository up to specified depth."""
     # initialize the list of files and directories that
@@ -378,12 +378,15 @@ def _get_repository_files(
 def _collect_files_recursive(  # noqa: PLR0913
     repo_full_name: str,
     path: str,
-    max_depth: int,
+    max_depth: Optional[int],
     current_depth: int,
     headers: dict,
     all_files: List[dict],
 ) -> None:
     """Recursively collect files and directories from a GitHub repository up to a maximum depth."""
+    # ensure that the maximum depth has a value
+    if max_depth is None:
+        max_depth = MAX_DEPTH
     # stop the recursion if the current depth exceeds the maximum depth;
     # the use of the maximum depth parameter is the means by which this
     # function controls the computational cost of the recursive search
