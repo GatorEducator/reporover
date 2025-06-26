@@ -1,5 +1,6 @@
 """Module for finding private GitHub repositories using search criteria."""
 
+from datetime import datetime
 from typing import Optional
 
 import github
@@ -161,8 +162,6 @@ def _repository_matches_criteria(  # noqa: PLR0911, PLR0913
         # check created after date if specified
         if created_after:
             try:
-                from datetime import datetime
-
                 created_date = repository.created_at.date()
                 after_date = datetime.strptime(
                     created_after, "%Y-%m-%d"
@@ -174,8 +173,6 @@ def _repository_matches_criteria(  # noqa: PLR0911, PLR0913
         # check updated after date if specified
         if updated_after:
             try:
-                from datetime import datetime
-
                 updated_date = repository.updated_at.date()
                 after_date = datetime.strptime(
                     updated_after, "%Y-%m-%d"
