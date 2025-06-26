@@ -108,10 +108,17 @@ def _filter_repositories_by_criteria(  # noqa: PLR0913
     # convert the repositories paginated list to a list for counting
     # and filtering through the repositories
     try:
-        repos_list = list(repositories)
-        total_repos = len(repos_list)
+        # display a spinner using rich because the process of
+        # accessing the repositories can take some time; this is
+        # due to the fact that the repositories are paginated
+        # and the API needs to fetch all of them and there is
+        # the interaction with the GitHub API may have rate limits
+        with console.status("Finding Repositories", spinner="dots"):
+            repos_list = list(repositories)
+            total_repos = len(repos_list)
+        console.print()
         console.print(
-            f":mag: Processing {total_repos} accessible repositories"
+            f":information: Processing {total_repos} accessible repositories"
         )
         console.print()
     except Exception:
