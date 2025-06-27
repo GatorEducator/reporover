@@ -259,8 +259,8 @@ def comment(  # noqa: PLR0913
 status_app = Typer(help="Get GitHub Actions status for repositories.")
 
 
-@status_app.command()
-def organizations(
+@status_app.command(name="organization")
+def organization_status(
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -333,8 +333,8 @@ def organizations(
         raise typer.Exit(code=1)
 
 
-@status_app.command()
-def files(
+@status_app.command(name="file")
+def file_status(
     reporover_json: Path = typer.Argument(
         ...,
         help="Path to reporover.json file containing repository information",
@@ -613,8 +613,8 @@ def commit(  # noqa: PLR0913
 clone_app = Typer(help="Clone GitHub repositories to a local directory.")
 
 
-@clone_app.command()
-def organization(  # noqa: PLR0913
+@clone_app.command(name="organization")
+def organization_clone(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -686,8 +686,8 @@ def organization(  # noqa: PLR0913
         raise typer.Exit(code=1)
 
 
-@clone_app.command()
-def file(
+@clone_app.command(name="file")
+def file_clone(
     reporover_json: Path = typer.Argument(
         ...,
         help="Path to reporover.json file containing repository information",
