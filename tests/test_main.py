@@ -406,6 +406,7 @@ def test_cli_status_command_with_all_parameters_success(temp_usernames_file):
             app,
             [
                 "status",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
@@ -431,6 +432,7 @@ def test_cli_status_command_with_all_parameters_failure(temp_usernames_file):
             app,
             [
                 "status",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
@@ -456,6 +458,7 @@ def test_cli_status_command_multiple_usernames_success(temp_usernames_file):
             app,
             [
                 "status",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
@@ -489,6 +492,7 @@ def test_cli_status_command_mixed_success_failure(temp_usernames_file):
             app,
             [
                 "status",
+                "organization",
                 "https://github.com/Allegheny-Computer-Science-202-S2025/",
                 "computer-science-202-algorithm-analysis-executable-exam-3",
                 str(temp_usernames_file),
