@@ -403,8 +403,8 @@ def file_status(
                 # extract organization and repository name from URL
                 # URL format: https://github.com/org/repo
                 url_parts = repo.url.rstrip("/").split("/")
-                if len(url_parts) >= 2:
-                    github_org = url_parts[-2]
+                if len(url_parts) >= Numbers.TWO.value:
+                    github_org = url_parts[-Numbers.TWO.value]
                     repo_name = url_parts[-1]
                     github_org_url = f"https://github.com/{github_org}"
                     # get the GitHub Actions status for this repository
