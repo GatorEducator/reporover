@@ -101,4 +101,4 @@ All test cases should follow these standards:
    file.
 7. **Completion**: When you are finished with tasks, please summarize what tasks
    you completed, how you completed them, the challenges you faced, how you
-  overcame them, and the rules that you followed during completion of the tasks.
+   overcame them, and the rules that you followed during completion of the tasks.
