@@ -213,15 +213,28 @@ def test_symbols_is_enum():
 
 def test_symbols_values():
     """Test that Symbols has the correct values."""
+    assert Symbols.AT.value == "@"
     assert Symbols.ELLIPSIS.value == "..."
+    assert Symbols.EMPTY.value == ""
+    assert Symbols.DASH.value == "-"
     assert Symbols.ERROR.value == ""
     assert Symbols.CHECK.value == "󰄬"
+    assert Symbols.QUESTION.value == "?"
     assert Symbols.UNKNOWN.value == "Unknown"
 
 
 def test_symbols_members():
     """Test that Symbols enum has exactly the expected members."""
-    expected_members = {"ELLIPSIS", "ERROR", "CHECK", "UNKNOWN"}
+    expected_members = {
+        "AT",
+        "ELLIPSIS",
+        "EMPTY",
+        "DASH",
+        "ERROR",
+        "CHECK",
+        "QUESTION",
+        "UNKNOWN",
+    }
     actual_members = {member.name for member in Symbols}
     assert actual_members == expected_members
 
@@ -263,9 +276,13 @@ def test_all_enums_accessible():
     assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
     assert hasattr(Numbers, "MAX_NAME_LENGTH")
     # Symbols
+    assert hasattr(Symbols, "AT")
     assert hasattr(Symbols, "ELLIPSIS")
+    assert hasattr(Symbols, "EMPTY")
+    assert hasattr(Symbols, "DASH")
     assert hasattr(Symbols, "ERROR")
     assert hasattr(Symbols, "CHECK")
+    assert hasattr(Symbols, "QUESTION")
     assert hasattr(Symbols, "UNKNOWN")
 
 
@@ -295,17 +312,25 @@ def test_numbers_constant_values_are_positive():
 
 def test_symbols_constant_access():
     """Test that Symbols constants can be accessed as attributes."""
+    assert hasattr(Symbols, "AT")
     assert hasattr(Symbols, "ELLIPSIS")
+    assert hasattr(Symbols, "EMPTY")
+    assert hasattr(Symbols, "DASH")
     assert hasattr(Symbols, "ERROR")
     assert hasattr(Symbols, "CHECK")
+    assert hasattr(Symbols, "QUESTION")
     assert hasattr(Symbols, "UNKNOWN")
 
 
 def test_symbols_constant_types():
     """Test that Symbols constants have the correct types."""
+    assert isinstance(Symbols.AT.value, str)
     assert isinstance(Symbols.ELLIPSIS.value, str)
+    assert isinstance(Symbols.EMPTY.value, str)
+    assert isinstance(Symbols.DASH.value, str)
     assert isinstance(Symbols.ERROR.value, str)
     assert isinstance(Symbols.CHECK.value, str)
+    assert isinstance(Symbols.QUESTION.value, str)
     assert isinstance(Symbols.UNKNOWN.value, str)
 
 
