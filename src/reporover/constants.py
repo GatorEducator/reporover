@@ -82,7 +82,11 @@ class Numbers(Enum):
 class Symbols(Enum):
     """Define the symbols used in the RepoRover application."""
 
+    AT = "@"
     ELLIPSIS = "..."
+    EMPTY = ""
+    DASH = "-"
     ERROR = ""
     CHECK = "󰄬"
+    QUESTION = "?"
     UNKNOWN = "Unknown"
