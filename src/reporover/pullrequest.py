@@ -9,6 +9,7 @@ from reporover.constants import (
     GitHubAccessLevel,
     PullRequestMessages,
     StatusCode,
+    Symbols,
 )
 from reporover.util import print_json_string
 
@@ -40,12 +41,12 @@ def leave_pr_comment(  # noqa: PLR0913
     }
     # build up the data for the request,
     # starting with an empty message
-    complete_message = ""
+    complete_message = Symbols.EMPTY.value
     # check if the access level is specified
     # and use it to create the complete message
     if access_level:
         complete_message = (
-            f"Hello @{username}! {PullRequestMessages.MODIFIED_TO_PHRASE.value} `{access_level.value}`. "
+            f"Hello {Symbols.AT.value}{username}! {PullRequestMessages.MODIFIED_TO_PHRASE.value} `{access_level.value}`. "
             + f"{PullRequestMessages.ASSISTANCE_SENTENCE.value} "
             + f"{message}"
         )
@@ -59,14 +60,14 @@ def leave_pr_comment(  # noqa: PLR0913
     # check if the request was successful
     if response.status_code == StatusCode.CREATED.value:
         progress.console.print(
-            f"󰄬 Commented on the pull request number {pr_number} for GitHub repository {full_repository_name}"
+            f"{Symbols.CHECK.value} Commented on the pull request number {pr_number} for GitHub repository {full_repository_name}"
         )
         # return the status code of the request, which will
         # indicate that the comment was successfully created
         return StatusCode.CREATED
     else:
         progress.console.print(
-            f" Failed to comment on pull request {pr_number} for GitHub repository {full_repository_name}\n"
+            f"{Symbols.ERROR.value} Failed to comment on pull request {pr_number} for GitHub repository {full_repository_name}\n"
             + f"  Diagnostic: {response.status_code}"
         )
         print_json_string(response.text, progress)
