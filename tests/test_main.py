@@ -2,6 +2,7 @@
 
 # ruff: noqa: PLR2004
 
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -34,8 +35,6 @@ def progress():
 @pytest.fixture
 def temp_usernames_file(tmp_path):
     """Create a temporary JSON file with test usernames."""
-    import json
-
     usernames_data = {
         "usernames": ["gkapfham", "student1", "student2", "student3"]
     }
