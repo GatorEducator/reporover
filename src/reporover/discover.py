@@ -22,7 +22,7 @@ MAX_DISPLAY = Numbers.MAX_KEEP.value
 MAX_FILTER = Numbers.MAX_FILTER.value
 
 
-def discover_repositories(  # noqa: PLR0912, PLR0913, PLR0915
+def discover_repositories(  # noqa: PLR0912, PLR0913
     console: Console,
     token: str,
     language: Optional[str],
@@ -32,7 +32,7 @@ def discover_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     updated_after: Optional[str],
     files: Optional[List[str]],
     topics: Optional[List[str]],
-    max_depth: Optional[int] = Numbers.MAX_DEPTH.value,
+    max_depth: int = Numbers.MAX_DEPTH.value,
     max_filter: Optional[int] = Numbers.MAX_FILTER.value,
     max_display: Optional[int] = Numbers.MAX_KEEP.value,
     save_file: Optional[str] = None,
@@ -41,17 +41,11 @@ def discover_repositories(  # noqa: PLR0912, PLR0913, PLR0915
     # define the global variables based on the command-line arguments
     # that were input by the caller of this function and passed here
     global MAX_DEPTH, MAX_DISPLAY, MAX_FILTER  # noqa: PLW0603
-    if max_depth is None:
-        max_depth = MAX_DEPTH
-    else:
+    if max_depth is not None:
         MAX_DEPTH = max_depth
-    if max_filter is None:
-        max_filter = MAX_FILTER
-    else:
+    if max_filter is not None:
         MAX_FILTER = max_filter
-    if max_display is None:
-        max_display = MAX_DISPLAY
-    else:
+    if max_display is not None:
         MAX_DISPLAY = max_display
     # perform the search of the public repositories that
     # are on GitHub using the provided search parameters
