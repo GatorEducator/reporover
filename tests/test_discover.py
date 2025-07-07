@@ -8,10 +8,12 @@ import tempfile
 from unittest.mock import Mock, patch
 
 import pytest
+from github import GithubException
 from hypothesis import given
 from hypothesis import strategies as st
 from rich.console import Console
 
+import reporover.discover
 from reporover.constants import Numbers, StatusCode
 from reporover.discover import (
     _build_search_query,
@@ -488,8 +490,6 @@ class TestSearchRepositories:
         """Test search_repositories with GitHub API exception."""
         mock_github_instance = Mock()
         mock_github_class.return_value = mock_github_instance
-        from github import GithubException
-
         mock_github_instance.search_repositories.side_effect = GithubException(
             status=404, data="Not found"
         )
@@ -637,10 +637,8 @@ class TestSearchRepositories:
                 topics=[""],
             )
         assert result == StatusCode.SUCCESS
-        from reporover.discover import MAX_DISPLAY, MAX_FILTER
-
-        assert MAX_FILTER == 200
-        assert MAX_DISPLAY == 20
+        assert reporover.discover.MAX_FILTER == 200
+        assert reporover.discover.MAX_DISPLAY == 20
 
     @patch("reporover.discover.github.Github")
     @patch("reporover.discover.Progress")
