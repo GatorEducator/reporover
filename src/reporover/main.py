@@ -529,7 +529,7 @@ def commit(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to commit file(s) to at least one repository in"
+            f"\n{Symbols.ERROR.value} Failed to commit file(s) to at least one repository in"
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
