@@ -77,8 +77,10 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
-readme = "README.md"
+agents = "AGENTS.md"
+gemini = "GEMINI.md"
 plan = "docs/plan.md"
+readme = "README.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
