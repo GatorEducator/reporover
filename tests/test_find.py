@@ -4,7 +4,6 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from rich.console import Console
 
 from reporover.constants import StatusCode
 from reporover.find import (
@@ -157,16 +156,17 @@ def test_repository_matches_criteria_all_match():
     )
 
 
+@patch("reporover.find.Progress")
 @patch("github.Github")
-def test_find_repositories_success(mock_github):
+def test_find_repositories_success(mock_github, mock_progress):
     """Test that find_repositories returns success."""
-    # Arrange
+    _ = mock_progress
+    # arrange
     mock_org = MagicMock()
     mock_org.get_repos.return_value = [MockRepository()]
     mock_github.return_value.get_organization.return_value = mock_org
-    console = Console()
-
-    # Act
+    console = MagicMock()
+    # act
     status = find_repositories(
         console=console,
         token="fake_token",
@@ -179,23 +179,23 @@ def test_find_repositories_success(mock_github):
         updated_after=None,
         files=None,
     )
-
-    # Assert
+    # assert
     assert status == StatusCode.SUCCESS
 
 
+@patch("reporover.find.Progress")
 @patch("github.Github")
-def test_find_repositories_org_not_found(mock_github):
+def test_find_repositories_org_not_found(mock_github, mock_progress):
     """Test that find_repositories handles organization not found."""
-    # Arrange
+    _ = mock_progress
+    # arrange
     mock_github.return_value.get_organization.side_effect = (
         pytest.importorskip("github").UnknownObjectException(
             404, "Not Found", {}
         )
     )
-    console = Console()
-
-    # Act
+    console = MagicMock()
+    # act
     status = find_repositories(
         console=console,
         token="fake_token",
@@ -208,6 +208,5 @@ def test_find_repositories_org_not_found(mock_github):
         updated_after=None,
         files=None,
     )
-
-    # Assert
+    # assert
     assert status == StatusCode.FAILURE
