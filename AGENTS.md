@@ -1,8 +1,37 @@
 # AGENTS.md
 
+## Introduction to AI Agent Guidelines
+
 This document provides guidelines for AI agents contributing to this repository.
 For more detailed instructions, especially for Gemini agents, please refer to
 `GEMINI.md`.
+
+## Overview of Instructions
+
+- **Always use `uv`:** This project uses `uv` for all dependency management,
+  virtual environments, and task running. Do not use `pip` or `venv` directly.
+- **Follow all guidelines:** This document contains the complete set of
+  guidelines from `AGENTS.md` and `docs/plan.md`. You must follow them strictly.
+- **Verify your changes:** Before committing any changes, you must run all
+  linters and tests to ensure your changes are correct and follow the project's
+  style. Use `uv run task all`.
+- **Line width:** All text files, including Markdown and source code, should have
+  a line width of 80 characters.
+- **Permission to run commands:** You have permission to run all commands in this
+  file to verify their functionality.
+- **Incremental changes:** Make small, incremental changes. This makes it easier
+  to review your work and catch errors early.
+- **Communicate clearly:** When you propose changes, explain what you've done
+  and why.
+
+## Notification Instructions
+
+- The user has given permission to use the `notify-send` command to signal task
+completion. Here is an example of the command: `notify-send "Queston from
+Coding Agent" "Please clarify how to complete the testing task."`.
+- The user wants a `notify-send` notification whenever I ask a question.
+- Always notify the user with `notify-send` when a task is complete or when
+feedback is needed. I have standing permission to use the notification tool.
 
 ## Build, Lint, and Test Commands
 
@@ -71,11 +100,16 @@ All test cases should follow these standards:
 
 ## Making Changes
 
-1.  **Understand:** Thoroughly understand the request and the relevant codebase.
-    Use the available tools to explore the code.
-2.  **Plan:** Formulate a clear plan before making any changes.
-3.  **Implement:** Make small, incremental changes.
-4.  **Verify:** Run `uv run task all` to ensure your changes are correct and
-    follow the project's style.
-5.  **Commit:** Write a clear and concise commit message explaining the "why" of
-    your changes.
+1. **Understand:** Thoroughly understand the request and the relevant codebase.
+   Use the available tools to explore the code.
+2. **Plan:** Formulate a clear plan before making any changes.
+3. **Implement:** Make small, incremental changes.
+4. **Verify:** Run `uv run task all` to ensure your changes are correct and
+   follow the project's style.
+5. **Commit:** Write a clear and concise commit message explaining the "why" of
+   your changes.
+6. **Rules**: Always follow the rules in this file and in the `docs/plan.md`
+   file.
+7. **Completion**: When you are finished with tasks, please summarize what tasks
+   you completed, how you completed them, the challenges you faced, how you
+   overcame them, and the rules that you followed during completion of the tasks.
