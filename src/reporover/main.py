@@ -1,5 +1,6 @@
 """Main module for the reporover command-line interface."""
 
+import json
 from pathlib import Path
 from typing import List, Optional
 
@@ -13,10 +14,19 @@ from reporover.actions import get_github_actions_status
 from reporover.constants import (
     GitHubAccessLevel,
     GitHubPullRequestNumber,
+    Numbers,
     StatusCode,
+    Symbols,
 )
+from reporover.discover import discover_repositories, extract_repos_from_data
+from reporover.find import find_repositories
+from reporover.models import RepoRoverData
 from reporover.pullrequest import leave_pr_comment
-from reporover.repository import clone_repo_gitpython, commit_files_to_repo
+from reporover.repository import (
+    clone_repo_from_details_gitpython,
+    clone_repo_from_url_gitpython,
+    commit_files_to_repo,
+)
 from reporover.status import get_status_from_codes
 from reporover.user import modify_user_access
 from reporover.util import read_usernames_from_json
@@ -246,8 +256,11 @@ def comment(  # noqa: PLR0913
         raise typer.Exit(code=1)
 
 
-@app.command()
-def status(
+status_app = Typer(help="Get GitHub Actions status for repositories.")
+
+
+@status_app.command(name="organization")
+def organization_status(
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -262,9 +275,7 @@ def status(
         default=None, help="One or more usernames' accounts to modify"
     ),
 ):
-    """Get the GitHub Actions status for repositories."""
-    # create a default console
-    # console = Console()
+    """Get the GitHub Actions status for repositories in an organization using usernames."""
     # display the welcome message
     display_welcome_message()
     console.print(
@@ -316,10 +327,128 @@ def status(
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to access the status of GitHub Actions of at least one repository in"
+            "\n Failed to access the status of GitHub Actions of at least one repository in"
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
+
+
+@status_app.command(name="file")
+def file_status(
+    reporover_json: Path = typer.Argument(
+        ...,
+        help="Path to reporover.json file containing repository information",
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+):
+    """Get GitHub Actions status for repositories from a reporover.json file."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Retrieving GitHub Actions status for repositories from reporover.json file: {reporover_json}"
+    )
+    console.print()
+    # validate that the reporover.json file exists
+    if not reporover_json.exists():
+        console.print(
+            f"{Symbols.ERROR.value} The reporover.json file does not exist: {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+    # read and parse the reporover.json file
+    try:
+        with reporover_json.open() as f:
+            data = json.load(f)
+        # validate the data structure using Pydantic models
+        # and then extract the GitHub repositories from the data
+        reporover_data = RepoRoverData(**data)
+        repositories = extract_repos_from_data(reporover_data)
+    # since something went wrong, display a diagnostic message
+    except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
+        console.print(
+            f"{Symbols.ERROR.value} Failed to read or parse reporover.json file\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(
+            f"{Symbols.ERROR.value} Invalid reporover.json file format\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    # check if there are repositories to get status for
+    if not repositories:
+        console.print(
+            f"{Symbols.ERROR.value} No repositories found in reporover.json file"
+        )
+        raise typer.Exit(code=1)
+    # create a progress bar using rich
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Getting GitHub Actions Status", total=len(repositories)
+        )
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+        # iterate through each of the repositories and attempt to
+        # get the GitHub Actions status for it
+        for repo in repositories:
+            # get the GitHub Actions status using the URL from the JSON data;
+            # note that we need to extract the organization and repository name
+            # from the URL since the get_github_actions_status function expects
+            # these parameters separately
+            try:
+                # extract organization and repository name from URL
+                # URL format: https://github.com/org/repo
+                url_parts = repo.url.rstrip("/").split("/")
+                if len(url_parts) >= Numbers.TWO.value:
+                    github_org = url_parts[-Numbers.TWO.value]
+                    repo_name = url_parts[-1]
+                    github_org_url = f"https://github.com/{github_org}"
+                    # get the GitHub Actions status for this repository
+                    access_github_actions_status = get_github_actions_status(
+                        github_org_url,
+                        repo_name,
+                        "",  # no username needed as we have the full repo name
+                        token,
+                        progress,
+                    )
+                else:
+                    # invalid URL format, mark as failure
+                    access_github_actions_status = StatusCode.FAILURE
+                    progress.console.print(
+                        f"{Symbols.ERROR.value} Invalid repository URL format: {repo.url}"
+                    )
+            except Exception as e:
+                # error processing this repository, mark as failure
+                access_github_actions_status = StatusCode.FAILURE
+                progress.console.print(
+                    f"{Symbols.ERROR.value} Error processing repository {repo.name}: {e!s}"
+                )
+            # store the status code for this iteration
+            status_codes.append([access_github_actions_status])
+            # take the next step in the progress bar
+            progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            f"\n{Symbols.ERROR.value} Failed to access the status of GitHub Actions of at least one repository from"
+            + f" {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+
+
+# add the status subapp to the main app;
+# this ensures that the status command has
+# two subcommands: organization and file
+app.add_typer(status_app, name="status")
 
 
 @app.command()
@@ -400,14 +529,18 @@ def commit(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to commit file(s) to at least one repository in"
+            f"\n{Symbols.ERROR.value} Failed to commit file(s) to at least one repository in"
             + f" {github_org_url}"
         )
         raise typer.Exit(code=1)
 
 
-@app.command()
-def clone(  # noqa: PLR0913
+# create a subapp for clone commands
+clone_app = Typer(help="Clone GitHub repositories to a local directory.")
+
+
+@clone_app.command(name="organization")
+def organization_clone(  # noqa: PLR0913
     github_org_url: str = typer.Argument(
         ..., help="URL of GitHub organization"
     ),
@@ -425,7 +558,7 @@ def clone(  # noqa: PLR0913
         default=None, help="One or more usernames' accounts to clone"
     ),
 ):
-    """Clone GitHub repositories to a local directory."""
+    """Clone GitHub repositories from an organization using usernames."""
     # display the welcome message
     display_welcome_message()
     console.print(
@@ -453,7 +586,7 @@ def clone(  # noqa: PLR0913
         status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
         for current_username in usernames_parsed:
             # clone the repository
-            clone_repo_status_code = clone_repo_gitpython(
+            clone_repo_status_code = clone_repo_from_details_gitpython(
                 github_org_url,
                 repo_prefix,
                 current_username,
@@ -473,7 +606,281 @@ def clone(  # noqa: PLR0913
     # to indicate that the command did not complete successfully
     if overall_failure:
         progress.console.print(
-            "\n Failed to clone at least one repository in"
+            f"\n{Symbols.ERROR.value} Failed to clone at least one repository in"
             + f" {github_org_url}"
+        )
+        raise typer.Exit(code=1)
+
+
+@clone_app.command(name="file")
+def file_clone(
+    reporover_json: Path = typer.Argument(
+        ...,
+        help="Path to reporover.json file containing repository information",
+    ),
+    destination_directory: Path = typer.Argument(
+        ..., help="Local directory to clone repositories into"
+    ),
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+):
+    """Clone GitHub repositories from a reporover.json file."""
+    # display the welcome message
+    display_welcome_message()
+    console.print(
+        f":sparkles: Cloning repositories from reporover.json file: {reporover_json}"
+    )
+    console.print()
+    # validate that the reporover.json file exists
+    if not reporover_json.exists():
+        console.print(
+            f"{Symbols.ERROR.value} The reporover.json file does not exist: {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+    # read and parse the reporover.json file
+    try:
+        with reporover_json.open() as f:
+            data = json.load(f)
+        # validate the data structure using Pydantic models
+        # and then extract the GitHub repositories from the data
+        reporover_data = RepoRoverData(**data)
+        repositories = extract_repos_from_data(reporover_data)
+    # since something went wrong, display a diagnostic message
+    except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
+        console.print(
+            f"{Symbols.ERROR.value} Failed to read or parse reporover.json file\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(
+            f"{Symbols.ERROR.value} Invalid reporover.json file format\n"
+            f"  Diagnostic: {e!s}"
+        )
+        raise typer.Exit(code=1)
+    # check if there are repositories to clone
+    if not repositories:
+        console.print(
+            f"{Symbols.ERROR.value} No repositories found in reporover.json file"
+        )
+        raise typer.Exit(code=1)
+    # create a progress bar using rich
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TextColumn("[progress.completed]{task.completed}/{task.total}"),
+    ) as progress:
+        task = progress.add_task(
+            "[green]Cloning Repositories", total=len(repositories)
+        )
+        status_codes: List[List[StatusCode]] = []  # type: ignore[arg-type]
+        # iterate through each of the repositories and attempt to
+        # clone it to the provided destination directory
+        for repo in repositories:
+            # clone the repository using the URL from the JSON data;
+            # note that it is possible to access the URL and the name
+            # by using the "dot notation" since a Repo is an instance
+            # of the RepositoryInfo model defined in the models module
+            clone_repo_status_code = clone_repo_from_url_gitpython(
+                repo.url,
+                repo.name,
+                token,
+                destination_directory,
+                progress,
+            )
+            # store the status code for this iteration
+            status_codes.append([clone_repo_status_code])
+            # take the next step in the progress bar
+            progress.advance(task)
+    # determine if there was at least one error
+    # in the status codes list, which would designate
+    # that there was an overall failure in this command
+    overall_failure = get_status_from_codes(status_codes)  # type: ignore[arg-type]
+    # if there was an overall failure then return a non-zero exit code
+    # to indicate that the command did not complete successfully
+    if overall_failure:
+        progress.console.print(
+            f"\n{Symbols.ERROR.value} Failed to clone at least one repository from"
+            + f" {reporover_json}"
+        )
+        raise typer.Exit(code=1)
+
+
+# add the clone subapp to the main app;
+# this ensure that the clone command has
+# two subcommands: organization and file
+app.add_typer(clone_app, name="clone")
+
+
+@app.command()
+def discover(  # noqa: PLR0913
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    language: Optional[str] = typer.Option(
+        None, help="Programming language of the repository"
+    ),
+    stars: Optional[int] = typer.Option(
+        None, help="Minimum number of stars the repository should have"
+    ),
+    forks: Optional[int] = typer.Option(
+        None, help="Minimum number of forks the repository should have"
+    ),
+    created_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was created (format: YYYY-MM-DD)",
+    ),
+    updated_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was last updated (format: YYYY-MM-DD)",
+    ),
+    files: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact file names that the repository should contain",
+    ),
+    topics: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact topics that the repository should have",
+    ),
+    max_depth: int = typer.Option(
+        None,
+        help="Maximum depth to search for files in repository (default: 0 = repository root)",
+    ),
+    max_filter: int = typer.Option(
+        None,
+        help="Maximum number of discovered repositories to filter for files (default: 100)",
+    ),
+    max_keep: int = typer.Option(
+        Numbers.MAX_KEEP.value,
+        help="Maximum number of repositories to display and/or keep in results",
+    ),
+    save: Optional[str] = typer.Option(
+        None,
+        help="Save results to JSON file at specified path",
+    ),
+):
+    """Discover public GitHub repositories matching criteria."""
+    display_welcome_message()
+    console.print(
+        ":sparkles: Discovering public GitHub repositories matching the search criteria"
+    )
+    console.print()
+    # validate that max_filter and max_depth is only used when files are specified;
+    # the basic idea is that there is no value in parameterizing the filtering
+    # process if there are no files that are going to be used to filter repositories
+    if (max_filter is not None or max_depth is not None) and files is None:
+        console.print(
+            f"{Symbols.ERROR.value} The --max-filter and --max-depth options can only be used when --files is specified"
+        )
+        raise typer.Exit(code=1)
+    # perform the discovery by searching the
+    # public GitHub repositories according to
+    # the provided search and filtering criteria
+    search_status_code = discover_repositories(
+        console,
+        token,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+        files,
+        topics,
+        max_depth,
+        max_filter,
+        max_keep,
+        save,
+    )
+    # check if the search was successful and if it was
+    # not then display an error message and exit the sub-command
+    if search_status_code != StatusCode.SUCCESS:
+        console.print(
+            f"\n{Symbols.ERROR.value} Failed to discover public GitHub repositories"
+        )
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def find(  # noqa: PLR0913
+    token: str = typer.Argument(..., help="GitHub token for authentication"),
+    organization: str = typer.Argument(
+        ..., help="GitHub organization name to search within"
+    ),
+    name: Optional[str] = typer.Option(
+        None, help="Repository name fragment to search for"
+    ),
+    language: Optional[str] = typer.Option(
+        None, help="Programming language of the repository"
+    ),
+    stars: Optional[int] = typer.Option(
+        None, help="Minimum number of stars the repository should have"
+    ),
+    forks: Optional[int] = typer.Option(
+        None, help="Minimum number of forks the repository should have"
+    ),
+    created_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was created (format: YYYY-MM-DD)",
+    ),
+    updated_after: Optional[str] = typer.Option(
+        None,
+        help="Date after which the repository was last updated (format: YYYY-MM-DD)",
+    ),
+    files: Optional[List[str]] = typer.Option(
+        None,
+        help="List of exact file names that the repository should contain",
+    ),
+    max_depth: int = typer.Option(
+        None,
+        help="Maximum depth to search for files in repository (default: 0 = repository root)",
+    ),
+    max_filter: int = typer.Option(
+        None,
+        help="Maximum number of discovered repositories to filter for files (default: 100)",
+    ),
+    max_keep: int = typer.Option(
+        Numbers.MAX_KEEP.value,
+        help="Maximum number of repositories to display and/or keep in results",
+    ),
+    save: Optional[str] = typer.Option(
+        None,
+        help="Save results to JSON file at specified path",
+    ),
+):
+    """Find private GitHub repositories in an organization matching criteria."""
+    display_welcome_message()
+    console.print(
+        ":sparkles: Finding private GitHub repositories in the specified organization"
+    )
+    console.print()
+    # validate that max_filter and max_depth is only used when files are specified;
+    # the basic idea is that there is no value in parameterizing the filtering
+    # process if there are no files that are going to be used to filter repositories
+    if (max_filter is not None or max_depth is not None) and files is None:
+        console.print(
+            f"{Symbols.ERROR.value} The --max-filter and --max-depth options can only be used when --files is specified"
+        )
+        raise typer.Exit(code=1)
+    # perform the search by finding the private GitHub repositories
+    # within the specified organization according to the provided criteria
+    search_status_code = find_repositories(
+        console,
+        token,
+        organization,
+        name,
+        language,
+        stars,
+        forks,
+        created_after,
+        updated_after,
+        files,
+        max_depth,
+        max_filter,
+        max_keep,
+        save,
+    )
+    # check if the search was successful and if it was
+    # not then display an error message and exit the sub-command
+    if search_status_code != StatusCode.SUCCESS:
+        console.print(
+            f"\n{Symbols.ERROR.value} Failed to find private GitHub repositories"
         )
         raise typer.Exit(code=1)

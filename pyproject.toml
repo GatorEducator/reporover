@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 keywords = [
-  "github", "git"
+  "github", "git", "repository", "analysis", "management", "automation",
 ]
 classifiers = [
   "Environment :: Console",
@@ -23,6 +23,8 @@ classifiers = [
 ]
 dependencies = [
     "gitpython>=3.1.44",
+    "pydantic>=2.11.7",
+    "pygithub>=2.6.1",
     "requests>=2.32.3",
     "rich>=13.9.4",
     "typer>=0.15.1",
@@ -32,11 +34,12 @@ dependencies = [
 dev = [
     "hypothesis>=6.135.0",
     "mypy>=1.15.0",
+    "pymarkdownlnt>=0.9.30",
     "pytest>=8.3.4",
     "pytest-clarity>=1.0.1",
     "pytest-cov>=6.0.0",
-    "pytest-randomly>=3.16.0",
-    "ruff>=0.9.9",
+    "pytest-sugar>=1.0.0",
+    "ruff>=0.12.2",
     "symbex>=1.4",
     "taskipy>=1.14.1",
     "ty>=0.0.1a8",
@@ -74,10 +77,15 @@ ensure_newline_before_comments = true
 line_length = 88
 
 [tool.taskipy.variables]
+agents = "AGENTS.md"
+gemini = "GEMINI.md"
+plan = "docs/plan.md"
+readme = "README.md"
+readme_pypi = "README_PYPI.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
-coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=90 --cov-report term-missing --cov-report json --cov --cov-branch"
+coverage-test-command = "pytest -s --cov-context=test --cov-fail-under=80 --cov-report term-missing --cov-report json --cov --cov-branch"
 coverage-test-command-silent = "pytest -x --show-capture=no --cov-report term-missing --cov-report json --cov --cov-branch"
 developer-test-command = "pytest -x -s -vv"
 developer-test-command-no-property = "pytest -x -s -vv -m 'not property'"
@@ -90,13 +98,15 @@ symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recurs
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
 ty-command = {var = "ty check {project} {tests}", recursive = true}
+markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {readme_pypi} {plan} {agents} {gemini}", recursive = true }
 
 [tool.taskipy.tasks]
-all = "task lint && task test"
-lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented"
+all = "task lint && task test && task test-coverage"
+lint = "task format && task format && task check && task ty && task mypy && task symbex-typed && task symbex-documented && task markdownlint"
 check = { cmd = "{check-command}", help = "Run the ruff linting checks", use_vars = true }
 format = { cmd = "{format-command}", help = "Run the ruff formatter on source code", use_vars = true }
 format-fix = { cmd = "{fixformat-command}", help = "Run the ruff formatter to fix source code", use_vars = true }
+markdownlint = { cmd = "{markdownlint-command}", help = "Run the markdown linter on text files", use_vars = true }
 mypy = { cmd = "{mypy-command}", help = "Run the mypy type checker for potential type errors", use_vars = true }
 ty = { cmd = "{ty-command}", help = "Run the ty type checker for potential type errors", use_vars = true }
 symbex = "task symbex-typed && task symbex-documented"

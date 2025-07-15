@@ -6,11 +6,14 @@ from enum import Enum
 
 from reporover.constants import (
     Data,
+    FileSystem,
     GitHubAccessLevel,
     GitHubPullRequestNumber,
     GitHubRepositoryDetails,
+    Numbers,
     PullRequestMessages,
     StatusCode,
+    Symbols,
 )
 
 
@@ -175,25 +178,88 @@ def test_status_code_members():
     assert actual_members == expected_members
 
 
+def test_numbers_is_enum():
+    """Test that Numbers is an Enum class."""
+    assert issubclass(Numbers, Enum)
+
+
+def test_numbers_values():
+    """Test that Numbers has the correct values."""
+    assert Numbers.MAX_KEEP.value == 75
+    assert Numbers.MAX_FILTER.value == 100
+    assert Numbers.MAX_DESCRIPTION_LENGTH.value == 50
+    assert Numbers.MAX_NAME_LENGTH.value == 40
+
+
+def test_numbers_members():
+    """Test that Numbers enum has exactly the expected members with the expected names."""
+    expected_members = {
+        "ONE",
+        "TWO",
+        "MAX_DEPTH",
+        "MAX_KEEP",
+        "MAX_FILTER",
+        "MAX_DESCRIPTION_LENGTH",
+        "MAX_NAME_LENGTH",
+    }
+    actual_members = {member.name for member in Numbers}
+    assert actual_members == expected_members
+
+
+def test_symbols_is_enum():
+    """Test that Symbols is an Enum class."""
+    assert issubclass(Symbols, Enum)
+
+
+def test_symbols_values():
+    """Test that Symbols has the correct values."""
+    assert Symbols.AT.value == "@"
+    assert Symbols.ELLIPSIS.value == "..."
+    assert Symbols.EMPTY.value == ""
+    assert Symbols.DASH.value == "-"
+    assert Symbols.ERROR.value == ""
+    assert Symbols.CHECK.value == "󰄬"
+    assert Symbols.QUESTION.value == "?"
+    assert Symbols.UNKNOWN.value == "Unknown"
+
+
+def test_symbols_members():
+    """Test that Symbols enum has exactly the expected members."""
+    expected_members = {
+        "AT",
+        "ELLIPSIS",
+        "EMPTY",
+        "DASH",
+        "ERROR",
+        "CHECK",
+        "QUESTION",
+        "UNKNOWN",
+    }
+    actual_members = {member.name for member in Symbols}
+    assert actual_members == expected_members
+
+
 def test_all_enums_accessible():
     """Test that all enum constants can be accessed as attributes."""
+    # FileSystem
+    assert hasattr(FileSystem, "FILE")
+    assert hasattr(FileSystem, "DIRECTORY")
+    assert hasattr(FileSystem, "EMPTY")
+    assert hasattr(FileSystem, "PATH")
     # GitHubAccessLevel
     assert hasattr(GitHubAccessLevel, "READ")
     assert hasattr(GitHubAccessLevel, "TRIAGE")
     assert hasattr(GitHubAccessLevel, "WRITE")
     assert hasattr(GitHubAccessLevel, "MAINTAIN")
     assert hasattr(GitHubAccessLevel, "ADMIN")
-
     # GitHubPullRequestNumber
     assert hasattr(GitHubPullRequestNumber, "ONE")
     assert hasattr(GitHubPullRequestNumber, "TWO")
     assert hasattr(GitHubPullRequestNumber, "THREE")
     assert hasattr(GitHubPullRequestNumber, "DEFAULT")
-
     # PullRequestMessages
     assert hasattr(PullRequestMessages, "MODIFIED_TO_PHRASE")
     assert hasattr(PullRequestMessages, "ASSISTANCE_SENTENCE")
-
     # StatusCode
     assert hasattr(StatusCode, "WORKING")
     assert hasattr(StatusCode, "CREATED")
@@ -204,3 +270,126 @@ def test_all_enums_accessible():
     assert hasattr(StatusCode, "NOT_FOUND")
     assert hasattr(StatusCode, "UNPROCESSABLE_ENTITY")
     assert hasattr(StatusCode, "INTERNAL_SERVER_ERROR")
+    # Numbers
+    assert hasattr(Numbers, "MAX_KEEP")
+    assert hasattr(Numbers, "MAX_FILTER")
+    assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
+    assert hasattr(Numbers, "MAX_NAME_LENGTH")
+    # Symbols
+    assert hasattr(Symbols, "AT")
+    assert hasattr(Symbols, "ELLIPSIS")
+    assert hasattr(Symbols, "EMPTY")
+    assert hasattr(Symbols, "DASH")
+    assert hasattr(Symbols, "ERROR")
+    assert hasattr(Symbols, "CHECK")
+    assert hasattr(Symbols, "QUESTION")
+    assert hasattr(Symbols, "UNKNOWN")
+
+
+def test_numbers_constant_access():
+    """Test that Numbers constants can be accessed as attributes."""
+    assert hasattr(Numbers, "MAX_KEEP")
+    assert hasattr(Numbers, "MAX_FILTER")
+    assert hasattr(Numbers, "MAX_DESCRIPTION_LENGTH")
+    assert hasattr(Numbers, "MAX_NAME_LENGTH")
+
+
+def test_numbers_constant_types():
+    """Test that Numbers constants have the correct types."""
+    assert isinstance(Numbers.MAX_KEEP.value, int)
+    assert isinstance(Numbers.MAX_FILTER.value, int)
+    assert isinstance(Numbers.MAX_DESCRIPTION_LENGTH.value, int)
+    assert isinstance(Numbers.MAX_NAME_LENGTH.value, int)
+
+
+def test_numbers_constant_values_are_positive():
+    """Test that Numbers constants have positive values."""
+    assert Numbers.MAX_KEEP.value > 0
+    assert Numbers.MAX_FILTER.value > 0
+    assert Numbers.MAX_DESCRIPTION_LENGTH.value > 0
+    assert Numbers.MAX_NAME_LENGTH.value > 0
+
+
+def test_symbols_constant_access():
+    """Test that Symbols constants can be accessed as attributes."""
+    assert hasattr(Symbols, "AT")
+    assert hasattr(Symbols, "ELLIPSIS")
+    assert hasattr(Symbols, "EMPTY")
+    assert hasattr(Symbols, "DASH")
+    assert hasattr(Symbols, "ERROR")
+    assert hasattr(Symbols, "CHECK")
+    assert hasattr(Symbols, "QUESTION")
+    assert hasattr(Symbols, "UNKNOWN")
+
+
+def test_symbols_constant_types():
+    """Test that Symbols constants have the correct types."""
+    assert isinstance(Symbols.AT.value, str)
+    assert isinstance(Symbols.ELLIPSIS.value, str)
+    assert isinstance(Symbols.EMPTY.value, str)
+    assert isinstance(Symbols.DASH.value, str)
+    assert isinstance(Symbols.ERROR.value, str)
+    assert isinstance(Symbols.CHECK.value, str)
+    assert isinstance(Symbols.QUESTION.value, str)
+    assert isinstance(Symbols.UNKNOWN.value, str)
+
+
+def test_symbols_ellipsis_is_unicode():
+    """Test that ELLIPSIS is the correct Unicode character."""
+    assert Symbols.ELLIPSIS.value == "..."
+    assert len(Symbols.ELLIPSIS.value) == 3
+
+
+def test_symbols_check_is_icon():
+    """Test that CHECK is the correct icon character."""
+    assert Symbols.CHECK.value == "󰄬"
+    assert len(Symbols.CHECK.value) == 1
+
+
+def test_all_enum_classes_are_subclasses_of_enum():
+    """Test that all constant classes are subclasses of Enum."""
+    assert issubclass(Data, Enum)
+    assert issubclass(FileSystem, Enum)
+    assert issubclass(GitHubAccessLevel, Enum)
+    assert issubclass(GitHubPullRequestNumber, Enum)
+    assert issubclass(GitHubRepositoryDetails, Enum)
+    assert issubclass(PullRequestMessages, Enum)
+    assert issubclass(StatusCode, Enum)
+    assert issubclass(Numbers, Enum)
+    assert issubclass(Symbols, Enum)
+    assert issubclass(GitHubPullRequestNumber, Enum)
+    assert issubclass(GitHubRepositoryDetails, Enum)
+    assert issubclass(PullRequestMessages, Enum)
+    assert issubclass(StatusCode, Enum)
+    assert issubclass(Numbers, Enum)
+    assert issubclass(Symbols, Enum)
+
+
+def test_enum_members_are_unique():
+    """Test that enum members within each enum are unique."""
+    # check Numbers enum uniqueness
+    numbers_values = [member.value for member in Numbers]
+    assert len(numbers_values) == len(set(numbers_values))
+    # check Symbols enum uniqueness
+    symbols_values = [member.value for member in Symbols]
+    assert len(symbols_values) == len(set(symbols_values))
+
+
+def test_filesystem_is_enum():
+    """Test that FileSystem is an Enum class."""
+    assert issubclass(FileSystem, Enum)
+
+
+def test_filesystem_values():
+    """Test that FileSystem has the correct values."""
+    assert FileSystem.FILE.value == "file"
+    assert FileSystem.DIRECTORY.value == "dir"
+    assert FileSystem.EMPTY.value == ""
+    assert FileSystem.PATH.value == "path"
+
+
+def test_filesystem_members():
+    """Test that FileSystem enum has exactly the expected members."""
+    expected_members = {"FILE", "DIRECTORY", "EMPTY", "PATH"}
+    actual_members = {member.name for member in FileSystem}
+    assert actual_members == expected_members

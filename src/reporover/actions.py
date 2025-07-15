@@ -5,6 +5,7 @@ from rich.progress import Progress
 
 from reporover.constants import (
     StatusCode,
+    Symbols,
 )
 from reporover.util import print_json_string
 
@@ -42,7 +43,7 @@ def get_github_actions_status(
             status = latest_run.get("status", "unknown")
             conclusion = latest_run.get("conclusion", "unknown")
             progress.console.print(
-                f"- Latest GitHub Actions run for {full_repository_name}:\n"
+                f"{Symbols.DASH.value} Latest GitHub Actions run for {full_repository_name}:\n"
                 f"  Status: {status}\n"
                 f"  Conclusion: {conclusion}"
             )
@@ -51,7 +52,7 @@ def get_github_actions_status(
         # it was possible to access the GitHub API and get a response
         else:
             progress.console.print(
-                f"? No GitHub Actions runs found for {full_repository_name}"
+                f"{Symbols.QUESTION.value} No GitHub Actions runs found for {full_repository_name}"
             )
         # return success status code, to indicate that it was
         # possible to access the GitHub Actions status for
@@ -60,7 +61,7 @@ def get_github_actions_status(
     # display error message since the request did not work
     else:
         progress.console.print(
-            f" Failed to get GitHub Actions status for {full_repository_name}\n"
+            f"{Symbols.ERROR.value} Failed to get GitHub Actions status for {full_repository_name}\n"
             f"  Diagnostic: {response.status_code}"
         )
         print_json_string(response.text, progress)

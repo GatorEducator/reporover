@@ -8,6 +8,7 @@ from rich.progress import Progress
 from reporover.constants import (
     GitHubAccessLevel,
     StatusCode,
+    Symbols,
 )
 from reporover.util import print_json_string
 
@@ -49,7 +50,7 @@ def modify_user_access(  # noqa: PLR0913
     # display positive configuration since change of the access level worked
     if response.status_code == StatusCode.SUCCESS.value:
         progress.console.print(
-            f"󰄬 Changed {username}'s access to '{access_level.value}' in"
+            f"{Symbols.CHECK.value} Changed {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}"
         )
         # indicate that the success occurred to
@@ -60,7 +61,7 @@ def modify_user_access(  # noqa: PLR0913
     else:
         # display the basic error message
         progress.console.print(
-            f" Failed to change {username}'s access to '{access_level.value}' in"
+            f"{Symbols.ERROR.value} Failed to change {username}'s access to '{access_level.value}' in"
             + f" {full_repository_name}\n"
             + f"  Diagnostic: {response.status_code}"
         )

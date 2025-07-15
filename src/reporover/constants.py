@@ -9,6 +9,15 @@ class Data(Enum):
     USERNAMES = "usernames"
 
 
+class FileSystem(Enum):
+    """Define the file system locations for the RepoRover application."""
+
+    FILE = "file"
+    DIRECTORY = "dir"
+    EMPTY = ""
+    PATH = "path"
+
+
 class GitHubAccessLevel(Enum):
     """Define the access levels for GitHub repositories."""
 
@@ -58,8 +67,26 @@ class StatusCode(Enum):
     FAILURE = 600
 
 
+class Numbers(Enum):
+    """Define the numbers used in the RepoRover application."""
+
+    ONE = 1
+    TWO = 2
+    MAX_DEPTH = 0
+    MAX_KEEP = 75
+    MAX_FILTER = 100
+    MAX_DESCRIPTION_LENGTH = 50
+    MAX_NAME_LENGTH = 40
+
+
 class Symbols(Enum):
     """Define the symbols used in the RepoRover application."""
 
+    AT = "@"
+    ELLIPSIS = "..."
+    EMPTY = ""
+    DASH = "-"
     ERROR = ""
     CHECK = "󰄬"
+    QUESTION = "?"
+    UNKNOWN = "Unknown"

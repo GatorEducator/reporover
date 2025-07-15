@@ -9,7 +9,7 @@ from git import Repo
 from git.exc import GitCommandError
 from rich.progress import Progress
 
-from reporover.constants import GitHubRepositoryDetails, StatusCode
+from reporover.constants import GitHubRepositoryDetails, StatusCode, Symbols
 from reporover.util import print_json_string
 
 
@@ -45,7 +45,7 @@ def commit_files_to_repo(  # noqa: PLR0913
             file_content = (directory / file_path).read_bytes()
         except (FileNotFoundError, PermissionError, OSError) as e:
             progress.console.print(
-                f" Failed to read file {file_path} from directory {directory}\n"
+                f"{Symbols.ERROR.value} Failed to read file {file_path} from directory {directory}\n"
                 f"  Diagnostic: {e!s}"
             )
             return StatusCode.FAILURE
@@ -94,7 +94,7 @@ def commit_files_to_repo(  # noqa: PLR0913
     return StatusCode.WORKING
 
 
-def clone_repo_gitpython(  # noqa: PLR0913
+def clone_repo_from_details_gitpython(  # noqa: PLR0913
     github_organization_url: str,
     repo_prefix: str,
     username: str,
@@ -116,7 +116,7 @@ def clone_repo_gitpython(  # noqa: PLR0913
     # confirm that the local path does not exist
     if local_path.exists():
         progress.console.print(
-            f" Failed to clone {full_repository_name} to {local_path}\n"
+            f"{Symbols.ERROR.value} Failed to clone {full_repository_name} to {local_path}\n"
             f"  Diagnostic: {local_path} already exists"
         )
         # return failure status code because of the
@@ -127,15 +127,52 @@ def clone_repo_gitpython(  # noqa: PLR0913
         # clone the repository using GitPython
         Repo.clone_from(repo_url, local_path)
         progress.console.print(
-            f"󰄬 Cloned {full_repository_name} to {local_path}"
+            f"{Symbols.CHECK.value} Cloned {full_repository_name} to {local_path}"
         )
         # return success status code because the clone
         # to the provided directory worked correctly
         return StatusCode.WORKING
     except GitCommandError as e:
         progress.console.print(
-            f" Failed to clone {full_repository_name}\n  Diagnostic: {e!s}"
+            f"{Symbols.ERROR.value} Failed to clone {full_repository_name}\n  Diagnostic: {e!s}"
         )
         # return failure status code because the clone
         # to the provided directory did not work
+        return StatusCode.FAILURE
+
+
+def clone_repo_from_url_gitpython(
+    repo_url: str,
+    repo_name: str,
+    token: str,
+    destination_directory: Path,
+    progress: Progress,
+) -> StatusCode:
+    """Clone a GitHub repository from a URL to a local directory."""
+    # construct the repository URL with authentication token
+    authenticated_url = repo_url.replace(
+        "https://github.com/", f"https://{token}@github.com/"
+    )
+    if not authenticated_url.endswith(".git"):
+        authenticated_url += ".git"
+    # define the local path for the cloned repository
+    local_path = destination_directory / repo_name
+    # confirm that the local path does not exist
+    if local_path.exists():
+        progress.console.print(
+            f"{Symbols.ERROR.value} Failed to clone {repo_name} to {local_path}\n"
+            f"  Diagnostic: {local_path} already exists"
+        )
+        return StatusCode.FAILURE
+    try:
+        # clone the repository using GitPython
+        Repo.clone_from(authenticated_url, local_path)
+        progress.console.print(
+            f"{Symbols.CHECK.value} Cloned {repo_name} to {local_path}"
+        )
+        return StatusCode.WORKING
+    except GitCommandError as e:
+        progress.console.print(
+            f"{Symbols.ERROR.value} Failed to clone {repo_name}\n  Diagnostic: {e!s}"
+        )
         return StatusCode.FAILURE
