@@ -81,6 +81,7 @@ agents = "AGENTS.md"
 gemini = "GEMINI.md"
 plan = "docs/plan.md"
 readme = "README.md"
+readme_pypi = "README_PYPI.md"
 project = "src/reporover"
 tests = "tests"
 check-command = { var = "ruff check {project} {tests}", recursive = true }
@@ -97,7 +98,7 @@ symbex-typed-command = {var = "symbex -s --untyped -d {project} --check", recurs
 symbex-documented-command = {var = "symbex -s --undocumented -d {project} --check", recursive = true}
 mypy-command = {var = "mypy {project} {tests}", recursive = true}
 ty-command = {var = "ty check {project} {tests}", recursive = true}
-markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {plan} {agents} {gemini}", recursive = true }
+markdownlint-command = { var = "pymarkdown --config .pymarkdown.cfg scan {readme} {readme_pypi} {plan} {agents} {gemini}", recursive = true }
 
 [tool.taskipy.tasks]
 all = "task lint && task test && task test-coverage"
