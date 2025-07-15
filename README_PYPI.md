@@ -306,4 +306,3 @@ Questions or comments about RepoRover? You can direct those to the development
 by opening an issue in our [issue
 tracker](https://github.com/your-repo/reporover/issues). We'd love to hear from
 and collaborate with you! Happy RepoRovering!
-
